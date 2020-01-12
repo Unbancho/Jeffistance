@@ -6,7 +6,12 @@ namespace jeffistance
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            truth();
+        }
+
+        static void truth()
+        {
+            Console.WriteLine("casca gae");
         }
     }
 }
