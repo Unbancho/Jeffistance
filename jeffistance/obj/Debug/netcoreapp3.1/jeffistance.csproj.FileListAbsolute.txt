@@ -1,0 +1,11 @@
+D:\GitKraken\Jeffistance\jeffistance\bin\Debug\netcoreapp3.1\jeffistance.exe
+D:\GitKraken\Jeffistance\jeffistance\bin\Debug\netcoreapp3.1\jeffistance.deps.json
+D:\GitKraken\Jeffistance\jeffistance\bin\Debug\netcoreapp3.1\jeffistance.runtimeconfig.json
+D:\GitKraken\Jeffistance\jeffistance\bin\Debug\netcoreapp3.1\jeffistance.runtimeconfig.dev.json
+D:\GitKraken\Jeffistance\jeffistance\bin\Debug\netcoreapp3.1\jeffistance.dll
+D:\GitKraken\Jeffistance\jeffistance\bin\Debug\netcoreapp3.1\jeffistance.pdb
+D:\GitKraken\Jeffistance\jeffistance\obj\Debug\netcoreapp3.1\jeffistance.csprojAssemblyReference.cache
+D:\GitKraken\Jeffistance\jeffistance\obj\Debug\netcoreapp3.1\jeffistance.AssemblyInfoInputs.cache
+D:\GitKraken\Jeffistance\jeffistance\obj\Debug\netcoreapp3.1\jeffistance.AssemblyInfo.cs
+D:\GitKraken\Jeffistance\jeffistance\obj\Debug\netcoreapp3.1\jeffistance.dll
+D:\GitKraken\Jeffistance\jeffistance\obj\Debug\netcoreapp3.1\jeffistance.pdb
