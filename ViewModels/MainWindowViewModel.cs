@@ -6,6 +6,6 @@ namespace Jeffistance.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "Hello World!";
+        public string Greeting => "casca gae";
     }
 }
