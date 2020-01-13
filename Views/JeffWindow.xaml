@@ -14,7 +14,9 @@
 
     <DockPanel>
         <TextBlock DockPanel.Dock="Top" Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <Button Content="{Binding TheTruth}" Command="{Binding OnClicked}"></Button>
+        <Button Click="OnButtonClick"
+                Content="{Binding TheTruth}"
+                PointerEnter="OnPointerEnter"/>
     </DockPanel>
 
 </Window>
