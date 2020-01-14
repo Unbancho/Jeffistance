@@ -4,7 +4,6 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Interactivity;
 using Avalonia.Input;
 
-using System;
 
 namespace Jeffistance.Views
 {
@@ -13,6 +12,8 @@ namespace Jeffistance.Views
         public MainWindow()
         {
             InitializeComponent();
+
+            NetworkTest(true);
         }
 
         private void InitializeComponent()
@@ -20,25 +21,31 @@ namespace Jeffistance.Views
             AvaloniaXamlLoader.Load(this);
         }
 
-        private TimeSpan _firstTime;
-        public TimeSpan ElapsedTime{
-            get{ return DateTime.Now.TimeOfDay - _firstTime; }
+        User User;
+        public void NetworkTest(bool host=false)
+        {
+            string ip;
+            if(host)
+            {
+                ServerConnection server = new ServerConnection();
+                ip = NetworkUtilities.GetLocalIPAddress();
+            }
+            else
+            {
+                ip = "176.78.147.48";
+            }
+            User = new User(new ClientConnection(ip));
         }
 
         private void OnButtonClick(object sender, RoutedEventArgs e)
         {
-            int elapsedTime = (int) ElapsedTime.TotalSeconds;
-            ((Button) sender).Content = String.Format("Factorial of {0} = {1}", elapsedTime, Factorial((ulong)elapsedTime));
+            ClientConnection cc = (ClientConnection) User.Connection;
+            cc.Send("button clicked epicly");
         }
 
         private void OnPointerEnter(object sender, PointerEventArgs e)
         {
-            _firstTime = DateTime.Now.TimeOfDay;
-        }
 
-        private ulong Factorial(ulong n)
-        {
-            return n == 0 ? 1 : n*Factorial(n-1);
         }
 
         private void OnPointerLeave(object sender, PointerEventArgs e)
