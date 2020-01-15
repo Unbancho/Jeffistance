@@ -14,9 +14,11 @@
 
     <DockPanel>
         <TextBlock DockPanel.Dock="Top" Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <Button Click="OnButtonClick"
-                Content="{Binding TheTruth}"
+        <Button Click="OnHostButtonClick"
+                Content="Host"
                 PointerEnter="OnPointerEnter"/>
+        <Button Click="OnClientButtonClick"
+                Content="Join"/>
     </DockPanel>
 
 </Window>

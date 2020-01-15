@@ -12,8 +12,6 @@ namespace Jeffistance.Views
         public MainWindow()
         {
             InitializeComponent();
-
-            NetworkTest(true);
         }
 
         private void InitializeComponent()
@@ -34,11 +32,27 @@ namespace Jeffistance.Views
             {
                 ip = "176.78.147.48";
             }
-            User = new User(new ClientConnection(ip));
+            User = new User(new ClientConnection(ip, "cascagae"));
         }
 
-        private void OnButtonClick(object sender, RoutedEventArgs e)
+        private void OnHostButtonClick(object sender, RoutedEventArgs e)
         {
+            if(User == null)
+            {
+                NetworkTest(true);
+                return;
+            }
+            ClientConnection cc = (ClientConnection) User.Connection;
+            cc.Send("button clicked epicly");
+        }
+
+        private void OnClientButtonClick(object sender, RoutedEventArgs e)
+        {
+            if(User == null)
+            {
+                NetworkTest();
+                return;
+            }
             ClientConnection cc = (ClientConnection) User.Connection;
             cc.Send("button clicked epicly");
         }

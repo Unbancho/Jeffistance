@@ -5,11 +5,18 @@ using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
+using System.Net.Security;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+using System.IO;
+
+
 
 public abstract class ConnectionTCP
 {
     public readonly int PORT_NO;
     public readonly string SERVER_IP;
+
     public bool IsLocalConnection;
 
     protected ConnectionTCP(string ip, int port=7700)
@@ -22,7 +29,6 @@ public abstract class ConnectionTCP
 public class ServerConnection:ConnectionTCP
 {
     public static implicit operator TcpListener(ServerConnection s) => s.Listener;
-
     TcpListener Listener;
     List<User> UserList = new List<User>();
 
@@ -43,7 +49,8 @@ public class ServerConnection:ConnectionTCP
         {
             while (true)
             {
-                newClientConnection = new ClientConnection(await Listener.AcceptTcpClientAsync(), SERVER_IP);
+                TcpClient newClient = await Listener.AcceptTcpClientAsync();
+                newClientConnection = ProcessClient(newClient);
                 newUser = new User(newClientConnection);
                 UserList.Add(newUser);
                 Console.WriteLine(String.Format("New connection: {0}", newClientConnection.Client.Client.RemoteEndPoint));
@@ -52,6 +59,12 @@ public class ServerConnection:ConnectionTCP
                 t.Start();
             }
         });
+    }
+
+    private ClientConnection ProcessClient(TcpClient client)
+    {
+        ClientConnection clientConnection = new ClientConnection(client, SERVER_IP);
+        return clientConnection;
     }
     public void ListenForMessages(User user)
     {
@@ -64,7 +77,8 @@ public class ServerConnection:ConnectionTCP
                 message = ReceiveMessage(user);
             }
             catch (Exception e) when (e is System.IO.IOException || e is InvalidOperationException)
-            {UserList.Remove(user);
+            {   
+                UserList.Remove(user);
                 stopListening = true;
                 message = user.Name + " has disconnected.";
                 Console.WriteLine(message);
@@ -77,9 +91,7 @@ public class ServerConnection:ConnectionTCP
 
     public string ReceiveMessage(User user)
     {
-        string dataReceived = ": ";
-        dataReceived += NetworkUtilities.Receive((ClientConnection) user.Connection);
-        dataReceived = user.Name+dataReceived;
+        string dataReceived = NetworkUtilities.Receive((ClientConnection) user.Connection);
         return dataReceived;
     }
 
@@ -152,8 +164,8 @@ public static class NetworkUtilities
     public static string Receive(TcpClient client)
     {
         NetworkStream nwStream = client.GetStream();
-        byte[] buffer = new byte[client.ReceiveBufferSize];
-        int bytesRead = nwStream.Read(buffer, 0, client.ReceiveBufferSize);
+        byte[] buffer = new byte[client.Client.ReceiveBufferSize];
+        int bytesRead = nwStream.Read(buffer, 0, buffer.Length);
         string dataReceived = Encoding.ASCII.GetString(buffer, 0, bytesRead);
         return dataReceived;
     }
