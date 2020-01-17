@@ -5,168 +5,273 @@ using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
-using System.Net.Security;
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
-using System.IO;
 
-
-
-public abstract class ConnectionTCP
+namespace Networking
 {
-    public readonly int PORT_NO;
-    public readonly string SERVER_IP;
-
-    public bool IsLocalConnection;
-
-    protected ConnectionTCP(string ip, int port=7700)
+    public abstract class ConnectionTcp
     {
-        PORT_NO = port;
-        SERVER_IP = ip;
-    }
-}
+        public readonly int PORT_NO;
+        public readonly string SERVER_IP;
 
-public class ServerConnection:ConnectionTCP
-{
-    public static implicit operator TcpListener(ServerConnection s) => s.Listener;
-    TcpListener Listener;
-    List<User> UserList = new List<User>();
+        public bool IsLocalConnection;
 
-    public ServerConnection():base(NetworkUtilities.GetLocalIPAddress())
-    {
-        IsLocalConnection = true;
-        Listener = new TcpListener(IPAddress.Parse(SERVER_IP), PORT_NO);
-        ListenForConnections();
-    }
+        public CancellationTokenSource CancellationSource;
 
-    public void ListenForConnections()
-    {
-        User newUser;
-        ClientConnection newClientConnection;
-        Listener.Start();
-        Console.WriteLine("Listening...");
-        Task.Factory.StartNew(async () =>
+        public void Stop()
         {
-            while (true)
-            {
-                TcpClient newClient = await Listener.AcceptTcpClientAsync();
-                newClientConnection = ProcessClient(newClient);
-                newUser = new User(newClientConnection);
-                UserList.Add(newUser);
-                Console.WriteLine(String.Format("New connection: {0}", newClientConnection.Client.Client.RemoteEndPoint));
-                Thread t = new Thread(() => ListenForMessages(newUser));
-                t.IsBackground = true;
-                t.Start();
-            }
-        });
+            CancellationSource.Cancel();
+        }
+
+        protected ConnectionTcp(string ip, int port)
+        {
+            PORT_NO = port;
+            SERVER_IP = ip;
+        }
     }
 
-    private ClientConnection ProcessClient(TcpClient client)
+    public class ServerConnection:ConnectionTcp
     {
-        ClientConnection clientConnection = new ClientConnection(client, SERVER_IP);
-        return clientConnection;
-    }
-    public void ListenForMessages(User user)
-    {
-        string message;
-        bool stopListening = false;
-        while (true)
+        public static implicit operator TcpListener(ServerConnection s) => s.Listener;  // No reason for this, I just thought it was epic
+        TcpListener Listener;
+        public bool Listening;
+        public delegate void ConnectionHandler(object obj, ConnectionArgs args);
+        public event ConnectionHandler OnConnection;
+
+        public ClientConnection LatestClient
+        {
+            set
+            {
+                ConnectionArgs args = new ConnectionArgs(value);
+                OnConnection(this, args);
+            }
+        }
+        List<ClientConnection> Clients = new List<ClientConnection>();
+
+        public ServerConnection(int port):base(NetworkUtilities.GetLocalIPAddress(), port)
+        {
+            IsLocalConnection = true;
+            Listener = new TcpListener(IPAddress.Parse(SERVER_IP), PORT_NO);
+        }
+
+        public void Run()
+        {
+            Listener.Start();
+            ListenForConnections();
+        }
+
+        private void StopListening()
+        {
+            Listener.Stop();
+            Listening = false;
+        }
+
+        public async void ListenForConnections()
+        {
+            ClientConnection newClient;
+            CancellationSource = new CancellationTokenSource();
+            CancellationSource.Token.Register(Stop);
+            Listening = true;
+            Console.WriteLine("Listening...");
+            using(CancellationSource.Token.Register(Stop))
+            {
+                while(Listening)
+                {
+                    try
+                    {
+                        newClient = ProcessClient(await AcceptClient(CancellationSource.Token));
+                        LatestClient = newClient;
+                    }
+                    catch(NullReferenceException)
+                    {
+                        continue;
+                    }
+                    ListenToClient(newClient);
+                }
+            }
+        }
+
+        private void ListenToClient(ClientConnection client)
+        {
+            Clients.Add(client);
+            Task.Run(() => ListenForMessages(client));
+        }
+
+        public async Task<TcpClient> AcceptClient(CancellationToken token)
         {
             try
             {
-                message = ReceiveMessage(user);
+                TcpClient client = await Listener.AcceptTcpClientAsync(); 
+                return client;
             }
-            catch (Exception e) when (e is System.IO.IOException || e is InvalidOperationException)
-            {   
-                UserList.Remove(user);
-                stopListening = true;
-                message = user.Name + " has disconnected.";
-                Console.WriteLine(message);
+            catch(ObjectDisposedException e)
+            {
+                if(token.IsCancellationRequested)
+                {
+                    return null;
+                }
+                throw e;
             }
-            Broadcast(message);
-            if (stopListening)
-                break;
         }
-    }
 
-    public string ReceiveMessage(User user)
-    {
-        string dataReceived = NetworkUtilities.Receive((ClientConnection) user.Connection);
-        return dataReceived;
-    }
-
-    public void Broadcast(string message)
-    {
-        foreach (User user in this.UserList)
+        private ClientConnection ProcessClient(TcpClient client)
         {
-            NetworkUtilities.Send(message, (ClientConnection) user.Connection);
+            ClientConnection clientConnection = new ClientConnection(client, SERVER_IP, PORT_NO);
+            Console.WriteLine(String.Format("New connection: {0}", client.Client.RemoteEndPoint));
+            return clientConnection;
         }
-    }
-}
-
-public class ClientConnection:ConnectionTCP
-{
-    public static implicit operator TcpClient(ClientConnection c) => c.Client;
-
-    public TcpClient Client;
-
-    public ClientConnection(string ip):base(ip)
-    {
-        IsLocalConnection = true;
-        Client = new TcpClient(SERVER_IP, PORT_NO);
-        Thread listenThread = new Thread(ListenForMessages);
-        listenThread.Start();
-    }
-
-    public ClientConnection(TcpClient client, string serverIP):base(serverIP)
-    {
-        Client = client;
-        IsLocalConnection = false;
-    }
-
-    public void Send(string message)
-    {
-        NetworkUtilities.Send(message, Client);
-    }
-
-    public void ListenForMessages()
-    {
-        while(true)
+        public void ListenForMessages(ClientConnection client)
         {
-            Console.WriteLine(ReceiveMessage());
+            string message = "";
+            while (true)
+            {
+                try
+                {
+                    message = ReceiveMessage(client);
+                }
+                catch (Exception e) when (e is System.IO.IOException || e is InvalidOperationException)
+                {   
+                    message = ((TcpClient) client).Client.RemoteEndPoint + " has disconnected.";
+                    Clients.Remove(client);
+                    ((TcpClient) client).Close();
+                    break;
+                }
+                finally
+                {
+                    Broadcast(message);
+                }
+            }
+        }
+
+        public string ReceiveMessage(ClientConnection client)
+        {
+            string dataReceived = NetworkUtilities.Receive(client).Result;
+            if(dataReceived == "")
+            {
+                throw new InvalidOperationException();
+            }
+            return dataReceived;
+        }
+
+        public void Broadcast(string message)
+        {
+            foreach (ClientConnection client in this.Clients)    // This might not be thread safe /shrug
+            {
+                NetworkUtilities.Send(message, client);
+            }
         }
     }
 
-    public string ReceiveMessage()
+    public class ClientConnection:ConnectionTcp
     {
-        return NetworkUtilities.Receive(Client);
+        public static implicit operator TcpClient(ClientConnection c) => c.Client; // No reason for this, I just thought it was epic
+
+        private TcpClient Client;
+        public bool Connected;
+
+        public string IPAddress
+        {
+            get
+            {
+                return Client.Client.RemoteEndPoint.ToString();
+            }
+        }
+
+        public ClientConnection(string ip, int port):base(ip, port)
+        {
+            IsLocalConnection = true;
+            Client = new TcpClient(SERVER_IP, PORT_NO);
+            Connected = true;
+            Thread listenThread = new Thread(ListenForMessages);
+            listenThread.Start();
+        }
+
+        public ClientConnection(TcpClient client, string serverIP, int port):base(serverIP, port)
+        {
+            Client = client;
+            IsLocalConnection = false;
+        }
+
+        private void Close()
+        {
+            Client.Close();
+            Connected = false;
+        }
+
+        public void Send(string message)
+        {
+            NetworkUtilities.Send(message, Client);
+        }
+
+        public void ListenForMessages()
+        {
+            CancellationSource = new CancellationTokenSource();
+            using(CancellationSource.Token.Register(Close))
+            {
+                while(Connected)
+                {
+                    Console.WriteLine(ReceiveMessage());
+                }
+            }
+        }
+
+        public string ReceiveMessage()
+        {
+            return NetworkUtilities.Receive(Client, CancellationSource.Token).Result;
+        }
     }
-}
 
 
-public static class NetworkUtilities
-{
-    public static string GetLocalIPAddress()
+    public static class NetworkUtilities
     {
-        string strHostName = Dns.GetHostName();
-        IPHostEntry ipHostEntry = Dns.GetHostEntry(strHostName);
-        IPAddress[] address = ipHostEntry.AddressList;
-        return address[address.Length-1].ToString();
+        public static string GetLocalIPAddress()
+        {
+            string strHostName = Dns.GetHostName();
+            IPHostEntry ipHostEntry = Dns.GetHostEntry(strHostName);
+            IPAddress[] address = ipHostEntry.AddressList;
+            return address[address.Length-1].ToString();
+        }
+
+        public static void Send(string message, TcpClient client)
+        {
+            byte[] bytesToSend = Encoding.ASCII.GetBytes(message);
+            client.GetStream().Write(bytesToSend, 0, bytesToSend.Length);
+        }
+
+        public async static Task<string> Receive(TcpClient client, CancellationToken token = new CancellationToken())
+        {
+            try
+            {
+                byte[] buffer = new byte[client.Client.ReceiveBufferSize];
+                int bytesRead = await client.GetStream().ReadAsync(buffer, 0, buffer.Length);
+                string dataReceived = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+                return dataReceived;
+            }
+            catch (Exception e) when (e is ObjectDisposedException || e is System.IO.IOException || e is SocketException)
+            {
+                if(token.IsCancellationRequested)
+                {
+                    return "";
+                }
+                throw e;
+            }
+        }
     }
 
-    public static void Send(string message, TcpClient client)
+    public class ConnectionArgs : EventArgs
     {
-        NetworkStream nwStream = client.GetStream();
-        byte[] bytesToSend = Encoding.ASCII.GetBytes(message);
-        nwStream.Write(bytesToSend, 0, bytesToSend.Length);
-    }
+        private ClientConnection client;
 
-    public static string Receive(TcpClient client)
-    {
-        NetworkStream nwStream = client.GetStream();
-        byte[] buffer = new byte[client.Client.ReceiveBufferSize];
-        int bytesRead = nwStream.Read(buffer, 0, buffer.Length);
-        string dataReceived = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-        return dataReceived;
+        public ConnectionArgs(ClientConnection newClient)
+        {
+            client = newClient;
+        }
+
+        public ClientConnection Client
+        {
+            get
+            {
+                return client;
+            }
+        }
     }
 }

@@ -2,8 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Interactivity;
-using Avalonia.Input;
-
+using System.ComponentModel;
 
 namespace Jeffistance.Views
 {
@@ -17,53 +16,38 @@ namespace Jeffistance.Views
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+            Closing += OnWindowClosing;
         }
 
         User User;
-        public void NetworkTest(bool host=false)
+        public void NetworkTest(Button btn, bool host=false)
         {
-            string ip;
-            if(host)
+            if(User == null)
             {
-                ServerConnection server = new ServerConnection();
-                ip = NetworkUtilities.GetLocalIPAddress();
+                btn.Content = "PING PEOPLE";
+                User = host ? new Host() : new User();
+                if(!host)
+                {
+                    User.Connect("176.78.147.48");
+                }
             }
-            else
-            {
-                ip = "176.78.147.48";
-            }
-            User = new User(new ClientConnection(ip, "cascagae"));
+            User.Connection.Send("button clicked epicly");
         }
 
         private void OnHostButtonClick(object sender, RoutedEventArgs e)
         {
-            if(User == null)
-            {
-                NetworkTest(true);
-                return;
-            }
-            ClientConnection cc = (ClientConnection) User.Connection;
-            cc.Send("button clicked epicly");
+            NetworkTest((Button)sender, true);
         }
 
-        private void OnClientButtonClick(object sender, RoutedEventArgs e)
+        private void OnJoinButtonClick(object sender, RoutedEventArgs e)
         {
-            if(User == null)
-            {
-                NetworkTest();
-                return;
-            }
-            ClientConnection cc = (ClientConnection) User.Connection;
-            cc.Send("button clicked epicly");
+            NetworkTest((Button)sender);
         }
 
-        private void OnPointerEnter(object sender, PointerEventArgs e)
+        private void OnWindowClosing(object sender, CancelEventArgs e)
         {
-
-        }
-
-        private void OnPointerLeave(object sender, PointerEventArgs e)
-        {
+            if(User != null)
+                User.Disconnect();
         }
     }
 }

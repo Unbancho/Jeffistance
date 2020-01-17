@@ -4,6 +4,8 @@ using Avalonia.Markup.Xaml;
 using Jeffistance.ViewModels;
 using Jeffistance.Views;
 
+using System;
+
 namespace Jeffistance
 {
     public class App : Application
