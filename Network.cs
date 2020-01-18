@@ -69,10 +69,9 @@ namespace Networking
         {
             ClientConnection newClient;
             CancellationSource = new CancellationTokenSource();
-            CancellationSource.Token.Register(Stop);
             Listening = true;
             Console.WriteLine("Listening...");
-            using(CancellationSource.Token.Register(Stop))
+            using(CancellationSource.Token.Register(StopListening))
             {
                 while(Listening)
                 {
@@ -181,8 +180,7 @@ namespace Networking
             IsLocalConnection = true;
             Client = new TcpClient(SERVER_IP, PORT_NO);
             Connected = true;
-            Thread listenThread = new Thread(ListenForMessages);
-            listenThread.Start();
+            Task.Run(() => ListenForMessages());
         }
 
         public ClientConnection(TcpClient client, string serverIP, int port):base(serverIP, port)
@@ -216,7 +214,12 @@ namespace Networking
 
         public string ReceiveMessage()
         {
-            return NetworkUtilities.Receive(Client, CancellationSource.Token).Result;
+            string message = NetworkUtilities.Receive(Client, CancellationSource.Token).Result;
+            if(message == "")
+            {
+                Stop();
+            }
+            return message;
         }
     }
 
@@ -246,9 +249,9 @@ namespace Networking
                 string dataReceived = Encoding.ASCII.GetString(buffer, 0, bytesRead);
                 return dataReceived;
             }
-            catch (Exception e) when (e is ObjectDisposedException || e is System.IO.IOException || e is SocketException)
+            catch (Exception e) when (e is System.IO.IOException || e is SocketException || e is System.InvalidOperationException)
             {
-                if(token.IsCancellationRequested)
+                if(token.IsCancellationRequested || e is System.IO.IOException || e is SocketException || e is System.InvalidOperationException)
                 {
                     return "";
                 }
