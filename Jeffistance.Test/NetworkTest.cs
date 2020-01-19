@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Networking;
 using System;
+using System.Threading;
 
 namespace Jeffistance.Test
 {
@@ -17,27 +18,39 @@ namespace Jeffistance.Test
         [TearDown]
         public void TearDown()
         {
-            // This gives me a weird-ass null reference error for CancellationToken so it's epic
-            // foreach (User user in host.UserList)
-            // {
-            //     user.Disconnect();
-            // }
             host.Disconnect();
         }
 
         [Test]
-        public void HostTest()
+        public void TestHost()
         {
             Assert.IsNotNull(host);
         }
 
         [Test, Timeout(1000)]
-        public void ConnectionTest()
+        public void TestConnection()
         {
             while(true)
             {
                 if (host.UserList.Count > 0) break;
             }
+        }
+
+        [Test, Timeout(2000), Ignore("fucking async")]
+        public void TestDisconnectClient()
+        {
+            host = new Host();
+            while(true)
+            {
+                if (host.UserList.Count > 0) break;
+            }
+
+            foreach(User user in host.UserList)
+            {
+                user.Disconnect();
+            }
+
+            Assert.IsTrue(host.UserList.Count == 0);
         }
     }
 }
