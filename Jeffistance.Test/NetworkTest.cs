@@ -1,7 +1,6 @@
 using NUnit.Framework;
 using Networking;
 using System;
-using System.Threading;
 
 namespace Jeffistance.Test
 {
@@ -39,7 +38,6 @@ namespace Jeffistance.Test
         [Test, Timeout(2000), Ignore("fucking async")]
         public void TestDisconnectClient()
         {
-            host = new Host();
             while(true)
             {
                 if (host.UserList.Count > 0) break;
