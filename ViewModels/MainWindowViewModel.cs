@@ -1,14 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Avalonia.Controls;
+﻿using ReactiveUI;
 
 namespace Jeffistance.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "Casca gae";
-        public string TheTruth => "Jeff ungae";
-    
+        ViewModelBase content;
+
+        public ViewModelBase Content
+        {
+            get => content;
+            private set => this.RaiseAndSetIfChanged(ref content, value);
+        }
+        
+        public MainWindowViewModel()
+        {
+            Content = new MainMenuViewModel(this);
+        }
+
+        public void DisplayHostView()
+        {
+            Content = new HostMenuViewModel();
+        }
     }
 }

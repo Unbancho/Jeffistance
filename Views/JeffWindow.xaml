@@ -6,21 +6,11 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Jeffistance.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Jeffistance">
+        Title="Jeffistance"
+        Content="{Binding Content}">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-
-    <DockPanel>
-        <TextBlock DockPanel.Dock="Top" Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <Button Click="OnHostButtonClick"
-                Content="Host"
-                Height="400"
-                DockPanel.Dock="Bottom"/>
-        <Button Click="OnJoinButtonClick"
-                Content="Join"
-                DockPanel.Dock="Bottom"/>
-    </DockPanel>
 
 </Window>
