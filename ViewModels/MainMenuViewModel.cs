@@ -29,13 +29,14 @@ namespace Jeffistance.ViewModels
 
         private void OnHostButtonClick()
         {
-            parent.DisplayHostView();
+            parent.Content = new HostMenuViewModel();
             NetworkTest(true);
         }
 
         private void OnJoinButtonClick()
         {
-            NetworkTest();
+            parent.Content = new JoinMenuViewModel();
+            // NetworkTest();
         }
     }
 }

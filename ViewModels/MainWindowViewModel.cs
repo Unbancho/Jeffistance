@@ -9,17 +9,12 @@ namespace Jeffistance.ViewModels
         public ViewModelBase Content
         {
             get => content;
-            private set => this.RaiseAndSetIfChanged(ref content, value);
+            set => this.RaiseAndSetIfChanged(ref content, value);
         }
         
         public MainWindowViewModel()
         {
             Content = new MainMenuViewModel(this);
-        }
-
-        public void DisplayHostView()
-        {
-            Content = new HostMenuViewModel();
         }
     }
 }
