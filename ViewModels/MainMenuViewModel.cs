@@ -18,7 +18,7 @@ namespace Jeffistance.ViewModels
 
         private void OnJoinButtonClick()
         {
-            parent.Content = new JoinMenuViewModel();
+            parent.Content = new JoinMenuViewModel(parent);
         }
     }
 }

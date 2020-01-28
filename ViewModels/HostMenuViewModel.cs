@@ -49,8 +49,8 @@ namespace Jeffistance.ViewModels
 
             Ok = ReactiveCommand.Create(
                 () => {
-                    Console.WriteLine($"Would host with {port}");
-                    NetworkTest(true);},
+                    Console.WriteLine($"Hosting on {port}");
+                    Host();},
                 okEnabled
             );
             Cancel = ReactiveCommand.Create(
@@ -59,15 +59,11 @@ namespace Jeffistance.ViewModels
             );
         }
 
-        public void NetworkTest(bool host=false)
+        public void Host()
         {
             if(CurrentUser == null)
             {
-                CurrentUser = host ? new Host(port) : new User();
-                if(!host)
-                {
-                    CurrentUser.Connect("176.78.147.48");
-                }
+                CurrentUser = new Host(port);
             }
             CurrentUser.Connection.Send("button clicked epicly");
         }
