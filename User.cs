@@ -34,15 +34,15 @@ public class Host : User
 {
     public ServerConnection Server;
     public List<User> UserList;
-    public Host(string username="Host", bool dedicated=false):base(username)
+    public Host(int port=DEFAULT_PORT, string username="Host", bool dedicated=false):base(username)
     {
-        Server = new ServerConnection(DEFAULT_PORT);
+        Server = new ServerConnection(port);
         Server.OnConnection += OnConnection;
         UserList = new List<User>();
         Server.Run();
         if(!dedicated)
         {
-            Connect(Networking.NetworkUtilities.GetLocalIPAddress());
+            Connect(Networking.NetworkUtilities.GetLocalIPAddress(), port);
         }
     }
 
