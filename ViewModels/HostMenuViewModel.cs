@@ -9,13 +9,6 @@ namespace Jeffistance.ViewModels
     {
         MainWindowViewModel parent;
         int port = User.DEFAULT_PORT;
-        User currentUser;
-
-        public User CurrentUser
-        {
-            get => currentUser;
-            set => this.RaiseAndSetIfChanged(ref currentUser, value);
-        }
 
         //TODO Actual port validation
         public string Port
@@ -43,10 +36,6 @@ namespace Jeffistance.ViewModels
                 x => x.Port,
                 x => x != "-1"
             );
-            var cancelEnabled = this.WhenAnyValue(
-                x => x.CurrentUser,
-                selector: x => x is null
-            );
 
             Ok = ReactiveCommand.Create(
                 () => {
@@ -55,18 +44,15 @@ namespace Jeffistance.ViewModels
                 okEnabled
             );
             Cancel = ReactiveCommand.Create(
-                () => {parent.Content = new MainMenuViewModel(parent);},
-                cancelEnabled
+                () => {parent.Content = new MainMenuViewModel(parent);}
             );
         }
 
         public void Host()
         {
-            if(CurrentUser == null)
-            {
-                CurrentUser = new Host(port);
-            }
-            CurrentUser.Connection.Send("button clicked epicly");
+            GameState gs = GameState.GetGameState();
+            gs.CurrentUser = new Host(port);
+            parent.Content = new LobbyViewModel(parent);
         }
     }
 }
