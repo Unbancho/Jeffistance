@@ -1,6 +1,5 @@
 using NUnit.Framework;
-using Networking;
-using System;
+using Jeffistance.Models;
 
 namespace Jeffistance.Test
 {

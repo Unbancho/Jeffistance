@@ -1,7 +1,8 @@
 using System;
 using System.Reactive;
 using ReactiveUI;
-using Networking;
+using Jeffistance.Models;
+using Jeffistance.Services;
 
 namespace Jeffistance.ViewModels
 {
@@ -10,7 +11,7 @@ namespace Jeffistance.ViewModels
         MainWindowViewModel parent;
         User currentUser;
         int port = User.DEFAULT_PORT;
-        string ipAddress = Networking.NetworkUtilities.GetLocalIPAddress();
+        string ipAddress = NetworkUtilities.GetLocalIPAddress();
 
         public string Port
         {

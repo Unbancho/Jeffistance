@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 
-namespace Networking
+namespace Jeffistance.Services
 {
     public abstract class ConnectionTcp
     {
