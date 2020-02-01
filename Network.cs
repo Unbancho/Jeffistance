@@ -120,6 +120,7 @@ namespace Networking
         }
         public void ListenForMessages(ClientConnection client)
         {
+            string clientIP = client.IPAddress;
             string message = "";
             while (true)
             {
@@ -129,9 +130,12 @@ namespace Networking
                 }
                 catch (Exception e) when (e is System.IO.IOException || e is InvalidOperationException)
                 {   
-                    message = ((TcpClient) client).Client.RemoteEndPoint + " has disconnected.";
+                    message = clientIP + " has disconnected.";
                     Clients.Remove(client);
-                    ((TcpClient) client).Close();
+                    if(!(e is InvalidOperationException))
+                    {
+                        ((TcpClient) client).Close();
+                    }
                     break;
                 }
                 finally
@@ -158,6 +162,11 @@ namespace Networking
                 NetworkUtilities.Send(message, client);
             }
         }
+
+        public void Kick(ClientConnection client)
+        {
+            client.Stop();
+        }
     }
 
     public class ClientConnection:ConnectionTcp
@@ -171,7 +180,15 @@ namespace Networking
         {
             get
             {
-                return Client.Client.RemoteEndPoint.ToString();
+                return Client.Client.RemoteEndPoint.ToString().Split(':')[0];
+            }
+        }
+
+        public int Port
+        {
+            get
+            {
+                return Int16.Parse(Client.Client.RemoteEndPoint.ToString().Split(':')[1]);
             }
         }
 
@@ -186,7 +203,7 @@ namespace Networking
         public ClientConnection(TcpClient client, string serverIP, int port):base(serverIP, port)
         {
             Client = client;
-            IsLocalConnection = false;
+            IsLocalConnection = IPAddress == NetworkUtilities.GetLocalIPAddress();
         }
 
         private void Close()
@@ -220,6 +237,11 @@ namespace Networking
                 Stop();
             }
             return message;
+        }
+
+        public new void Stop()
+        {
+            Client.Close();
         }
     }
 

@@ -35,7 +35,7 @@ namespace Jeffistance.Test
             }
         }
 
-        [Test, Timeout(2000), Ignore("fucking async")]
+        [Test, Timeout(2000)]
         public void TestDisconnectClient()
         {
             while(true)
@@ -43,9 +43,9 @@ namespace Jeffistance.Test
                 if (host.UserList.Count > 0) break;
             }
 
-            foreach(User user in host.UserList)
+            foreach(User user in host.UserList.ToArray())
             {
-                user.Disconnect();
+                host.Kick(user);
             }
 
             Assert.IsTrue(host.UserList.Count == 0);
