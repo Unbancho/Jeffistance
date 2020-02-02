@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Jeffistance.Models;
+using System.Linq;
 
 namespace Jeffistance.Test
 {
@@ -42,7 +43,7 @@ namespace Jeffistance.Test
                 if (host.UserList.Count > 0) break;
             }
 
-            foreach(User user in host.UserList.ToArray())
+            foreach(User user in host.UserList.ToList())
             {
                 host.Kick(user);
             }

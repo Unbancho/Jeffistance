@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Jeffistance.Services;
 
 namespace Jeffistance.Models
@@ -8,7 +8,7 @@ namespace Jeffistance.Models
         public bool IsHost = false;
         public const int DEFAULT_PORT = 7700;
 
-        public string Name { get; set; }
+        public string Name { get; set; } = "Change me";
 
         public ClientConnection Connection;
 
@@ -36,12 +36,12 @@ namespace Jeffistance.Models
     public class Host : User
     {
         public ServerConnection Server;
-        public List<User> UserList;
+        public ObservableCollection<User> UserList;
         public Host(int port=DEFAULT_PORT, string username="Host", bool dedicated=false):base(username)
         {
             Server = new ServerConnection(port);
             Server.OnConnection += OnConnection;
-            UserList = new List<User>();
+            UserList = new ObservableCollection<User>();
             Server.Run();
             if(!dedicated)
             {
