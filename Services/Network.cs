@@ -41,7 +41,7 @@ namespace Jeffistance.Services
         {
             set
             {
-                ConnectionArgs args = new ConnectionArgs(value);
+                ConnectionArgs args = new ConnectionArgs(value, ReceiveMessage(value));
                 OnConnection(this, args);
             }
         }
@@ -188,7 +188,7 @@ namespace Jeffistance.Services
         {
             get
             {
-                return Int16.Parse(Client.Client.RemoteEndPoint.ToString().Split(':')[1]);
+                return Int32.Parse(Client.Client.RemoteEndPoint.ToString().Split(':')[1]);
             }
         }
 
@@ -271,7 +271,7 @@ namespace Jeffistance.Services
                 string dataReceived = Encoding.ASCII.GetString(buffer, 0, bytesRead);
                 return dataReceived;
             }
-            catch (Exception e) when (e is System.IO.IOException || e is SocketException || e is System.InvalidOperationException)
+            catch (Exception e)
             {
                 if(token.IsCancellationRequested || e is System.IO.IOException || e is SocketException || e is System.InvalidOperationException)
                 {
@@ -285,10 +285,12 @@ namespace Jeffistance.Services
     public class ConnectionArgs : EventArgs
     {
         private ClientConnection client;
+        private string greeting;
 
-        public ConnectionArgs(ClientConnection newClient)
+        public ConnectionArgs(ClientConnection newClient, string greeting)
         {
             client = newClient;
+            this.greeting = greeting;
         }
 
         public ClientConnection Client
@@ -296,6 +298,14 @@ namespace Jeffistance.Services
             get
             {
                 return client;
+            }
+        }
+
+        public string Greeting
+        {
+            get
+            {
+                return greeting;
             }
         }
     }

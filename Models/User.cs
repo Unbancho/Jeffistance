@@ -8,7 +8,7 @@ namespace Jeffistance.Models
         public bool IsHost = false;
         public const int DEFAULT_PORT = 7700;
 
-        public string Name { get; set; } = "Change me";
+        public string Name { get; set; }
 
         public ClientConnection Connection;
 
@@ -17,14 +17,16 @@ namespace Jeffistance.Models
             Name = username;
         }
 
-        public User(ClientConnection connection)
+        public User(ClientConnection connection, string username)
         {
             Connection = connection;
+            Name = username;
         }
 
         public void Connect(string ip, int port=DEFAULT_PORT)
         {
             Connection = new ClientConnection(ip, port);
+            Connection.Send(Name);
         }
 
         public void Disconnect()
@@ -65,7 +67,8 @@ namespace Jeffistance.Models
         private void OnConnection(object sender, ConnectionArgs args)
         {
             ClientConnection client = args.Client;
-            UserList.Add(new User(client));
+            string username = args.Greeting;
+            UserList.Add(new User(client, username));
         }
     }
 }

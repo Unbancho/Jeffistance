@@ -76,7 +76,10 @@ namespace Jeffistance.ViewModels
                 CurrentUser = new User();
                 CurrentUser.Connect(IpAddress, port);
             }
-            CurrentUser.Connection.Send("button clicked epicly");
+            else
+            {
+                CurrentUser.Connection.Send("not a username message");
+            }
         }
     }
 }
