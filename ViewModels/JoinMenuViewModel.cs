@@ -76,7 +76,7 @@ namespace Jeffistance.ViewModels
                 CurrentUser = new User();
                 CurrentUser.Connect(IpAddress, port);
             }
-            CurrentUser.Connection.Send(Console.ReadLine());
+            CurrentUser.Connection.Send("help");
         }
     }
 }
