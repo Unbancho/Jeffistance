@@ -1,14 +1,18 @@
 using System.Collections.ObjectModel;
 using Jeffistance.Services;
+using System;
+using System.Runtime.Serialization;
+using Avalonia.Threading;
 
 namespace Jeffistance.Models
 {
-    public class User
+    [Serializable]
+    public class User : ISerializable
     {
         public bool IsHost = false;
         public const int DEFAULT_PORT = 7700;
 
-        public string Name { get; set; }
+        public string Name {get; set;}
 
         public ClientConnection Connection;
 
@@ -17,16 +21,22 @@ namespace Jeffistance.Models
             Name = username;
         }
 
-        public User(ClientConnection connection, string username)
+        protected User(SerializationInfo info, StreamingContext context)
         {
-            Connection = connection;
-            Name = username;
+            Name = info.GetString("Name");
+            IsHost = info.GetBoolean("IsHost");
+        }
+
+        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("Name", Name);
+            info.AddValue("IsHost", IsHost);
         }
 
         public void Connect(string ip, int port=DEFAULT_PORT)
         {
             Connection = new ClientConnection(ip, port);
-            Connection.Send(Name);
+            Connection.Send(this);
         }
 
         public void Disconnect()
@@ -35,13 +45,16 @@ namespace Jeffistance.Models
         }
     }
 
+    [Serializable]
     public class Host : User
     {
         public ServerConnection Server;
         public ObservableCollection<User> UserList;
         public Host(int port=DEFAULT_PORT, string username="Host", bool dedicated=false):base(username)
         {
+            IsHost = true;
             Server = new ServerConnection(port);
+            Server.OnMessageReceived += OnMessageReceived;
             Server.OnConnection += OnConnection;
             UserList = new ObservableCollection<User>();
             Server.Run();
@@ -49,8 +62,9 @@ namespace Jeffistance.Models
             {
                 Connect(NetworkUtilities.GetLocalIPAddress(), port);
             }
-            IsHost = true;
         }
+
+        protected Host(SerializationInfo info, StreamingContext context) : base(info, context){}
 
         public new void Disconnect()
         {
@@ -64,11 +78,41 @@ namespace Jeffistance.Models
             Server.Kick(user.Connection);
         }
 
-        private void OnConnection(object sender, ConnectionArgs args)
+        private ClientConnection client;
+        private ClientConnection ConnectingClient
+        {
+            set
+            {
+                if(value == null || ConnectingClient == null)
+                {
+                    client = value;
+                }
+            }
+            get
+            {
+                return client;
+            }
+        }
+        public void OnMessageReceived(object sender, MessageReceivedArgs args)
+        {
+            object receivedObject = args.Message;
+            if(receivedObject is User user)
+            {   
+                user.Connection = ConnectingClient;
+                ConnectingClient = null;
+                Dispatcher.UIThread.Post(()=> UserList.Add(user));
+                Server.Broadcast(String.Format("{0} has joined from {1}.", user.Name, user.Connection.IPAddress));
+            }
+            else if(receivedObject is string str)
+            {
+                Server.Broadcast(str);
+            }
+        }
+
+        public void OnConnection(object sender, ConnectionArgs args)
         {
             ClientConnection client = args.Client;
-            string username = args.Greeting;
-            UserList.Add(new User(client, username));
+            ConnectingClient = client;
         }
     }
 }

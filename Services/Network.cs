@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Jeffistance.Services
 {
@@ -35,13 +36,15 @@ namespace Jeffistance.Services
         TcpListener Listener;
         public bool Listening;
         public delegate void ConnectionHandler(object obj, ConnectionArgs args);
+        public delegate void MessageReceivedHandler(object obj, MessageReceivedArgs args);
         public event ConnectionHandler OnConnection;
+        public event MessageReceivedHandler OnMessageReceived;
 
         public ClientConnection LatestClient
         {
             set
             {
-                ConnectionArgs args = new ConnectionArgs(value, ReceiveMessage(value));
+                ConnectionArgs args = new ConnectionArgs(value);
                 OnConnection(this, args);
             }
         }
@@ -121,12 +124,13 @@ namespace Jeffistance.Services
         public void ListenForMessages(ClientConnection client)
         {
             string clientIP = client.IPAddress;
-            string message = "";
+            object message = "";
             while (true)
             {
                 try
                 {
                     message = ReceiveMessage(client);
+                    OnMessageReceived(this, new MessageReceivedArgs(message));
                 }
                 catch (Exception e) when (e is System.IO.IOException || e is InvalidOperationException)
                 {   
@@ -138,26 +142,22 @@ namespace Jeffistance.Services
                     }
                     break;
                 }
-                finally
-                {
-                    Broadcast(message);
-                }
             }
         }
 
-        public string ReceiveMessage(ClientConnection client)
+        public object ReceiveMessage(ClientConnection client)
         {
-            string dataReceived = NetworkUtilities.Receive(client).Result;
+            object dataReceived = NetworkUtilities.Receive(client);
             if(dataReceived == "")
             {
-                throw new InvalidOperationException();
+                throw new System.InvalidOperationException();
             }
             return dataReceived;
         }
 
         public void Broadcast(string message)
         {
-            foreach (ClientConnection client in this.Clients)    // This might not be thread safe /shrug
+            foreach (ClientConnection client in this.Clients.ToArray())
             {
                 NetworkUtilities.Send(message, client);
             }
@@ -175,6 +175,11 @@ namespace Jeffistance.Services
 
         private TcpClient Client;
         public bool Connected;
+
+        public new bool IsLocalConnection()
+        {
+            return IPAddress == NetworkUtilities.GetLocalIPAddress();
+        }
 
         public string IPAddress
         {
@@ -194,7 +199,6 @@ namespace Jeffistance.Services
 
         public ClientConnection(string ip, int port):base(ip, port)
         {
-            IsLocalConnection = true;
             Client = new TcpClient(SERVER_IP, PORT_NO);
             Connected = true;
             Task.Run(() => ListenForMessages());
@@ -203,16 +207,14 @@ namespace Jeffistance.Services
         public ClientConnection(TcpClient client, string serverIP, int port):base(serverIP, port)
         {
             Client = client;
-            IsLocalConnection = IPAddress == NetworkUtilities.GetLocalIPAddress();
         }
 
         private void Close()
         {
             Client.Close();
-            Connected = false;
         }
 
-        public void Send(string message)
+        public void Send(object message)
         {
             NetworkUtilities.Send(message, Client);
         }
@@ -229,9 +231,9 @@ namespace Jeffistance.Services
             }
         }
 
-        public string ReceiveMessage()
+        public object ReceiveMessage()
         {
-            string message = NetworkUtilities.Receive(Client, CancellationSource.Token).Result;
+            object message = NetworkUtilities.Receive(Client);
             if(message == "")
             {
                 Stop();
@@ -241,6 +243,7 @@ namespace Jeffistance.Services
 
         public new void Stop()
         {
+            Connected = false;
             Client.Close();
         }
     }
@@ -256,41 +259,44 @@ namespace Jeffistance.Services
             return address[address.Length-1].ToString();
         }
 
-        public static void Send(string message, TcpClient client)
+        public static void Send(object message, TcpClient client)
         {
-            byte[] bytesToSend = Encoding.ASCII.GetBytes(message);
-            client.GetStream().Write(bytesToSend, 0, bytesToSend.Length);
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            binaryFormatter.Serialize(client.GetStream(), message);
         }
 
-        public async static Task<string> Receive(TcpClient client, CancellationToken token = new CancellationToken())
+        public static object Receive(TcpClient client, CancellationToken token = new CancellationToken())
         {
             try
             {
-                byte[] buffer = new byte[client.Client.ReceiveBufferSize];
-                int bytesRead = await client.GetStream().ReadAsync(buffer, 0, buffer.Length);
-                string dataReceived = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+                object dataReceived = DeserializeStream(client.GetStream());
                 return dataReceived;
+
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                if(token.IsCancellationRequested || e is System.IO.IOException || e is SocketException || e is System.InvalidOperationException)
+                if(token.IsCancellationRequested || e is System.IO.IOException || e is SocketException || e is System.InvalidOperationException || e is System.Runtime.Serialization.SerializationException)
                 {
                     return "";
                 }
                 throw e;
             }
         }
+
+        private static object DeserializeStream(NetworkStream networkStream)
+        {
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            return binaryFormatter.Deserialize(networkStream);
+        }
     }
 
     public class ConnectionArgs : EventArgs
     {
         private ClientConnection client;
-        private string greeting;
 
-        public ConnectionArgs(ClientConnection newClient, string greeting)
+        public ConnectionArgs(ClientConnection newClient)
         {
             client = newClient;
-            this.greeting = greeting;
         }
 
         public ClientConnection Client
@@ -300,12 +306,22 @@ namespace Jeffistance.Services
                 return client;
             }
         }
+    }
 
-        public string Greeting
+    public class MessageReceivedArgs : EventArgs
+    {
+        private object message;
+
+        public MessageReceivedArgs(object message)
+        {
+            this.message = message;
+        }
+
+        public object Message
         {
             get
             {
-                return greeting;
+                return message;
             }
         }
     }
