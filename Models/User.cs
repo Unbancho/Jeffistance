@@ -4,8 +4,13 @@ using System;
 using System.Runtime.Serialization;
 using Avalonia.Threading;
 
+using Jeffistance.Services.Messaging;
+
 namespace Jeffistance.Models
 {
+    [Flags]
+    enum CustomFlagsHere{}   // Have to be powers of 2 for bitwise operations! Cast them to MessageFlags when passing to a Message.
+
     [Serializable]
     public class User : ISerializable
     {
@@ -36,12 +41,24 @@ namespace Jeffistance.Models
         public void Connect(string ip, int port=DEFAULT_PORT)
         {
             Connection = new ClientConnection(ip, port);
-            Connection.Send(this);
+            Message greetingMessage = new Message(String.Format("{0} has joined from {1}.", Name, Connection.IPAddress), MessageFlags.Greeting | MessageFlags.Broadcast);
+            greetingMessage["User"] = this;
+            Send(greetingMessage);
         }
 
         public void Disconnect()
         {
             Connection.Stop();
+        }
+
+        public void Send(Message message)
+        {
+            Connection.Send(message);
+        }
+
+        public void Send(string message)
+        {
+            Connection.Send(new Message(message, MessageFlags.Broadcast));
         }
     }
 
@@ -50,6 +67,7 @@ namespace Jeffistance.Models
     {
         public ServerConnection Server;
         public ObservableCollection<User> UserList;
+
         public Host(int port=DEFAULT_PORT, string username="Host", bool dedicated=false):base(username)
         {
             IsHost = true;
@@ -78,41 +96,39 @@ namespace Jeffistance.Models
             Server.Kick(user.Connection);
         }
 
-        private ClientConnection client;
-        private ClientConnection ConnectingClient
+        private void AddUser(User user, ClientConnection connection)
         {
-            set
-            {
-                if(value == null || ConnectingClient == null)
-                {
-                    client = value;
-                }
-            }
-            get
-            {
-                return client;
-            }
+            user.Connection = connection;
+            Dispatcher.UIThread.Post(()=> UserList.Add(user));
         }
         public void OnMessageReceived(object sender, MessageReceivedArgs args)
         {
-            object receivedObject = args.Message;
-            if(receivedObject is User user)
-            {   
-                user.Connection = ConnectingClient;
-                ConnectingClient = null;
-                Dispatcher.UIThread.Post(()=> UserList.Add(user));
-                Server.Broadcast(String.Format("{0} has joined from {1}.", user.Name, user.Connection.IPAddress));
-            }
-            else if(receivedObject is string str)
+            Message message = (Message) args.Message;
+            if(message.HasFlag(MessageFlags.Greeting))
             {
-                Server.Broadcast(str);
+                User user = (User)message["User"];
+                ClientConnection connection = (ClientConnection) args.Sender;
+                AddUser(user, connection);
             }
+            if(message.HasFlag(MessageFlags.Broadcast))
+            {
+                Server.Broadcast(message.Text);
+            }
+        }
+
+        public void Broadcast(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        public void Broadcast(string message)
+        {
+            Server.Broadcast(new Message(message));
         }
 
         public void OnConnection(object sender, ConnectionArgs args)
         {
-            ClientConnection client = args.Client;
-            ConnectingClient = client;
+
         }
     }
 }

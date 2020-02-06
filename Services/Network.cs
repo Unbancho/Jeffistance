@@ -124,13 +124,13 @@ namespace Jeffistance.Services
         public void ListenForMessages(ClientConnection client)
         {
             string clientIP = client.IPAddress;
-            object message = "";
+            object message = null;
             while (true)
             {
                 try
                 {
                     message = ReceiveMessage(client);
-                    OnMessageReceived(this, new MessageReceivedArgs(message));
+                    OnMessageReceived(this, new MessageReceivedArgs(message, client));
                 }
                 catch (Exception e) when (e is System.IO.IOException || e is InvalidOperationException)
                 {   
@@ -148,14 +148,14 @@ namespace Jeffistance.Services
         public object ReceiveMessage(ClientConnection client)
         {
             object dataReceived = NetworkUtilities.Receive(client);
-            if(dataReceived == "")
+            if(dataReceived == null)
             {
                 throw new System.InvalidOperationException();
             }
             return dataReceived;
         }
 
-        public void Broadcast(string message)
+        public void Broadcast(object message)
         {
             foreach (ClientConnection client in this.Clients.ToArray())
             {
@@ -234,7 +234,7 @@ namespace Jeffistance.Services
         public object ReceiveMessage()
         {
             object message = NetworkUtilities.Receive(Client);
-            if(message == "")
+            if(message == null)
             {
                 Stop();
             }
@@ -277,7 +277,7 @@ namespace Jeffistance.Services
             {
                 if(token.IsCancellationRequested || e is System.IO.IOException || e is SocketException || e is System.InvalidOperationException || e is System.Runtime.Serialization.SerializationException)
                 {
-                    return "";
+                    return null;
                 }
                 throw e;
             }
@@ -311,10 +311,12 @@ namespace Jeffistance.Services
     public class MessageReceivedArgs : EventArgs
     {
         private object message;
+        private ConnectionTcp sender;
 
-        public MessageReceivedArgs(object message)
+        public MessageReceivedArgs(object message, ConnectionTcp sender)
         {
             this.message = message;
+            this.sender = sender;
         }
 
         public object Message
@@ -322,6 +324,14 @@ namespace Jeffistance.Services
             get
             {
                 return message;
+            }
+        }
+
+        public ConnectionTcp Sender
+        {
+            get
+            {
+                return sender;
             }
         }
     }
