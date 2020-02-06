@@ -9,7 +9,6 @@ namespace Jeffistance.ViewModels
     public class JoinMenuViewModel : ViewModelBase
     {
         MainWindowViewModel parent;
-        User currentUser;
         int port = User.DEFAULT_PORT;
         string ipAddress = NetworkUtilities.GetLocalIPAddress();
 
@@ -34,12 +33,6 @@ namespace Jeffistance.ViewModels
             set => this.RaiseAndSetIfChanged(ref ipAddress, value);
         }
 
-        public User CurrentUser
-        {
-            get => currentUser;
-            set => this.RaiseAndSetIfChanged(ref currentUser, value);
-        }
-
         public ReactiveCommand<Unit, Unit> Ok { get; }
         public ReactiveCommand<Unit, Unit> Cancel { get; }
 
@@ -52,10 +45,6 @@ namespace Jeffistance.ViewModels
                 x => x.IpAddress,
                 (port, ip) => port != "-1" && !string.IsNullOrWhiteSpace(ip)
             );
-            var cancelEnabled = this.WhenAnyValue(
-                x => x.CurrentUser,
-                selector: x => x is null
-            );
 
             Ok = ReactiveCommand.Create(
                 () => {
@@ -64,19 +53,16 @@ namespace Jeffistance.ViewModels
                 okEnabled
             );
             Cancel = ReactiveCommand.Create(
-                () => {parent.Content = new MainMenuViewModel(parent);},
-                cancelEnabled
+                () => {parent.Content = new MainMenuViewModel(parent);}
             );
         }
 
         public void Join()
         {
-            if(CurrentUser == null)
-            {
-                CurrentUser = new User();
-                CurrentUser.Connect(IpAddress, port);
-            }
-            CurrentUser.Send("help");
+            GameState gs = GameState.GetGameState();
+            gs.CurrentUser = new User();
+            gs.CurrentUser.Connect(IpAddress, port);
+            parent.Content = new LobbyViewModel(parent);
         }
     }
 }
