@@ -15,8 +15,7 @@ namespace Jeffistance.ViewModels
         {
             this.parent = parent;
             GameState gs = GameState.GetGameState();
-            // Doesn't work because you're casting to Host, User should have UserList too
-            Users = ((Host)gs.CurrentUser).UserList;
+            Users = gs.CurrentUser.UserList;
         }
 
         public void OnKickEveryoneClicked()

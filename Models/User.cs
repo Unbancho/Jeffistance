@@ -5,18 +5,33 @@ using System.Runtime.Serialization;
 using Avalonia.Threading;
 
 using Jeffistance.Services.Messaging;
+using System.Reflection;
+using System.Linq;
 
 namespace Jeffistance.Models
 {
     [Flags]
-    enum CustomFlagsHere{}   // Have to be powers of 2 for bitwise operations! Cast them to MessageFlags when passing to a Message.
+    enum JeffistanceFlags // Have to be powers of 2 for bitwise operations! Cast them to MessageFlags when passing to a Message.
+    {
+        Update = 4
+    }   
 
     [Serializable]
     public class User : ISerializable
     {
+        public override bool Equals(object u2){return ID == ((User)u2).ID;}
+        public override int GetHashCode(){ return ID.GetHashCode();}
+        private ObservableCollection<User> _userList;
+        public ObservableCollection<User> UserList
+        {
+            get{ return _userList;}
+            set{foreach (var item in value.Except(UserList)){ Dispatcher.UIThread.Post(()=> UserList.Add(item));}}
+        }
+
         public bool IsHost = false;
         public const int DEFAULT_PORT = 7700;
 
+        public int ID;
         public string Name {get; set;}
 
         public ClientConnection Connection;
@@ -24,23 +39,27 @@ namespace Jeffistance.Models
         public User(string username="Guest")
         {
             Name = username;
+            _userList = new ObservableCollection<User>();
         }
 
         protected User(SerializationInfo info, StreamingContext context)
         {
             Name = info.GetString("Name");
             IsHost = info.GetBoolean("IsHost");
+            ID = info.GetInt32("id");
         }
 
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("Name", Name);
             info.AddValue("IsHost", IsHost);
+            info.AddValue("id", ID);
         }
 
         public void Connect(string ip, int port=DEFAULT_PORT)
         {
             Connection = new ClientConnection(ip, port);
+            Connection.OnMessageReceived += OnMessageReceived;
             Message greetingMessage = new Message(String.Format("{0} has joined from {1}.", Name, Connection.IPAddress), MessageFlags.Greeting | MessageFlags.Broadcast);
             greetingMessage["User"] = this;
             Send(greetingMessage);
@@ -60,13 +79,31 @@ namespace Jeffistance.Models
         {
             Connection.Send(new Message(message, MessageFlags.Broadcast));
         }
+
+        public void OnMessageReceived(object sender, MessageReceivedArgs args)
+        {
+            ProcessMessage((Message) args.Message, args.Sender);
+        }
+
+        public virtual void ProcessMessage(Message message, ConnectionTcp sender)
+        {
+            if(message.HasFlag(JeffistanceFlags.Update))
+            {
+                object result;
+                while(message.TryPop(out result))
+                {
+                    (object obj, string name) = (ValueTuple<object, string>) result;
+                    PropertyInfo pi = this.GetType().GetProperty(name, BindingFlags.Instance|BindingFlags.Public);
+                    pi.SetValue(this, obj);
+                }
+            }
+        }
     }
 
     [Serializable]
     public class Host : User
     {
         public ServerConnection Server;
-        public ObservableCollection<User> UserList;
 
         public Host(int port=DEFAULT_PORT, string username="Host", bool dedicated=false):base(username)
         {
@@ -74,7 +111,6 @@ namespace Jeffistance.Models
             Server = new ServerConnection(port);
             Server.OnMessageReceived += OnMessageReceived;
             Server.OnConnection += OnConnection;
-            UserList = new ObservableCollection<User>();
             Server.Run();
             if(!dedicated)
             {
@@ -99,20 +135,26 @@ namespace Jeffistance.Models
         private void AddUser(User user, ClientConnection connection)
         {
             user.Connection = connection;
+            user.ID =  UserList.Count;
             Dispatcher.UIThread.Post(()=> UserList.Add(user));
+            Message updateList = new Message("Update your lists, scrubs", (MessageFlags) JeffistanceFlags.Update);
+            updateList["UserList"] = UserList;
+            Broadcast(updateList);
         }
-        public void OnMessageReceived(object sender, MessageReceivedArgs args)
+
+        public override void ProcessMessage(Message message, ConnectionTcp sender)
         {
-            Message message = (Message) args.Message;
+
             if(message.HasFlag(MessageFlags.Greeting))
             {
                 User user = (User)message["User"];
-                ClientConnection connection = (ClientConnection) args.Sender;
+                ClientConnection connection = (ClientConnection) sender;
                 AddUser(user, connection);
             }
             if(message.HasFlag(MessageFlags.Broadcast))
             {
-                Server.Broadcast(message.Text);
+                if(!message.HasFlag((MessageFlags)JeffistanceFlags.Update)) message = new Message(message.Text);
+                Server.Broadcast(message);
             }
         }
 

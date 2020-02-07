@@ -14,6 +14,9 @@ namespace Jeffistance.Services
         public readonly int PORT_NO;
         public readonly string SERVER_IP;
 
+        public delegate void ConnectionHandler(object obj, ConnectionArgs args);
+        public delegate void MessageReceivedHandler(object obj, MessageReceivedArgs args);
+
         public bool IsLocalConnection;
 
         public CancellationTokenSource CancellationSource;
@@ -35,8 +38,7 @@ namespace Jeffistance.Services
         public static implicit operator TcpListener(ServerConnection s) => s.Listener;  // No reason for this, I just thought it was epic
         TcpListener Listener;
         public bool Listening;
-        public delegate void ConnectionHandler(object obj, ConnectionArgs args);
-        public delegate void MessageReceivedHandler(object obj, MessageReceivedArgs args);
+
         public event ConnectionHandler OnConnection;
         public event MessageReceivedHandler OnMessageReceived;
 
@@ -121,6 +123,7 @@ namespace Jeffistance.Services
             Console.WriteLine(String.Format("New connection: {0}", client.Client.RemoteEndPoint));
             return clientConnection;
         }
+        
         public void ListenForMessages(ClientConnection client)
         {
             string clientIP = client.IPAddress;
@@ -172,7 +175,7 @@ namespace Jeffistance.Services
     public class ClientConnection:ConnectionTcp
     {
         public static implicit operator TcpClient(ClientConnection c) => c.Client; // No reason for this, I just thought it was epic
-
+        public event MessageReceivedHandler OnMessageReceived;
         private TcpClient Client;
         public bool Connected;
 
@@ -224,9 +227,12 @@ namespace Jeffistance.Services
             CancellationSource = new CancellationTokenSource();
             using(CancellationSource.Token.Register(Close))
             {
+                object message;
                 while(Connected)
                 {
-                    Console.WriteLine(ReceiveMessage());
+                    message = ReceiveMessage();
+                    Console.WriteLine(message);
+                    OnMessageReceived(this, new MessageReceivedArgs(message, null));
                 }
             }
         }
