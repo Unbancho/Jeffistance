@@ -5,17 +5,11 @@ using System.Runtime.Serialization;
 using Avalonia.Threading;
 
 using Jeffistance.Services.Messaging;
-using System.Reflection;
+using Jeffistance.Services.MessageProcessing;
 using System.Linq;
 
 namespace Jeffistance.Models
 {
-    [Flags]
-    enum JeffistanceFlags // Have to be powers of 2 for bitwise operations! Cast them to MessageFlags when passing to a Message.
-    {
-        Update = 4
-    }   
-
     [Serializable]
     public class User : ISerializable
     {
@@ -36,10 +30,13 @@ namespace Jeffistance.Models
 
         public ClientConnection Connection;
 
+        public MessageProcessor MessageProcessor;
+
         public User(string username="Guest")
         {
             Name = username;
             _userList = new ObservableCollection<User>();
+            MessageProcessor = new MessageProcessor();
         }
 
         protected User(SerializationInfo info, StreamingContext context)
@@ -60,7 +57,7 @@ namespace Jeffistance.Models
         {
             Connection = new ClientConnection(ip, port);
             Connection.OnMessageReceived += OnMessageReceived;
-            Message greetingMessage = new Message(String.Format("{0} has joined from {1}.", Name, Connection.IPAddress), MessageFlags.Greeting | MessageFlags.Broadcast);
+            Message greetingMessage = new Message(String.Format("{0} has joined from {1}.", Name, Connection.IPAddress), MessageFlags.Greeting, MessageFlags.Broadcast);
             greetingMessage["User"] = this;
             Send(greetingMessage);
         }
@@ -77,26 +74,14 @@ namespace Jeffistance.Models
 
         public void Send(string message)
         {
-            Connection.Send(new Message(message, MessageFlags.Broadcast));
+            Send(new Message(message, MessageFlags.Broadcast));
         }
 
         public void OnMessageReceived(object sender, MessageReceivedArgs args)
         {
-            ProcessMessage((Message) args.Message, args.Sender);
-        }
-
-        public virtual void ProcessMessage(Message message, ConnectionTcp sender)
-        {
-            if(message.HasFlag(JeffistanceFlags.Update))
-            {
-                object result;
-                while(message.TryPop(out result))
-                {
-                    (object obj, string name) = (ValueTuple<object, string>) result;
-                    PropertyInfo pi = this.GetType().GetProperty(name, BindingFlags.Instance|BindingFlags.Public);
-                    pi.SetValue(this, obj);
-                }
-            }
+            Message message = (Message) args.Message;
+            message.Sender = args.Sender;
+            MessageProcessor.ProcessMessage(message);
         }
     }
 
@@ -132,30 +117,13 @@ namespace Jeffistance.Models
             Server.Kick(user.Connection);
         }
 
-        private void AddUser(User user, ClientConnection connection)
+        public void AddUser(User user)
         {
-            user.Connection = connection;
             user.ID =  UserList.Count;
             Dispatcher.UIThread.Post(()=> UserList.Add(user));
             Message updateList = new Message("Update your lists, scrubs", (MessageFlags) JeffistanceFlags.Update);
             updateList["UserList"] = UserList;
             Broadcast(updateList);
-        }
-
-        public override void ProcessMessage(Message message, ConnectionTcp sender)
-        {
-
-            if(message.HasFlag(MessageFlags.Greeting))
-            {
-                User user = (User)message["User"];
-                ClientConnection connection = (ClientConnection) sender;
-                AddUser(user, connection);
-            }
-            if(message.HasFlag(MessageFlags.Broadcast))
-            {
-                if(!message.HasFlag((MessageFlags)JeffistanceFlags.Update)) message = new Message(message.Text);
-                Server.Broadcast(message);
-            }
         }
 
         public void Broadcast(Message message)

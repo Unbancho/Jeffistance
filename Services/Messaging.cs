@@ -1,6 +1,8 @@
 using System;
 using System.Runtime.Serialization;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Linq;
 
 namespace Jeffistance.Services.Messaging
 {
@@ -23,21 +25,20 @@ namespace Jeffistance.Services.Messaging
             get{ return PackedObjects[name]; }
             set{ PackObject(value, name); }
         }
-        public Enum Flags;
+
+        public object Sender;
+
+        public MessageFlags[] Flags;
         public string Text;
 
-        public Message(string text=null, Enum flags=null, params object[] objectsToPack)
+        public Message(string text=null, params Enum[] flags)
         {
             PackedObjects = new Dictionary<string, object>();
             Text = text == null ? String.Empty : text;
-            Flags = flags == null ? MessageFlags.None : flags;
-            foreach (var obj in objectsToPack)
-            {
-                PackObject(obj);
-            }
+            Flags = Array.ConvertAll(flags, f => (MessageFlags)f);
         }
 
-         public void PackObject<T>(T obj, string name=null)
+        public void PackObject<T>(T obj, string name=null)
         {
             if(name == null)
             {
@@ -82,7 +83,18 @@ namespace Jeffistance.Services.Messaging
 
         public bool HasFlag(Enum flag)
         {
-            return Flags.HasFlag((MessageFlags)flag);
+            foreach (MessageFlags f in Flags)
+            {
+                if(f.HasFlag(flag)) return true;
+            }
+            return false;
+        }
+
+        public MethodInfo[] GetFlaggedMethods<T>(T instance, string flagName, BindingFlags flags = BindingFlags.NonPublic|BindingFlags.Instance)
+        {
+            return instance.GetType().GetMethods(flags)
+                .Where(y => y.GetCustomAttributes().OfType<MessageMethodAttribute>()
+                .Where(attr => attr.FlagName == flagName).Any()).ToArray();
         }
 
         protected Message(SerializationInfo info, StreamingContext context)
@@ -93,7 +105,7 @@ namespace Jeffistance.Services.Messaging
                 PackObject(entry.Value, entry.Name);
             }
             Text = (string) Pop("Text");
-            Flags = (Enum) Pop("Flags");
+            Flags = (MessageFlags[]) Pop("Flags");
         }
 
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -104,6 +116,17 @@ namespace Jeffistance.Services.Messaging
             }
             info.AddValue("Text", Text);
             info.AddValue("Flags", Flags);
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    public class MessageMethodAttribute : Attribute
+    {
+        public string FlagName;
+
+        public MessageMethodAttribute(string flagName)
+        {
+            FlagName = flagName;
         }
     }
 

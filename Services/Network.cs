@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
@@ -162,8 +161,13 @@ namespace Jeffistance.Services
         {
             foreach (ClientConnection client in this.Clients.ToArray())
             {
-                NetworkUtilities.Send(message, client);
+                SendMessageTo(message, client);
             }
+        }
+
+        public void SendMessageTo(object message, ClientConnection client)
+        {
+            NetworkUtilities.Send(message, client);
         }
 
         public void Kick(ClientConnection client)
