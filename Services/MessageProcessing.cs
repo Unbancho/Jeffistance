@@ -9,6 +9,8 @@ namespace Jeffistance.Services.MessageProcessing
     [Flags]
     enum JeffistanceFlags // Have to be powers of 2 for bitwise operations! Cast them to MessageFlags when passing to a Message.
     {
+        Greeting = 1,
+        Broadcast = 2,
         Update = 4
     }
 
@@ -20,7 +22,7 @@ namespace Jeffistance.Services.MessageProcessing
             string flagName;
             foreach (Enum flag in message.Flags)
             {
-                flagName = flag.ToString().Length > 1 ? flag.ToString() : ((JeffistanceFlags) flag).ToString();
+                flagName = ((JeffistanceFlags) flag).ToString();
                 foreach (var method in message.GetFlaggedMethods(this, flagName))
                 {
                     method.Invoke(this, parametersToPass);

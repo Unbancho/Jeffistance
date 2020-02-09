@@ -57,7 +57,7 @@ namespace Jeffistance.Models
         {
             Connection = new ClientConnection(ip, port);
             Connection.OnMessageReceived += OnMessageReceived;
-            Message greetingMessage = new Message(String.Format("{0} has joined from {1}.", Name, Connection.IPAddress), MessageFlags.Greeting, MessageFlags.Broadcast);
+            Message greetingMessage = new Message(String.Format("{0} has joined from {1}.", Name, Connection.IPAddress), JeffistanceFlags.Greeting, JeffistanceFlags.Broadcast);
             greetingMessage["User"] = this;
             Send(greetingMessage);
         }
@@ -74,7 +74,7 @@ namespace Jeffistance.Models
 
         public void Send(string message)
         {
-            Send(new Message(message, MessageFlags.Broadcast));
+            Send(new Message(message, JeffistanceFlags.Broadcast));
         }
 
         public void OnMessageReceived(object sender, MessageReceivedArgs args)

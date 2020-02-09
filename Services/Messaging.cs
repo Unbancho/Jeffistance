@@ -9,9 +9,7 @@ namespace Jeffistance.Services.Messaging
     [Flags]
     public enum MessageFlags
     {
-        None = 0,
-        Greeting = 1,
-        Broadcast = 2,
+        None = 0
     }
 
     [Serializable]
