@@ -2,6 +2,8 @@ using NUnit.Framework;
 using Jeffistance.Services;
 using System.Threading;
 
+using System;
+
 namespace Jeffistance.Test
 {
     [TestFixture]
@@ -19,7 +21,7 @@ namespace Jeffistance.Test
         [TearDown]
         public void TearDown()
         {
-            server.Stop();
+            server.ShutDown();
         }
 
         [Test, Timeout(2000)]
@@ -32,6 +34,24 @@ namespace Jeffistance.Test
                  if (server.Clients.Count > 0) break;
             }
             Assert.IsTrue(server.Clients.Count > 0);
+        }
+
+        [Test, Timeout(20000)]
+        public void TestDisconnectClient()
+        {
+            server.Run();
+            var client = new ClientConnection(NetworkUtilities.GetLocalIPAddress(), DEFAULT_PORT);
+            while(true)
+            {
+                if (server.Clients.Count > 0) break;
+            }
+
+            foreach(ClientConnection c in server.Clients.ToArray())
+            {
+                server.Kick(c);
+            }
+
+            Assert.IsTrue(server.Clients.Count == 0);
         }
     }
 }

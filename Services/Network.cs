@@ -61,6 +61,15 @@ namespace Jeffistance.Services
             Listening = false;
         }
 
+        public void ShutDown()
+        {
+            foreach (var client in Clients.ToArray())
+            {
+                Kick(client);
+            }
+            StopListening();
+        }
+
         public async void ListenForConnections()
         {
             TcpClient newClient;
@@ -76,7 +85,7 @@ namespace Jeffistance.Services
                         newClient = await AcceptClient(CancellationSource.Token);
                         var processTask = Task.Run(() => ProcessClient(newClient));
                     }
-                    catch(NullReferenceException)
+                    catch(Exception e) when(e is NullReferenceException || e is ObjectDisposedException)
                     {
                         continue;
                     }
@@ -166,6 +175,7 @@ namespace Jeffistance.Services
 
         public void Kick(ClientConnection client)
         {
+            Clients.Remove(client);
             client.Stop();
         }
     }
