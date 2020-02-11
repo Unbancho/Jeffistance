@@ -41,7 +41,7 @@ namespace Jeffistance.Services
         public event ConnectionHandler OnConnection;
         public event MessageReceivedHandler OnMessageReceived;
 
-        List<ClientConnection> Clients = new List<ClientConnection>();
+        public List<ClientConnection> Clients = new List<ClientConnection>();
 
         public ServerConnection(int port):base(NetworkUtilities.GetLocalIPAddress(), port)
         {

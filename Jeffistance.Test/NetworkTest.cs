@@ -27,12 +27,11 @@ namespace Jeffistance.Test
         {
             server.Run();
             var client = new ClientConnection(NetworkUtilities.GetLocalIPAddress(), DEFAULT_PORT);
-            // FIXME 1) make Clients public 2) handle that event
-            // while(true)
-            // {
-            //     if (server.Clients.Count > 0) break;
-            // }
-            // Assert.IsTrue(server.Clients.Count > 0);
+            while(true)
+            {
+                 if (server.Clients.Count > 0) break;
+            }
+            Assert.IsTrue(server.Clients.Count > 0);
         }
     }
 }
