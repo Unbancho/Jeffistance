@@ -121,7 +121,7 @@ namespace Jeffistance.Models
         {
             user.ID =  UserList.Count;
             Dispatcher.UIThread.Post(()=> UserList.Add(user));
-            Message updateList = new Message("Update your lists, scrubs", (MessageFlags) JeffistanceFlags.Update);
+            Message updateList = new Message("Update your lists, scrubs", JeffistanceFlags.Update);
             updateList["UserList"] = UserList;
             Broadcast(updateList);
         }

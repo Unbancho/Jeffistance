@@ -26,14 +26,16 @@ namespace Jeffistance.Services.Messaging
 
         public object Sender;
 
-        public MessageFlags[] Flags;
+        private MessageFlags Flag;
+        private MessageFlags[] FlagsArray;
         public string Text;
 
         public Message(string text=null, params Enum[] flags)
         {
             PackedObjects = new Dictionary<string, object>();
             Text = text == null ? String.Empty : text;
-            Flags = Array.ConvertAll(flags, f => (MessageFlags)f);
+            FlagsArray = Array.ConvertAll(flags, f => (MessageFlags)f);
+            foreach (MessageFlags f in FlagsArray){ Flag |= f; }
         }
 
         public void PackObject<T>(T obj, string name=null)
@@ -79,13 +81,18 @@ namespace Jeffistance.Services.Messaging
             }
         }
 
+        public IEnumerable<MessageFlags> GetFlags(bool enumerable = true)
+        {
+            if(!enumerable) yield return Flag;
+            foreach (MessageFlags flag in FlagsArray)
+            {
+                yield return flag;
+            }
+        }
+
         public bool HasFlag(Enum flag)
         {
-            foreach (MessageFlags f in Flags)
-            {
-                if(f.HasFlag(flag)) return true;
-            }
-            return false;
+            return Flag.HasFlag((MessageFlags)flag);
         }
 
         public MethodInfo[] GetFlaggedMethods<T>(T instance, string flagName, BindingFlags flags = BindingFlags.NonPublic|BindingFlags.Instance)
@@ -103,7 +110,8 @@ namespace Jeffistance.Services.Messaging
                 PackObject(entry.Value, entry.Name);
             }
             Text = (string) Pop("Text");
-            Flags = (MessageFlags[]) Pop("Flags");
+            FlagsArray = (MessageFlags[]) Pop("FlagsArray");
+            Flag = (MessageFlags) Pop("Flag");
         }
 
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -113,7 +121,8 @@ namespace Jeffistance.Services.Messaging
                 info.AddValue(entry.Key, entry.Value);
             }
             info.AddValue("Text", Text);
-            info.AddValue("Flags", Flags);
+            info.AddValue("FlagsArray", FlagsArray);
+            info.AddValue("Flag", Flag);
         }
     }
 
