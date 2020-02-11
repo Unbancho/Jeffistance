@@ -15,7 +15,7 @@ namespace Jeffistance.ViewModels
         {
             get => port.ToString();
             set {
-                if (Int32.TryParse(value, out int result))
+                if (Int32.TryParse(value, out int result) && result >= 0 && result <= 65535)
                 {
                     this.RaiseAndSetIfChanged(ref port, result);
                 }
