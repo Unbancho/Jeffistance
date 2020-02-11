@@ -41,14 +41,6 @@ namespace Jeffistance.Services
         public event ConnectionHandler OnConnection;
         public event MessageReceivedHandler OnMessageReceived;
 
-        public ClientConnection LatestClient
-        {
-            set
-            {
-                ConnectionArgs args = new ConnectionArgs(value);
-                OnConnection(this, args);
-            }
-        }
         List<ClientConnection> Clients = new List<ClientConnection>();
 
         public ServerConnection(int port):base(NetworkUtilities.GetLocalIPAddress(), port)
@@ -71,7 +63,7 @@ namespace Jeffistance.Services
 
         public async void ListenForConnections()
         {
-            ClientConnection newClient;
+            TcpClient newClient;
             CancellationSource = new CancellationTokenSource();
             Listening = true;
             Console.WriteLine("Listening...");
@@ -81,14 +73,13 @@ namespace Jeffistance.Services
                 {
                     try
                     {
-                        newClient = ProcessClient(await AcceptClient(CancellationSource.Token));
-                        LatestClient = newClient;
+                        newClient = await AcceptClient(CancellationSource.Token);
+                        var processTask = Task.Run(() => ProcessClient(newClient));
                     }
                     catch(NullReferenceException)
                     {
                         continue;
                     }
-                    ListenToClient(newClient);
                 }
             }
         }
@@ -116,11 +107,14 @@ namespace Jeffistance.Services
             }
         }
 
-        private ClientConnection ProcessClient(TcpClient client)
+        private void ProcessClient(TcpClient client)
         {
             ClientConnection clientConnection = new ClientConnection(client, SERVER_IP, PORT_NO);
             Console.WriteLine(String.Format("New connection: {0}", client.Client.RemoteEndPoint));
-            return clientConnection;
+            ConnectionArgs args = new ConnectionArgs(clientConnection);
+            ConnectionHandler tempHandler;
+            if((tempHandler = OnConnection) != null) OnConnection(this, args);
+            ListenToClient(clientConnection);
         }
         
         public void ListenForMessages(ClientConnection client)
