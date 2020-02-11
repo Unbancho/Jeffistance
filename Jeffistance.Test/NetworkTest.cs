@@ -1,54 +1,38 @@
 using NUnit.Framework;
-using Jeffistance.Models;
-using System.Linq;
+using Jeffistance.Services;
+using System.Threading;
 
 namespace Jeffistance.Test
 {
     [TestFixture]
     public class Tests
     {
-        Host host;
+        ServerConnection server;
+        public const int DEFAULT_PORT = 7700;
+
         [SetUp]
         public void Setup()
         {
-            host = new Host();
+            server = new ServerConnection(DEFAULT_PORT);
         }
 
         [TearDown]
         public void TearDown()
         {
-            host.Disconnect();
-        }
-
-        [Test]
-        public void TestHost()
-        {
-            Assert.IsNotNull(host);
-        }
-
-        [Test, Timeout(1000)]
-        public void TestConnection()
-        {
-            while(true)
-            {
-                if (host.UserList.Count > 0) break;
-            }
+            server.Stop();
         }
 
         [Test, Timeout(2000)]
-        public void TestDisconnectClient()
+        public void TestConnection()
         {
-            while(true)
-            {
-                if (host.UserList.Count > 0) break;
-            }
-
-            foreach(User user in host.UserList.ToList())
-            {
-                host.Kick(user);
-            }
-
-            Assert.IsTrue(host.UserList.Count == 0);
+            server.Run();
+            var client = new ClientConnection(NetworkUtilities.GetLocalIPAddress(), DEFAULT_PORT);
+            // FIXME 1) make Clients public 2) handle that event
+            // while(true)
+            // {
+            //     if (server.Clients.Count > 0) break;
+            // }
+            // Assert.IsTrue(server.Clients.Count > 0);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Reactive;
 using ReactiveUI;
 using Jeffistance.Models;
@@ -16,7 +17,7 @@ namespace Jeffistance.ViewModels
         {
             get => port.ToString();
             set {
-                if (Int32.TryParse(value, out int result))
+                if (Int32.TryParse(value, out int result) && result >= 0 && result <= 65535)
                 {
                     this.RaiseAndSetIfChanged(ref port, result);
                 }
@@ -43,7 +44,7 @@ namespace Jeffistance.ViewModels
             var okEnabled = this.WhenAnyValue(
                 x => x.Port,
                 x => x.IpAddress,
-                (port, ip) => port != "-1" && !string.IsNullOrWhiteSpace(ip)
+                (port, ip) => port != "-1" && IPAddress.TryParse(ip, out IPAddress _)
             );
 
             Ok = ReactiveCommand.Create(
