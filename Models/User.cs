@@ -1,25 +1,27 @@
-using System.Collections.ObjectModel;
-using Jeffistance.Services;
 using System;
 using System.Runtime.Serialization;
-using Avalonia.Threading;
-
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using Jeffistance.Services;
 using Jeffistance.Services.Messaging;
 using Jeffistance.Services.MessageProcessing;
-using System.Linq;
 
 namespace Jeffistance.Models
 {
     [Serializable]
-    public class User : ISerializable
+    public class User : ISerializable, INotifyPropertyChanged
     {
         public override bool Equals(object u2){return ID == ((User)u2).ID;}
         public override int GetHashCode(){ return ID.GetHashCode();}
-        private ObservableCollection<User> _userList;
-        public ObservableCollection<User> UserList
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private List<User> _userList;
+        public List<User> UserList
         {
             get{ return _userList;}
-            set{foreach (var item in value.Except(UserList)){ Dispatcher.UIThread.Post(()=> UserList.Add(item));}}
+            set{ _userList = value; OnPropertyChanged();}
         }
 
         public bool IsHost = false;
@@ -35,7 +37,7 @@ namespace Jeffistance.Models
         public User(string username="Guest")
         {
             Name = username;
-            _userList = new ObservableCollection<User>();
+            UserList = new List<User>();
             MessageProcessor = new MessageProcessor();
         }
 
@@ -83,6 +85,11 @@ namespace Jeffistance.Models
             message.Sender = args.Sender;
             MessageProcessor.ProcessMessage(message);
         }
+
+        private void OnPropertyChanged([CallerMemberName] String propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
     [Serializable]
@@ -120,7 +127,7 @@ namespace Jeffistance.Models
         public void AddUser(User user)
         {
             user.ID =  UserList.Count;
-            Dispatcher.UIThread.Post(()=> UserList.Add(user));
+            UserList.Add(user);
             Message updateList = new Message("Update your lists, scrubs", JeffistanceFlags.Update);
             updateList["UserList"] = UserList;
             Broadcast(updateList);

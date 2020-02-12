@@ -36,7 +36,7 @@ namespace Jeffistance.Test
             Assert.IsTrue(server.Clients.Count > 0);
         }
 
-        [Test, Timeout(20000)]
+        [Test, Timeout(2000)]
         public void TestDisconnectClient()
         {
             server.Run();

@@ -121,8 +121,7 @@ namespace Jeffistance.Services
             ClientConnection clientConnection = new ClientConnection(client, SERVER_IP, PORT_NO);
             Console.WriteLine(String.Format("New connection: {0}", client.Client.RemoteEndPoint));
             ConnectionArgs args = new ConnectionArgs(clientConnection);
-            ConnectionHandler tempHandler;
-            if((tempHandler = OnConnection) != null) OnConnection(this, args);
+            OnConnection?.Invoke(this, args);
             ListenToClient(clientConnection);
         }
         
