@@ -34,11 +34,14 @@ namespace Jeffistance.Models
 
         public MessageProcessor MessageProcessor;
 
+        public Permissions Perms;
+
         public User(string username="Guest")
         {
             Name = username;
             UserList = new List<User>();
             MessageProcessor = new MessageProcessor();
+            Perms = new Permissions();
         }
 
         protected User(SerializationInfo info, StreamingContext context)
@@ -101,6 +104,10 @@ namespace Jeffistance.Models
         {
             IsHost = true;
             Server = new ServerConnection(port);
+            Perms = new Permissions
+            {
+                CanKick = true
+            };
             Server.OnMessageReceived += OnMessageReceived;
             Server.OnConnection += OnConnection;
             Server.Run();

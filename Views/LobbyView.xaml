@@ -5,7 +5,8 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Jeffistance.Views.LobbyView">
   <DockPanel>
-    <Button Content="Kick Everyone" Command="{Binding OnKickEveryoneClicked}"/>
+    <Button Content="Kick Everyone" Command="{Binding OnKickEveryoneClicked}"
+            DockPanel.Dock="Bottom" IsVisible="{Binding ShowKickButton}"/>
     <ListBox DockPanel.Dock="Right" Items="{Binding Users}">
       <ListBox.ItemTemplate>
         <DataTemplate>
