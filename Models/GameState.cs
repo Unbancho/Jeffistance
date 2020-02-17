@@ -13,8 +13,7 @@ namespace Jeffistance.Models
 
         public static GameState GetGameState()
         {
-            if (currentGameState is null) currentGameState = new GameState();
-            return currentGameState;
+            return currentGameState ??= new GameState();
         }
     }
 }
