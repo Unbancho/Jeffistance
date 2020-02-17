@@ -20,6 +20,12 @@ namespace Jeffistance.Models
             Players = new List<Player>(players);
             InProgress = true;
             Gamemode.AssignFactions(Players);
+            LeaderPhase();
+        }
+
+        private void LeaderPhase()
+        {
+            
         }
     }
 }

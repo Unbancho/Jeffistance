@@ -24,7 +24,7 @@ namespace Jeffistance.Test
             server.ShutDown();
         }
 
-        [Test, Timeout(2000)]
+        [Test, Timeout(20000)]
         public void TestConnection()
         {
             server.Run();
@@ -34,6 +34,8 @@ namespace Jeffistance.Test
                  if (server.Clients.Count > 0) break;
             }
             Assert.IsTrue(server.Clients.Count > 0);
+            // FIXME vvvvv THIS SHOULD WORK ^^^^^^^ THIS SHOULDN'T
+            // Assert.That(server.Clients.Count, Is.GreaterThan(0).After(5).Seconds.PollEvery(500).MilliSeconds);
         }
 
         [Test, Timeout(2000)]
