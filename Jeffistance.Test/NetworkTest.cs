@@ -24,14 +24,14 @@ namespace Jeffistance.Test
             server.ShutDown();
         }
 
-        [Test, Timeout(20000)]
+        [Test, Timeout(2000)]
         public void TestConnection()
         {
             server.Run();
             var client = new ClientConnection(NetworkUtilities.GetLocalIPAddress(), DEFAULT_PORT);
             while(true)
             {
-                 if (server.Clients.Count > 0) break;
+                if (server.Clients.Count > 0) break;
             }
             Assert.IsTrue(server.Clients.Count > 0);
             // FIXME vvvvv THIS SHOULD WORK ^^^^^^^ THIS SHOULDN'T
