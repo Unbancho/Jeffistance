@@ -1,17 +1,22 @@
 namespace Jeffistance.Models
 {
-    public class Faction
+    public interface IFaction
     {
-        public string Name { get; set; }
+        string Name { get; }
+    }
+
+    public class ResistanceFaction : IFaction
+    {
+        public string Name { get; } = "Resistance";
     }
 
     public class FactionFactory
     {
-        private Faction resistance;
+        private ResistanceFaction resistance;
 
-        public Faction MakeResistance()
+        public IFaction MakeResistance()
         {
-            return resistance ??= new Faction() { Name = "Resistance" };
+            return resistance ??= new ResistanceFaction();
         }
     }
 }
