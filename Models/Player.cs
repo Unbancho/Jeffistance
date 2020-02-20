@@ -9,5 +9,6 @@ namespace Jeffistance.Models
         public IRole Role { get => role; set => role = value; }
         public int ID { get; set; } = -1;
         public string Name { get; set; }
+        public bool IsLeader { get; set; } = false;
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Jeffistance.Models
 {
@@ -13,6 +14,8 @@ namespace Jeffistance.Models
 
     public class BasicGamemode : IGamemode
     {
+        private int nextLeaderID = 0;
+
         public FactionFactory FactionFactory { get; set; } = new FactionFactory();
         public RoleFactory RoleFactory { get; set; } = new RoleFactory();
 
@@ -34,7 +37,12 @@ namespace Jeffistance.Models
 
         public void PickLeader(IEnumerable<Player> players)
         {
-            
+            foreach (Player p in players)
+            {
+                p.IsLeader = false;
+            }
+            players.First((p) => p.ID == nextLeaderID).IsLeader = true;
+            nextLeaderID = (nextLeaderID < players.Count() - 1) ? nextLeaderID + 1 : 0;
         }
     }
 }
