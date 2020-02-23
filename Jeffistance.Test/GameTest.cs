@@ -1,23 +1,34 @@
 using NUnit.Framework;
 using Jeffistance.Models;
+using Jeffistance.Services;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Jeffistance.Test
 {
     [TestFixture]
     public class BasicGameTests
     {
+        List<Player> players;
         Game game;
+        PlayerEventManager playerEventManager;
 
         [SetUp]
         public void Setup()
         {
-            game = new Game(new BasicGamemode());
+            playerEventManager = new PlayerEventManager();
+            game = new Game(new BasicGamemode(), playerEventManager);
+            players = new List<Player>();
+            for (int i = 0; i < 10; i++)
+            {
+                players.Add(new Player());
+            }
         }
 
         [Test]
         public void TestStart()
         {
-            game.Start(new Player[] {new Player(), new Player()});
+            game.Start(players);
             
             Assert.Multiple(() =>
             {
@@ -32,8 +43,19 @@ namespace Jeffistance.Test
         public void TestPhases()
         {
             Assert.That(game.CurrentPhase, Is.EqualTo(Phase.Standby));
-            game.Start(new Player[] {new Player()});
+            game.Start(players);
             Assert.That(game.CurrentPhase, Is.EqualTo(Phase.TeamPicking));
+        }
+
+        [Test]
+        public void TestPickTeam([Range(0, 2)] int x, [Range(3, 5)] int y, [Range(6, 8)] int z)
+        {
+            game.Start(players);
+            int[] team = {x, y, z};
+            playerEventManager.PickTeam(team);
+            Assert.That(game.CurrentPhase, Is.EqualTo(Phase.TeamVoting));
+            var currentTeamIDs = game.CurrentTeam.Select((p) => p.ID);
+            Assert.That(currentTeamIDs, Is.EqualTo(team));
         }
     }
 

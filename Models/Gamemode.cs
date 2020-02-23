@@ -9,7 +9,7 @@ namespace Jeffistance.Models
         RoleFactory RoleFactory { get; set; }
         void AssignFactions(IEnumerable<Player> players);
         void AssignRoles(IEnumerable<Player> players);
-        void PickLeader(IEnumerable<Player> players);
+        Player PickLeader(IEnumerable<Player> players);
     }
 
     public class BasicGamemode : IGamemode
@@ -35,14 +35,16 @@ namespace Jeffistance.Models
             }
         }
 
-        public void PickLeader(IEnumerable<Player> players)
+        public Player PickLeader(IEnumerable<Player> players)
         {
             foreach (Player p in players)
             {
                 p.IsLeader = false;
             }
-            players.First((p) => p.ID == nextLeaderID).IsLeader = true;
+            Player leader = players.First((p) => p.ID == nextLeaderID);
+            leader.IsLeader = true;
             nextLeaderID = (nextLeaderID < players.Count() - 1) ? nextLeaderID + 1 : 0;
+            return leader;
         }
     }
 }
