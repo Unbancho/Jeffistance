@@ -7,18 +7,22 @@
   <DockPanel>
     <Button DockPanel.Dock="Bottom" Command="{Binding Cancel}">Cancel</Button>
     <Button DockPanel.Dock="Bottom" Command="{Binding Ok}">Join</Button>
-    <DockPanel Height="100">
+    <StackPanel Orientation = "Vertical" VerticalAlignment="Center" Height="100">
       <TextBox AcceptsReturn="False"
-              Text="{Binding Port}"
-              Watermark="Enter port"
-              Height="30"
-              Width="300"
-              DockPanel.Dock="Bottom"/>
+            Text="{Binding Username}"
+            Watermark="Username"
+            Height="30"
+            Width="300"/>
       <TextBox AcceptsReturn="False"
               Text="{Binding IpAddress}"
               Watermark="Enter ip"
               Height="30"
-              Width="700"/>
-    </DockPanel>
+              Width="300"/>
+      <TextBox AcceptsReturn="False"
+              Text="{Binding Port}"
+              Watermark="Enter port"
+              Height="30"
+              Width="300"/>
+    </StackPanel>
   </DockPanel>
 </UserControl>

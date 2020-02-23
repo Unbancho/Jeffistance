@@ -13,6 +13,8 @@ namespace Jeffistance.ViewModels
         int port = User.DEFAULT_PORT;
         string ipAddress = NetworkUtilities.GetLocalIPAddress();
 
+        public string Username {get; set;}
+
         public string Port
         {
             get => port.ToString();
@@ -61,7 +63,7 @@ namespace Jeffistance.ViewModels
         public void Join()
         {
             GameState gs = GameState.GetGameState();
-            gs.CurrentUser = new User();
+            gs.CurrentUser = new User(Username);
             gs.CurrentUser.Connect(IpAddress, port);
             parent.Content = new LobbyViewModel(parent);
         }

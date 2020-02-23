@@ -174,8 +174,10 @@ namespace Jeffistance.Services
 
         public void Kick(ClientConnection client)
         {
-            Clients.Remove(client);
-            client.Stop();
+            if(client!=null){
+                Clients.Remove(client);
+                client.Stop();
+            }
         }
     }
 

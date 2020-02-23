@@ -34,7 +34,7 @@ namespace Jeffistance.Services.MessageProcessing
         private void GreetingFlagMethod(Message message)
         {
             Host host = (Host) GameState.GetGameState().CurrentUser;
-            User user = (User)message["User"];
+            User user = (User) message["User"];
             ClientConnection connection = (ClientConnection) message.Sender;
             user.Connection = connection;
             host.AddUser(user);
