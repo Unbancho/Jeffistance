@@ -32,6 +32,29 @@ namespace Jeffistance.Services
         }
     }
 
+    public abstract class ConnectionUdp
+    {
+        public readonly int PORT_NO;
+
+        protected ConnectionUdp(int port)
+        {
+            PORT_NO = port;
+        }
+    }
+
+    public class ServerConnectionUdp:ConnectionUdp
+    {
+
+        UdpClient client;
+
+        public ServerConnectionUdp(int port):base(port)
+        {
+            client = new UdpClient();
+        }
+    }
+
+
+
     public class ServerConnection:ConnectionTcp
     {
         public static implicit operator TcpListener(ServerConnection s) => s.Listener;  // No reason for this, I just thought it was epic

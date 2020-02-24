@@ -2,12 +2,10 @@ using NUnit.Framework;
 using Jeffistance.Services;
 using System.Threading;
 
-using System;
-
 namespace Jeffistance.Test
 {
     [TestFixture]
-    public class Tests
+    public class NetworkTests
     {
         ServerConnection server;
         public const int DEFAULT_PORT = 7700;

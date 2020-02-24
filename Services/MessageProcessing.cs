@@ -7,7 +7,7 @@ namespace Jeffistance.Services.MessageProcessing
 {
 
     [Flags]
-    enum JeffistanceFlags // Have to be powers of 2 for bitwise operations.
+    public enum JeffistanceFlags // Have to be powers of 2 for bitwise operations.
     {
         Greeting = 1,
         Broadcast = 2,
