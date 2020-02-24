@@ -21,7 +21,7 @@ namespace Jeffistance.Models
 
         public void AssignFactions(IEnumerable<Player> players)
         {
-            foreach (Player player in players)
+            foreach (var player in players)
             {
                 player.Faction = FactionFactory.MakeResistance();
             }
@@ -29,7 +29,7 @@ namespace Jeffistance.Models
 
         public void AssignRoles(IEnumerable<Player> players)
         {
-            foreach (Player player in players)
+            foreach (var player in players)
             {
                 player.Role = RoleFactory.MakeDefault();
             }
@@ -37,11 +37,11 @@ namespace Jeffistance.Models
 
         public Player PickLeader(IEnumerable<Player> players)
         {
-            foreach (Player p in players)
+            foreach (var p in players)
             {
                 p.IsLeader = false;
             }
-            Player leader = players.First((p) => p.ID == nextLeaderID);
+            var leader = players.First((p) => p.ID == nextLeaderID);
             leader.IsLeader = true;
             nextLeaderID = (nextLeaderID < players.Count() - 1) ? nextLeaderID + 1 : 0;
             return leader;

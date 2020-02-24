@@ -2,7 +2,7 @@ namespace Jeffistance.Models
 {
     public class GameState
     {
-        private static GameState currentGameState;
+        private static GameState _currentGameState;
 
         public User CurrentUser { get; set; }
 
@@ -13,7 +13,7 @@ namespace Jeffistance.Models
 
         public static GameState GetGameState()
         {
-            return currentGameState ??= new GameState();
+            return _currentGameState ??= new GameState();
         }
     }
 }

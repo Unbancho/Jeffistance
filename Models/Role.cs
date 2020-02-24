@@ -14,11 +14,11 @@ namespace Jeffistance.Models
 
     public class RoleFactory
     {
-        private DefaultRole defaultRole;
+        private DefaultRole _defaultRole;
 
         public IRole MakeDefault()
         {
-            return defaultRole ??= new DefaultRole();
+            return _defaultRole ??= new DefaultRole();
         }
     }
 }

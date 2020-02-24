@@ -15,16 +15,14 @@ namespace Jeffistance.Models
 
     public class Game
     {
-        private IGamemode gamemode;
         private PlayerEventManager playerEventManager;
         private Player currentLeader;
-        private IEnumerable<Player> currentTeam;
 
         public bool InProgress = false;
-        public List<Player> Players;
+        public List<Player> Players { get; private set; } = new List<Player>();
         public Phase CurrentPhase { get; set; } = Phase.Standby;
-        public IEnumerable<Player> CurrentTeam { get => currentTeam; }
-        public IGamemode Gamemode { get => gamemode; set => gamemode = value; }
+        public IEnumerable<Player> CurrentTeam { get; private set; }
+        public IGamemode Gamemode { get; set; }
 
         public Game(IGamemode gm, PlayerEventManager pem)
         {
@@ -36,7 +34,7 @@ namespace Jeffistance.Models
         public void Start(IEnumerable<Player> players)
         {
             InProgress = true;
-            Players = new List<Player>(players);
+            Players.Clear();
             Setup();
             PickLeader();
             PickTeam();
@@ -52,8 +50,8 @@ namespace Jeffistance.Models
 
         private void PreparePlayers()
         {
-            int i = 0;
-            foreach (Player player in Players)
+            var i = 0;
+            foreach (var player in Players)
             {
                 player.ID = i;
                 i++;
@@ -73,7 +71,7 @@ namespace Jeffistance.Models
 
         private void OnTeamPicked(TeamPickedArgs args)
         {
-            currentTeam = Players.Where((p) => args.PickedIDs.Contains(p.ID));
+            CurrentTeam = Players.Where((p) => args.PickedIDs.Contains(p.ID));
             CurrentPhase = Phase.TeamVoting;
         }
     }
