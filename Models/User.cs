@@ -27,6 +27,10 @@ namespace Jeffistance.Models
         public bool IsHost = false;
         public const int DEFAULT_PORT = 7700;
 
+        public const string DEFAULT_HOST_USERNAME = "Host";
+
+        public const string DEFAULT_USER_USERNAME = "Guest";
+
         public int ID;
         public string Name {get; set;}
 
@@ -36,8 +40,11 @@ namespace Jeffistance.Models
 
         public Permissions Perms { get; set; }
 
-        public User(string username="Guest")
+        public User(string username)
         {
+            if(username == null){
+                Name = DEFAULT_USER_USERNAME;
+            }
             Name = username;
             UserList = new List<User>();
             Processor = new MessageProcessor();
@@ -100,8 +107,11 @@ namespace Jeffistance.Models
     {
         public ServerConnection Server;
 
-        public Host(int port=DEFAULT_PORT, string username="Host", bool dedicated=false):base(username)
+        public Host(string username, int port=DEFAULT_PORT, bool dedicated=false):base(username)
         {
+            if(username == null){
+                Name = DEFAULT_HOST_USERNAME;
+            }
             IsHost = true;
             Server = new ServerConnection(port);
             Perms = new Permissions

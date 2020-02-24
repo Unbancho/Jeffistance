@@ -9,7 +9,7 @@ namespace Jeffistance.ViewModels
     {
         MainWindowViewModel parent;
         int port = User.DEFAULT_PORT;
-
+        
         //TODO Actual port validation
         public string Port
         {
@@ -25,6 +25,8 @@ namespace Jeffistance.ViewModels
                 }
             }
         }
+
+        public string Username {get; set;}
 
         public ReactiveCommand<Unit, Unit> Ok { get; }
         public ReactiveCommand<Unit, Unit> Cancel { get; }
@@ -51,7 +53,7 @@ namespace Jeffistance.ViewModels
         public void Host()
         {
             GameState gs = GameState.GetGameState();
-            gs.CurrentUser = new Host(port);
+            gs.CurrentUser = new Host(Username, port);
             parent.Content = new LobbyViewModel(parent);
         }
     }
