@@ -30,17 +30,17 @@ namespace Jeffistance.Models
         public int ID;
         public string Name {get; set;}
 
-        public ClientConnection Connection;
+        public ClientConnection Connection { get; set; }
 
-        public MessageProcessor MessageProcessor;
+        public MessageProcessor Processor { get; }
 
-        public Permissions Perms;
+        public Permissions Perms { get; set; }
 
         public User(string username="Guest")
         {
             Name = username;
             UserList = new List<User>();
-            MessageProcessor = new MessageProcessor();
+            Processor = new MessageProcessor();
             Perms = new Permissions();
         }
 
@@ -86,7 +86,7 @@ namespace Jeffistance.Models
         {
             Message message = (Message) args.Message;
             message.Sender = args.Sender;
-            MessageProcessor.ProcessMessage(message);
+            Processor.ProcessMessage(message);
         }
 
         private void OnPropertyChanged([CallerMemberName] String propertyName = "")
