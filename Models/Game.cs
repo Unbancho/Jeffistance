@@ -19,7 +19,7 @@ namespace Jeffistance.Models
         private Player currentLeader;
 
         public bool InProgress = false;
-        public List<Player> Players { get; private set; } = new List<Player>();
+        public List<Player> Players { get; private set; }
         public Phase CurrentPhase { get; set; } = Phase.Standby;
         public IEnumerable<Player> CurrentTeam { get; private set; }
         public IGamemode Gamemode { get; set; }
@@ -34,7 +34,7 @@ namespace Jeffistance.Models
         public void Start(IEnumerable<Player> players)
         {
             InProgress = true;
-            Players.Clear();
+            Players = new List<Player>(players);
             Setup();
             PickLeader();
             PickTeam();
