@@ -27,9 +27,9 @@ namespace Jeffistance.Models
         public bool IsHost = false;
         public const int DEFAULT_PORT = 7700;
 
-        public const String DEFAULT_HOST_USERNAME = "Host";
+        public const string DEFAULT_HOST_USERNAME = "Host";
 
-        public const String DEFAULT_USER_USERNAME = "Guest";
+        public const string DEFAULT_USER_USERNAME = "Guest";
 
         public int ID;
         public string Name {get; set;}
