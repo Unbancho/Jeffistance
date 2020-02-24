@@ -1,3 +1,4 @@
+
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -5,15 +6,100 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Jeffistance.Views.MainMenuView">
 
-  <DockPanel>
-    <TextBlock DockPanel.Dock="Top" Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-    <Button Command="{Binding OnHostButtonClick}"
-            Content="Host"
-            Height="400"
-            DockPanel.Dock="Bottom"/>
-    <Button Command="{Binding OnJoinButtonClick}"
-            Content="Join"
-            DockPanel.Dock="Bottom"/>
+  <DockPanel
+    Background="DarkSlateGray"
+    VerticalAlignment="Stretch">
+
+    <Menu DockPanel.Dock="Top" Background="Purple" Padding="4" FontSize="14" FontFamily="Inter UI">
+      <MenuItem Header="_Game">
+        <MenuItem Header="_Host..."/>
+        <Separator/>
+        <MenuItem Header="_Join..."/>
+      </MenuItem>
+      <MenuItem Header="_Screen">
+        <MenuItem Header="_Ratio">
+          <MenuItem Header="_1920:1080"/>
+          <MenuItem Header="_800:640"/>
+          <MenuItem Header="_640:400"/>
+        </MenuItem>
+        <MenuItem Header="_Background..."/>
+      </MenuItem>
+      <MenuItem Header="_Audio">
+        <CheckBox BorderThickness="0"
+                  IsHitTestVisible="False"
+                  Command="{Binding ToggleCommand}">
+          Alert
+        </CheckBox>
+        <Separator/>
+        <CheckBox IsChecked="True" BorderThickness="0"
+                  IsHitTestVisible="False"
+                  Command="{Binding ToggleCommand}">
+          Music
+        </CheckBox>
+      </MenuItem>
+      <MenuItem Header="_Help">
+        <MenuItem Header="_About..."/>
+        <Separator/>
+        <MenuItem Header="_Version..."/>
+      </MenuItem>
+    </Menu>
+    
+    <StackPanel
+      VerticalAlignment="Center">
+
+      <StackPanel.Styles>
+        <Style Selector="Button.RoundedButton">
+          <Setter Property="Template">
+            <ControlTemplate>
+              <Border CornerRadius="5" Background="Crimson" >
+                <ContentPresenter Padding="24" Content="{TemplateBinding Content}"/>
+              </Border>
+            </ControlTemplate>
+          </Setter>
+        </Style>
+
+        <Style Selector="Button.RoundedButton:pointerover">
+          <Setter Property="Template">
+            <ControlTemplate>
+              <Border CornerRadius="5" Background="Purple" >
+                <ContentPresenter Padding="24" Content="{TemplateBinding Content}"/>
+              </Border>
+            </ControlTemplate>
+          </Setter>
+        </Style>
+      </StackPanel.Styles>
+
+      <TextBlock Text="{Binding Path=Greeting, StringFormat='Jeffistance version {0}' }"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      FontFamily="Impact"
+                      FontSize="49"
+                      Margin="0,56"/>
+
+      <Button     Command="{Binding OnHostButtonClick}"
+                  Content="Host Game"
+                  FontSize="24"
+                  Padding="24"
+                  Margin="0, 0, 0, 24"
+                  Cursor="Hand"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  FontFamily="Inter UI"
+                  Classes="RoundedButton"/>
+
+
+      <Button     Command="{Binding OnJoinButtonClick}"
+                  Content="Join Game"
+                  FontSize="24"
+                  Padding="24"
+                  Margin="0, 24, 0, 0"
+                  Cursor="Hand"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  FontFamily="Inter UI"
+                  Classes="RoundedButton"/>
+
+    </StackPanel>
   </DockPanel>
 
 </UserControl>

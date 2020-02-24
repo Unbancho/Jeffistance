@@ -3,7 +3,7 @@ namespace Jeffistance.ViewModels
     public class MainMenuViewModel : ViewModelBase
     {
         MainWindowViewModel parent;
-        public string Greeting => "Casca gae";
+        public string Greeting => "0.01";
         public string TheTruth => "Jeff ungae";
 
         public MainMenuViewModel(MainWindowViewModel parent)
