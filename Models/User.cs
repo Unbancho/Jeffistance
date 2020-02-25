@@ -61,6 +61,7 @@ namespace Jeffistance.Models
         public void Connect(string ip, int port=DEFAULT_PORT)
         {
             Connection = new ClientConnection(ip, port);
+            if(Name != "Host") Connection.ListenForServers(port);
             Connection.OnMessageReceived += OnMessageReceived;
             Message greetingMessage = new Message(String.Format("{0} has joined from {1}.", Name, Connection.IPAddress), JeffistanceFlags.Greeting, JeffistanceFlags.Broadcast);
             greetingMessage["User"] = this;
@@ -110,7 +111,7 @@ namespace Jeffistance.Models
             };
             Server.OnMessageReceived += OnMessageReceived;
             Server.OnConnection += OnConnection;
-            Server.Run();
+            Server.Run(multicast:true);
             if(!dedicated)
             {
                 Connect(NetworkUtilities.GetLocalIPAddress(), port);

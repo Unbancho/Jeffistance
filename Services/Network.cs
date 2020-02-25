@@ -32,27 +32,60 @@ namespace Jeffistance.Services
         }
     }
 
-    public abstract class ConnectionUdp
+    public class ConnectionUdp
     {
+        public readonly string SERVER_IP;
         public readonly int PORT_NO;
 
-        protected ConnectionUdp(int port)
+        public UdpClient Client;
+        public IPEndPoint RemoteEndPoint;
+        public IPAddress multicastAddress;
+        public ConnectionUdp(string ip, int port)
         {
+            SERVER_IP = ip;
             PORT_NO = port;
+            Client = new UdpClient();
+            Client.EnableBroadcast = true;
         }
-    }
 
-    public class ServerConnectionUdp:ConnectionUdp
-    {
-
-        UdpClient client;
-
-        public ServerConnectionUdp(int port):base(port)
+        public ConnectionUdp(IPAddress multicastAddress)
         {
-            client = new UdpClient();
+            Client = new UdpClient();
+            Client.EnableBroadcast = true;
+            this.multicastAddress = multicastAddress;
         }
-    }
 
+        public void Broadcast(IPAddress multicastAddress)
+        {
+            Client.JoinMulticastGroup(multicastAddress);
+            RemoteEndPoint = new IPEndPoint(multicastAddress, 7700);
+        }
+
+        public void Bind(IPEndPoint iPEndPoint)
+        {
+            Client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            Client.ExclusiveAddressUse = false;
+            Client.Client.Bind(iPEndPoint);
+            Client.JoinMulticastGroup(multicastAddress);
+        }
+
+        public void Connect()
+        {
+            Client.Connect(SERVER_IP, PORT_NO);
+        }
+
+        public void Send(Byte[] message)
+        {
+            NetworkUtilities.Send(message, Client, RemoteEndPoint);
+        }
+
+        public void Receive()
+        {
+            IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            NetworkUtilities.Receive(Client, iPEndPoint);
+        }
+
+    }
 
 
     public class ServerConnection:ConnectionTcp
@@ -72,10 +105,21 @@ namespace Jeffistance.Services
             Listener = new TcpListener(IPAddress.Parse(SERVER_IP), PORT_NO);
         }
 
-        public void Run()
+        public void Run(bool multicast = false)
         {
             Listener.Start();
+            if(multicast)
+            {
+                Task.Run(() => Multicast());
+            }
             ListenForConnections();
+        }
+
+        private void Multicast()
+        {
+            ConnectionUdp server = new ConnectionUdp(NetworkUtilities.GetLocalIPAddress(), PORT_NO);
+            server.Broadcast(IPAddress.Parse("239.0.0.222"));
+            while(true) server.Send(new Byte[]{1});
         }
 
         private void StopListening()
@@ -282,6 +326,26 @@ namespace Jeffistance.Services
             Connected = false;
             Client.Close();
         }
+
+        public void ListenForServers(int port)
+        {
+            List<IPEndPoint> serversList = new List<IPEndPoint>();
+            ConnectionUdp client = new ConnectionUdp(System.Net.IPAddress.Parse("239.0.0.222"));
+            IPEndPoint iPEndPoint = new IPEndPoint(System.Net.IPAddress.Any, port);
+            client.Bind(iPEndPoint);
+            Task.Run(() => {
+                while(true)
+                {
+                    Byte[] bytesReceived = client.Client.Receive(ref iPEndPoint);
+                    if(!serversList.Contains(iPEndPoint))
+                    {
+                        Console.WriteLine(iPEndPoint);
+                        serversList.Add(iPEndPoint);
+                    }
+                }
+            }
+            );
+        }
     }
 
 
@@ -301,6 +365,11 @@ namespace Jeffistance.Services
             binaryFormatter.Serialize(client.GetStream(), message);
         }
 
+        public static void Send(Byte[] message, UdpClient client, IPEndPoint remoteEndPoint)
+        {
+            client.Send(message, message.Length, remoteEndPoint);
+        }
+
         public static object Receive(TcpClient client, CancellationToken token = new CancellationToken())
         {
             try
@@ -317,6 +386,13 @@ namespace Jeffistance.Services
                 }
                 throw e;
             }
+        }
+
+        public static Byte[] Receive(UdpClient client, IPEndPoint remoteEndPoint)
+        {
+            Byte[] bytesReceived = client.Receive(ref remoteEndPoint);
+            Console.WriteLine(remoteEndPoint);
+            return bytesReceived;
         }
 
         private static object DeserializeStream(NetworkStream networkStream)
