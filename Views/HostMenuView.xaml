@@ -7,12 +7,16 @@
   <DockPanel>
     <Button DockPanel.Dock="Bottom" Command="{Binding Cancel}">Cancel</Button>
     <Button DockPanel.Dock="Bottom" Command="{Binding Ok}">Host</Button>
-    <StackPanel Orientation = "Vertical" VerticalAlignment="Center">
+    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
       <TextBox AcceptsReturn="False"
             Text="{Binding Username}"
             Watermark="Username"
             Height="30"
-            Width="300"/>
+            Width="300">
+        <TextBox.KeyBindings>
+          <KeyBinding Command="{Binding Ok}" Gesture="Enter"/>
+        </TextBox.KeyBindings>
+      </TextBox>
       <TextBox AcceptsReturn="False"
             Text="{Binding Port}"
             Watermark="Enter port"
