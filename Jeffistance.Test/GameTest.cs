@@ -58,6 +58,76 @@ namespace Jeffistance.Test
             var currentTeamIDs = game.CurrentTeam.Select((p) => p.ID);
             Assert.That(currentTeamIDs, Is.EqualTo(team));
         }
+
+        [Test]
+        public void TestVoteTeamAllAccept()
+        {
+            game.Start(players);
+            playerEventManager.PickTeam(new int[] {0, 1});
+            foreach (var player in players)
+            {
+                playerEventManager.VoteTeam(player.ID, true);
+            }
+            Assert.That(game.CurrentPhase, Is.EqualTo(Phase.MissionVoting));
+        }
+
+        [Test]
+        public void TestVoteTeamAllReject()
+        {
+            game.Start(players);
+            var firstLeader = game.CurrentLeader;
+            playerEventManager.PickTeam(new int[] {0, 1});
+            foreach (var player in players)
+            {
+                playerEventManager.VoteTeam(player.ID, false);
+            }
+            Assert.That(game.CurrentPhase, Is.EqualTo(Phase.TeamPicking));
+            Assert.That(game.CurrentLeader.ID, Is.Not.EqualTo(firstLeader.ID));
+        }
+
+        [Test]
+        public void TestVoteTeamMajorityAccept()
+        {
+            game.Start(players);
+            playerEventManager.PickTeam(new int[] {0, 1});
+            playerEventManager.VoteTeam(0, true);
+            playerEventManager.VoteTeam(1, false);
+            playerEventManager.VoteTeam(2, true);
+            playerEventManager.VoteTeam(3, false);
+            playerEventManager.VoteTeam(4, true);
+
+            Assert.That(game.CurrentPhase, Is.EqualTo(Phase.MissionVoting));
+        }
+
+        [Test]
+        public void TestVoteTeamMajorityReject()
+        {
+            game.Start(players);
+            playerEventManager.PickTeam(new int[] {0, 1});
+            playerEventManager.VoteTeam(0, false);
+            playerEventManager.VoteTeam(1, false);
+            playerEventManager.VoteTeam(2, true);
+            playerEventManager.VoteTeam(3, false);
+            playerEventManager.VoteTeam(4, true);
+
+            Assert.That(game.CurrentPhase, Is.EqualTo(Phase.TeamPicking));
+        }
+
+        [Test]
+        public void TestVoteTeamTie()
+        {
+            players.Add(new Player());
+            game.Start(players);
+            playerEventManager.PickTeam(new int[] {0, 1});
+            playerEventManager.VoteTeam(0, true);
+            playerEventManager.VoteTeam(1, false);
+            playerEventManager.VoteTeam(2, true);
+            playerEventManager.VoteTeam(3, false);
+            playerEventManager.VoteTeam(4, true);
+            playerEventManager.VoteTeam(5, false);
+
+            Assert.That(game.CurrentPhase, Is.EqualTo(Phase.TeamPicking));
+        }
     }
 
     [TestFixture]
