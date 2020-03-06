@@ -22,6 +22,9 @@ namespace Jeffistance.Models
         public List<Player> Players { get; private set; }
         public Phase CurrentPhase { get; set; } = Phase.Standby;
         public IEnumerable<Player> CurrentTeam { get; private set; }
+        public Dictionary<int, int[]> TeamSizes { get; set; }
+        public int NextTeamSize { get; private set; }
+        public int CurrentRound { get; private set; }
         public IGamemode Gamemode { get; set; }
 
         public Game(IGamemode gm, PlayerEventManager pem)
@@ -29,6 +32,10 @@ namespace Jeffistance.Models
             Gamemode = gm;
             playerEventManager = pem;
             playerEventManager.OnTeamPicked += OnTeamPicked;
+            TeamSizes = new Dictionary<int, int[]>()
+            {
+                {5, new int[] {2, 3, 2, 3, 3}}
+            };
         }
 
         public void Start(IEnumerable<Player> players)
@@ -46,6 +53,8 @@ namespace Jeffistance.Models
             PreparePlayers();
             Gamemode.AssignFactions(Players);
             Gamemode.AssignRoles(Players);
+            CurrentRound = 0;
+            NextTeamSize = TeamSizes[Players.Count()][CurrentRound];
         }
 
         private void PreparePlayers()

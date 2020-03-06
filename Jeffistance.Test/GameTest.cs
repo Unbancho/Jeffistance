@@ -19,7 +19,7 @@ namespace Jeffistance.Test
             playerEventManager = new PlayerEventManager();
             game = new Game(new BasicGamemode(), playerEventManager);
             players = new List<Player>();
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 5; i++)
             {
                 players.Add(new Player());
             }
@@ -48,10 +48,11 @@ namespace Jeffistance.Test
         }
 
         [Test]
-        public void TestPickTeam([Range(0, 2)] int x, [Range(3, 5)] int y, [Range(6, 8)] int z)
+        public void TestPickTeam([Range(0, 2)] int x, [Range(3, 4)] int y)
         {
             game.Start(players);
-            int[] team = {x, y, z};
+            Assert.That(game.NextTeamSize, Is.EqualTo(2));
+            int[] team = {x, y};
             playerEventManager.PickTeam(team);
             Assert.That(game.CurrentPhase, Is.EqualTo(Phase.TeamVoting));
             var currentTeamIDs = game.CurrentTeam.Select((p) => p.ID);
