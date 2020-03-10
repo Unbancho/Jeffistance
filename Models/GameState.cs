@@ -21,7 +21,9 @@ namespace Jeffistance.Models
             set{ _userList = value; OnPropertyChanged();}
         }
 
-        public string Log { get { return ((IChatView)CurrentUser.CurrentWindow).ChatView.Log; } set {((IChatView)CurrentUser.CurrentWindow).ChatView.WriteLineInLog(value+"\n"); } }
+        public ViewModelBase CurrentWindow {get; set; }
+
+        public string Log { get { return ((IChatView)CurrentWindow).ChatView.Log; } set {((IChatView)CurrentWindow).ChatView.WriteLineInLog(value+"\n"); } }
 
         private GameState()
         {

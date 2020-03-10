@@ -55,7 +55,7 @@ namespace Jeffistance.ViewModels
             GameState gs = GameState.GetGameState();
             gs.CurrentUser = new Host(Username, port);
             parent.Content = new LobbyViewModel(parent);
-            gs.CurrentUser.CurrentWindow = parent.Content;
+            gs.CurrentWindow = parent.Content;
         }
     }
 }

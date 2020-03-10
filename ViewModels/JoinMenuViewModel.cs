@@ -3,7 +3,7 @@ using System.Net;
 using System.Reactive;
 using ReactiveUI;
 using Jeffistance.Models;
-using Jeffistance.Services;
+using ModusOperandi.Networking;
 
 namespace Jeffistance.ViewModels
 {
@@ -66,7 +66,7 @@ namespace Jeffistance.ViewModels
             gs.CurrentUser = new User(Username);
             gs.CurrentUser.Connect(IpAddress, port);
             parent.Content = new LobbyViewModel(parent);
-            gs.CurrentUser.CurrentWindow = parent.Content;
+            gs.CurrentWindow = parent.Content;
         }
     }
 }

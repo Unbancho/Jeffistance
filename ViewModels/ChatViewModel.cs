@@ -4,7 +4,7 @@ using Jeffistance.Models;
 using System;
 using Avalonia.Controls;
 using ReactiveUI;
-using Jeffistance.Services.Messaging;
+using ModusOperandi.Messaging;
 using Jeffistance.Services.MessageProcessing;
 
 namespace Jeffistance.ViewModels

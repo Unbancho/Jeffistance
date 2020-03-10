@@ -1,10 +1,9 @@
 using System;
 using System.Runtime.Serialization;
 using System.Collections.Generic;
-using Jeffistance.Services;
-using Jeffistance.Services.Messaging;
+using ModusOperandi.Networking;
+using ModusOperandi.Messaging;
 using Jeffistance.Services.MessageProcessing;
-using Jeffistance.ViewModels;
 
 namespace Jeffistance.Models
 {
@@ -29,8 +28,6 @@ namespace Jeffistance.Models
         public UserMessageProcessor Processor { get; set;}
 
         public Permissions Perms { get; set; }
-
-        public ViewModelBase CurrentWindow {get; set; }
 
         public User(string username)
         {
@@ -116,7 +113,7 @@ namespace Jeffistance.Models
             if(!dedicated)
             {
                 Connect(NetworkUtilities.GetLocalIPAddress(), port);
-                Processor.ProcessingMethods = Processor + new UserMessageProcessor();
+                Processor.ProcessingMethods = (Processor + new UserMessageProcessor()).ProcessingMethods;
             }
         }
 

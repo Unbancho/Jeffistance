@@ -1,7 +1,8 @@
 using System;
 using System.Reflection;
 using Jeffistance.Models;
-using Jeffistance.Services.Messaging;
+using ModusOperandi.Messaging;
+using ModusOperandi.Networking;
 using System.Linq;
 using System.Collections.Generic;
 
