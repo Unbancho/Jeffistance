@@ -11,7 +11,7 @@ namespace Jeffistance.Models
 
         public List<User> UserList { get { return CurrentUser.UserList; } set {CurrentUser.UserList = value; } }
 
-        public string Log { get { return ((IChatView)CurrentUser.CurrentWindow).Log; } set {((IChatView)CurrentUser.CurrentWindow).WriteLineInLog(value+"\n"); } }
+        public string Log { get { return ((IChatView)CurrentUser.CurrentWindow).ChatView.Log; } set {((IChatView)CurrentUser.CurrentWindow).ChatView.WriteLineInLog(value+"\n"); } }
 
         private GameState()
         {

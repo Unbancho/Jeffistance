@@ -9,7 +9,7 @@ using ReactiveUI;
 
 namespace Jeffistance.ViewModels
 {
-    public class LobbyViewModel : ViewModelBase
+    public class LobbyViewModel : ViewModelBase, IChatView
     {
         public ObservableCollection<User> Users {get;}
         bool showKickButton;
@@ -19,11 +19,11 @@ namespace Jeffistance.ViewModels
             set => this.RaiseAndSetIfChanged(ref showKickButton, value);
         }
         MainWindowViewModel parent;
-        ChatViewModel chatView;
+        private ChatViewModel _chatView;
         public ChatViewModel ChatView 
         {
-            get => chatView;
-            set => this.RaiseAndSetIfChanged(ref chatView, value);
+            get => _chatView;
+            set => this.RaiseAndSetIfChanged(ref _chatView, value);
         }
 
         public LobbyViewModel(MainWindowViewModel parent)

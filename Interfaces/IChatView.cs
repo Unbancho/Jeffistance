@@ -1,5 +1,6 @@
+using Jeffistance.ViewModels;
+
 interface IChatView
 {
-  string Log { get; }
-  void WriteLineInLog(string msg);
+  ChatViewModel ChatView {get; set;}
 }
