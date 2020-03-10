@@ -107,7 +107,6 @@ namespace Jeffistance.Models
             };
             UserList = new List<User>();
             Server.OnMessageReceived += OnMessageReceived;
-            Server.OnConnection += OnConnection;
             Server.Run();
             Processor = new HostMessageProcessor();
             if(!dedicated)
@@ -154,11 +153,6 @@ namespace Jeffistance.Models
         {
             base.OnMessageReceived(sender, args);
             Processor.ProcessMessage((Message)args.Message);
-        }
-
-        public void OnConnection(object sender, ConnectionArgs args)
-        {
-
         }
     }
 }
