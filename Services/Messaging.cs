@@ -116,13 +116,6 @@ namespace Jeffistance.Services.Messaging
             return Flag.HasFlag((MessageFlags)flag);
         }
 
-        public MethodInfo[] GetFlaggedMethods<T>(T instance, string flagName, BindingFlags flags = BindingFlags.NonPublic|BindingFlags.Instance)
-        {
-            return instance.GetType().GetMethods(flags)
-                .Where(y => y.GetCustomAttributes().OfType<MessageMethodAttribute>()
-                .Where(attr => attr.FlagName == flagName).Any()).ToArray();
-        }
-
         protected Message(SerializationInfo info, StreamingContext context)
         {
             PackedObjects = new Dictionary<string, object>();
@@ -173,7 +166,7 @@ namespace Jeffistance.Services.Messaging
         public Dictionary<Enum, MethodInfo> ProcessingMethods { get; set; }
 
         private Type _flagType;
-        public Type FlagType { get{ return _flagType; } set{ if(value.IsSubclassOf(typeof(Enum))) _flagType = value; else throw new InvalidFlagType(); } }
+        public Type FlagType { get{ return _flagType; } set{ if(value.IsDefined(typeof(FlagsAttribute), false)) _flagType = value; else throw new InvalidFlagType(value); } }
         
         public virtual void ProcessMessage(Message message)
         {
@@ -188,18 +181,10 @@ namespace Jeffistance.Services.Messaging
         }
     }
 
-    [AttributeUsage(AttributeTargets.Method)]
-    public class MessageMethodAttribute : Attribute
-    {
-        public string FlagName;
-
-        public MessageMethodAttribute(string flagName)
-        {
-            FlagName = flagName;
-        }
-    }
-
     public class EmptyMessageException : Exception {}
-    public class InvalidFlagType : Exception {}
+    public class InvalidFlagType : Exception 
+    {
+        public InvalidFlagType(Type type):base($"Invalid type for flag: {type}. Must be Enum Flag."){}
+    }
 
 }

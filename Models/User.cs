@@ -108,6 +108,7 @@ namespace Jeffistance.Models
             {
                 CanKick = true
             };
+            UserList = new List<User>();
             Server.OnMessageReceived += OnMessageReceived;
             Server.OnConnection += OnConnection;
             Server.Run();

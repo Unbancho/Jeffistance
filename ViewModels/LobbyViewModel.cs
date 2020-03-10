@@ -31,6 +31,7 @@ namespace Jeffistance.ViewModels
             this.parent = parent;
             GameState gs = GameState.GetGameState();
             ShowKickButton = gs.CurrentUser.Perms.CanKick;
+            gs.UserList = new List<User>();
             Users = new ObservableCollection<User>(gs.UserList);
             gs.PropertyChanged += OnGameStatePropertyChanged;
             this.ChatView = new ChatViewModel();
@@ -38,11 +39,12 @@ namespace Jeffistance.ViewModels
 
         private void OnGameStatePropertyChanged(object sender, PropertyChangedEventArgs args)
         {
-            var property = ((User) sender).GetType().GetProperty(args.PropertyName).GetValue(sender);
-            foreach (var item in ((List<User>) property).Except(Users))
-            { 
-                Dispatcher.UIThread.Post(()=> Users.Add(item));
-            }
+            var property = ((GameState) sender).GetType().GetProperty(args.PropertyName).GetValue(sender);
+            if(args.PropertyName == "UserList") // TODO: How can we do it not like this, help
+                foreach (var item in ((List<User>) property).Except(Users))
+                { 
+                    Dispatcher.UIThread.Post(()=> Users.Add(item));
+                }
         }
 
         public void OnKickEveryoneClicked()

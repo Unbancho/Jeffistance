@@ -9,12 +9,12 @@ namespace Jeffistance.Services.MessageProcessing
 {
 
     [Flags]
-    enum JeffistanceFlags // Have to be powers of 2 for bitwise operations.
+    enum JeffistanceFlags // Have to be powers of 2 for bitwise operations. Is the bitshifting way better or worse? Leave your comments down below!
     {
-        Greeting = 1,
-        Broadcast = 2,
-        Update = 4,
-        Chat = 8
+        Greeting = 1 << 0,
+        Broadcast = 1 << 1,
+        Update = 1 << 2,
+        Chat = 1 << 3
     }
 
     public abstract class JeffistanceMessageProcessor : MessageProcessor
@@ -72,6 +72,17 @@ namespace Jeffistance.Services.MessageProcessing
                 PropertyInfo pi = gameState.GetType().GetProperty(name);
                 pi?.SetValue(gameState, obj);
             }
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    public class MessageMethodAttribute : Attribute
+    {
+        public string FlagName;
+
+        public MessageMethodAttribute(string flagName)
+        {
+            FlagName = flagName;
         }
     }
 }   
