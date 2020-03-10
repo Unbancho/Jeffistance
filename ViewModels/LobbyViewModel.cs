@@ -31,12 +31,12 @@ namespace Jeffistance.ViewModels
             this.parent = parent;
             GameState gs = GameState.GetGameState();
             ShowKickButton = gs.CurrentUser.Perms.CanKick;
-            Users = new ObservableCollection<User>(gs.CurrentUser.UserList);
-            gs.CurrentUser.PropertyChanged += OnUserPropertyChanged;
+            Users = new ObservableCollection<User>(gs.UserList);
+            gs.PropertyChanged += OnGameStatePropertyChanged;
             this.ChatView = new ChatViewModel();
         }
 
-        private void OnUserPropertyChanged(object sender, PropertyChangedEventArgs args)
+        private void OnGameStatePropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             var property = ((User) sender).GetType().GetProperty(args.PropertyName).GetValue(sender);
             foreach (var item in ((List<User>) property).Except(Users))

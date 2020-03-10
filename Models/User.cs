@@ -1,8 +1,6 @@
 using System;
 using System.Runtime.Serialization;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using Jeffistance.Services;
 using Jeffistance.Services.Messaging;
 using Jeffistance.Services.MessageProcessing;
@@ -11,19 +9,10 @@ using Jeffistance.ViewModels;
 namespace Jeffistance.Models
 {
     [Serializable]
-    public class User : ISerializable, INotifyPropertyChanged
+    public class User : ISerializable
     {
         public override bool Equals(object u2){return ID == ((User)u2).ID;}
         public override int GetHashCode(){ return ID.GetHashCode();}
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private List<User> _userList;
-        public List<User> UserList
-        {
-            get{ return _userList;}
-            set{ _userList = value; OnPropertyChanged();}
-        }
 
         public bool IsHost = false;
         public const int DEFAULT_PORT = 7700;
@@ -49,7 +38,6 @@ namespace Jeffistance.Models
                 Name = DEFAULT_USER_USERNAME;
             }
             Name = username;
-            UserList = new List<User>();
             Processor = new UserMessageProcessor();
             Perms = new Permissions();
         }
@@ -98,19 +86,16 @@ namespace Jeffistance.Models
             message.Sender = args.Sender;
             Processor.ProcessMessage(message);
         }
-
-        private void OnPropertyChanged([CallerMemberName] String propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 
     [Serializable]
     public class Host : User
     {
-        public ServerConnection Server;
+        public ServerConnection Server {get; set;}
 
-        public new HostMessageProcessor Processor;
+        public new HostMessageProcessor Processor {get; set;}
+
+        public List<User> UserList {get; set;}
 
         public Host(string username, int port=DEFAULT_PORT, bool dedicated=false):base(username)
         {
@@ -151,10 +136,9 @@ namespace Jeffistance.Models
         public void AddUser(User user)
         {
             user.ID =  UserList.Count;
-            List<User> tempList = new List<User>(UserList);
-            tempList.Add(user);
+            UserList.Add(user);
             Message updateList = new Message($"{user.Name} has joined.", JeffistanceFlags.Update);
-            updateList["UserList"] = tempList;
+            updateList["UserList"] = UserList;
             Broadcast(updateList);
         }
 
