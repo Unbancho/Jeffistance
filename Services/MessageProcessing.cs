@@ -2,6 +2,8 @@ using System;
 using System.Reflection;
 using Jeffistance.Models;
 using Jeffistance.Services.Messaging;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Jeffistance.Services.MessageProcessing
 {
@@ -11,25 +13,26 @@ namespace Jeffistance.Services.MessageProcessing
     {
         Greeting = 1,
         Broadcast = 2,
-        Update = 4
+        Update = 4,
+        Chat = 8
     }
 
-    public class MessageProcessor
+    public abstract class JeffistanceMessageProcessor : MessageProcessor
     {
-        public void ProcessMessage(Message message)
+        public JeffistanceMessageProcessor()
         {
-            object[] parametersToPass = new object[]{message};
-            string flagName;
-            foreach (Enum flag in message.GetFlags())
+            FlagType = typeof(JeffistanceFlags);
+            ProcessingMethods = new Dictionary<Enum, MethodInfo>();
+            foreach (var processingMethod in GetType().GetMethods(BindingFlags.NonPublic|BindingFlags.Instance)
+                .Where(y => y.GetCustomAttributes().OfType<MessageMethodAttribute>().Any()))
             {
-                flagName = ((JeffistanceFlags) flag).ToString();
-                foreach (var method in message.GetFlaggedMethods(this, flagName))
-                {
-                    method.Invoke(this, parametersToPass);
-                }
+                ProcessingMethods[(JeffistanceFlags) Enum.Parse(typeof(JeffistanceFlags), ((MessageMethodAttribute) processingMethod.GetCustomAttribute(typeof(MessageMethodAttribute))).FlagName)] = processingMethod;
             }
         }
+    }
 
+    public class HostMessageProcessor : JeffistanceMessageProcessor
+    {
         [MessageMethod("Greeting")]
         private void GreetingFlagMethod(Message message)
         {
@@ -44,21 +47,31 @@ namespace Jeffistance.Services.MessageProcessing
         private void BroadcastFlagMethod(Message message)
         {
             Host host = (Host) GameState.GetGameState().CurrentUser;
-            if(!message.HasFlag(JeffistanceFlags.Update)) message = new Message(message.Text);
+            message.SetFlags((JeffistanceFlags) message.Flag | ~JeffistanceFlags.Broadcast);
             host.Broadcast(message);
         }
 
+        [MessageMethod("Chat")]
+        private void ChatFlagMethod(Message message)
+        {
+            Host host = (Host) GameState.GetGameState().CurrentUser;
+            message.SetFlags((JeffistanceFlags) message.Flag | JeffistanceFlags.Update & ~JeffistanceFlags.Chat);
+            message["Log"] = message.Text;
+        }
+    }
+
+    public class UserMessageProcessor : JeffistanceMessageProcessor
+    {
         [MessageMethod("Update")]
         private void UpdateFlagMethod(Message message)
         {
-            User currentUser = GameState.GetGameState().CurrentUser;
-            object result;
-            while(message.TryPop(out result))
+            GameState gameState = GameState.GetGameState();
+            while(message.TryPop(out object result))
             {
                 (object obj, string name) = (ValueTuple<object, string>) result;
-                PropertyInfo pi = currentUser.GetType().GetProperty(name, BindingFlags.Instance|BindingFlags.Public);
-                pi.SetValue(currentUser, obj);
+                PropertyInfo pi = gameState.GetType().GetProperty(name);
+                pi?.SetValue(gameState, obj);
             }
         }
     }
-}
+}   

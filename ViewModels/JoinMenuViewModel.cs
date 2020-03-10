@@ -66,6 +66,7 @@ namespace Jeffistance.ViewModels
             gs.CurrentUser = new User(Username);
             gs.CurrentUser.Connect(IpAddress, port);
             parent.Content = new LobbyViewModel(parent);
+            gs.CurrentUser.CurrentWindow = parent.Content;
         }
     }
 }

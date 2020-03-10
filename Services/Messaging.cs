@@ -26,8 +26,14 @@ namespace Jeffistance.Services.Messaging
 
         public object Sender;
 
-        private MessageFlags Flag;
-        private MessageFlags[] FlagsArray;
+        public MessageFlags Flag;
+
+        private MessageFlags[] _flagsArray;
+        private MessageFlags[] FlagsArray{
+            get{ return _flagsArray; }
+            set{ _flagsArray = value; foreach (var f in value) { Flag |= f; } }
+        }
+
         public string Text;
 
         public Message(string text=null, params Enum[] flags)
@@ -35,7 +41,6 @@ namespace Jeffistance.Services.Messaging
             PackedObjects = new Dictionary<string, object>();
             Text = text == null ? String.Empty : text;
             FlagsArray = Array.ConvertAll(flags, f => (MessageFlags)f);
-            foreach (MessageFlags f in FlagsArray){ Flag |= f; }
         }
 
         public void PackObject<T>(T obj, string name=null)
@@ -81,13 +86,29 @@ namespace Jeffistance.Services.Messaging
             }
         }
 
-        public IEnumerable<MessageFlags> GetFlags(bool enumerable = true)
+        public IEnumerable<Enum> GetFlags(bool enumerable = true)
         {
             if(!enumerable) yield return Flag;
-            foreach (MessageFlags flag in FlagsArray)
+            foreach (var flag in FlagsArray)
             {
                 yield return flag;
             }
+        }
+
+        public void SetFlags<T>(T flags)
+        {
+            List<MessageFlags> newFlags = new List<MessageFlags>();
+            foreach (var f in Enum.GetValues(flags.GetType()))
+            {
+                if((flags as Enum).HasFlag((Enum)f))
+                    newFlags.Add((MessageFlags) f);
+            } 
+            FlagsArray = newFlags.ToArray();
+        }
+
+        public void SetFlags(Enum[] flags)
+        {
+            FlagsArray = Array.ConvertAll(flags, item => (MessageFlags) item);;
         }
 
         public bool HasFlag(Enum flag)
@@ -126,6 +147,47 @@ namespace Jeffistance.Services.Messaging
         }
     }
 
+    [Serializable]
+    public class Package
+    {
+        public string Name { get; set;}
+        public object Object { get; set;}
+        public PropertyInfo PropertyInfo { get; set;}
+
+        public Package(object obj, PropertyInfo propertyInfo, string name)
+        {
+            Object = obj;
+            Name = name;
+        }
+    }
+
+    public class MessageProcessor
+    {
+        public static Dictionary<Enum, MethodInfo> operator +(MessageProcessor p1, MessageProcessor p2) {
+            return new Dictionary<Enum, MethodInfo>(p1.ProcessingMethods
+                .Concat(p2.ProcessingMethods
+                .Where( x=> !p1.ProcessingMethods.ContainsKey(x.Key))))
+                .ToDictionary(x=>x.Key,x=>x.Value);
+        }
+
+        public Dictionary<Enum, MethodInfo> ProcessingMethods { get; set; }
+
+        private Type _flagType;
+        public Type FlagType { get{ return _flagType; } set{ if(value.IsSubclassOf(typeof(Enum))) _flagType = value; else throw new InvalidFlagType(); } }
+        
+        public virtual void ProcessMessage(Message message)
+        {
+            object[] parametersToPass = new object[]{message};
+            MethodInfo method;
+            foreach (Enum flag in message.GetFlags())
+            {
+                var e = (Enum) Convert.ChangeType((Enum)Enum.ToObject(FlagType, flag), FlagType);
+                if(ProcessingMethods.TryGetValue(e, out method))
+                    method.Invoke(this, parametersToPass);
+            }
+        }
+    }
+
     [AttributeUsage(AttributeTargets.Method)]
     public class MessageMethodAttribute : Attribute
     {
@@ -138,5 +200,6 @@ namespace Jeffistance.Services.Messaging
     }
 
     public class EmptyMessageException : Exception {}
+    public class InvalidFlagType : Exception {}
 
 }

@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Jeffistance.Services;
 using Jeffistance.Services.Messaging;
 using Jeffistance.Services.MessageProcessing;
+using Jeffistance.ViewModels;
 
 namespace Jeffistance.Models
 {
@@ -36,9 +37,11 @@ namespace Jeffistance.Models
 
         public ClientConnection Connection { get; set; }
 
-        public MessageProcessor Processor { get; }
+        public UserMessageProcessor Processor { get; set;}
 
         public Permissions Perms { get; set; }
+
+        public ViewModelBase CurrentWindow {get; set; }
 
         public User(string username)
         {
@@ -47,7 +50,7 @@ namespace Jeffistance.Models
             }
             Name = username;
             UserList = new List<User>();
-            Processor = new MessageProcessor();
+            Processor = new UserMessageProcessor();
             Perms = new Permissions();
         }
 
@@ -69,7 +72,7 @@ namespace Jeffistance.Models
         {
             Connection = new ClientConnection(ip, port);
             Connection.OnMessageReceived += OnMessageReceived;
-            Message greetingMessage = new Message(String.Format("{0} has joined from {1}.", Name, Connection.IPAddress), JeffistanceFlags.Greeting, JeffistanceFlags.Broadcast);
+            Message greetingMessage = new Message($"{Name} has joined from {Connection.IPAddress}.", JeffistanceFlags.Greeting);
             greetingMessage["User"] = this;
             Send(greetingMessage);
         }
@@ -107,6 +110,8 @@ namespace Jeffistance.Models
     {
         public ServerConnection Server;
 
+        public new HostMessageProcessor Processor;
+
         public Host(string username, int port=DEFAULT_PORT, bool dedicated=false):base(username)
         {
             if(username == null){
@@ -121,9 +126,11 @@ namespace Jeffistance.Models
             Server.OnMessageReceived += OnMessageReceived;
             Server.OnConnection += OnConnection;
             Server.Run();
+            Processor = new HostMessageProcessor();
             if(!dedicated)
             {
                 Connect(NetworkUtilities.GetLocalIPAddress(), port);
+                Processor.ProcessingMethods = Processor + new UserMessageProcessor();
             }
         }
 
@@ -144,9 +151,10 @@ namespace Jeffistance.Models
         public void AddUser(User user)
         {
             user.ID =  UserList.Count;
-            UserList.Add(user);
-            Message updateList = new Message("Update your lists, scrubs", JeffistanceFlags.Update);
-            updateList["UserList"] = UserList;
+            List<User> tempList = new List<User>(UserList);
+            tempList.Add(user);
+            Message updateList = new Message($"{user.Name} has joined.", JeffistanceFlags.Update);
+            updateList["UserList"] = tempList;
             Broadcast(updateList);
         }
 
@@ -158,6 +166,12 @@ namespace Jeffistance.Models
         public void Broadcast(string message)
         {
             Server.Broadcast(new Message(message));
+        }
+
+        public new void OnMessageReceived(object sender, MessageReceivedArgs args)
+        {
+            base.OnMessageReceived(sender, args);
+            Processor.ProcessMessage((Message)args.Message);
         }
 
         public void OnConnection(object sender, ConnectionArgs args)

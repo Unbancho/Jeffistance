@@ -19,6 +19,12 @@ namespace Jeffistance.ViewModels
             set => this.RaiseAndSetIfChanged(ref showKickButton, value);
         }
         MainWindowViewModel parent;
+        ChatViewModel chatView;
+        public ChatViewModel ChatView 
+        {
+            get => chatView;
+            set => this.RaiseAndSetIfChanged(ref chatView, value);
+        }
 
         public LobbyViewModel(MainWindowViewModel parent)
         {
@@ -27,6 +33,7 @@ namespace Jeffistance.ViewModels
             ShowKickButton = gs.CurrentUser.Perms.CanKick;
             Users = new ObservableCollection<User>(gs.CurrentUser.UserList);
             gs.CurrentUser.PropertyChanged += OnUserPropertyChanged;
+            this.ChatView = new ChatViewModel();
         }
 
         private void OnUserPropertyChanged(object sender, PropertyChangedEventArgs args)

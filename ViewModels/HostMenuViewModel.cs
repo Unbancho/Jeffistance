@@ -10,6 +10,7 @@ namespace Jeffistance.ViewModels
         MainWindowViewModel parent;
         int port = User.DEFAULT_PORT;
         
+        //TODO Actual port validation
         public string Port
         {
             get => port.ToString();
@@ -54,6 +55,7 @@ namespace Jeffistance.ViewModels
             GameState gs = GameState.GetGameState();
             gs.CurrentUser = new Host(Username, port);
             parent.Content = new LobbyViewModel(parent);
+            gs.CurrentUser.CurrentWindow = parent.Content;
         }
     }
 }
