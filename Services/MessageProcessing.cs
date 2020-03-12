@@ -10,7 +10,7 @@ namespace Jeffistance.Services.MessageProcessing
 {
 
     [Flags]
-    enum JeffistanceFlags // Have to be powers of 2 for bitwise operations. Is the bitshifting way better or worse? Leave your comments down below!
+    public enum JeffistanceFlags // Have to be powers of 2 for bitwise operations. Is the bitshifting way better or worse? Leave your comments down below!
     {
         Greeting = 1 << 0,
         Broadcast = 1 << 1,
@@ -18,23 +18,23 @@ namespace Jeffistance.Services.MessageProcessing
         Chat = 1 << 3
     }
 
-    public abstract class JeffistanceMessageProcessor : MessageProcessor
+    public class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>
     {
+        public override Dictionary<JeffistanceFlags, MethodInfo> ProcessingMethods {get; set;}
         public JeffistanceMessageProcessor()
         {
-            FlagType = typeof(JeffistanceFlags);
-            ProcessingMethods = new Dictionary<Enum, MethodInfo>();
+            ProcessingMethods = new Dictionary<JeffistanceFlags, MethodInfo>();
             foreach (var processingMethod in GetType().GetMethods(BindingFlags.NonPublic|BindingFlags.Instance)
                 .Where(y => y.GetCustomAttributes().OfType<MessageMethodAttribute>().Any()))
             {
-                ProcessingMethods[(JeffistanceFlags) Enum.Parse(typeof(JeffistanceFlags), ((MessageMethodAttribute) processingMethod.GetCustomAttribute(typeof(MessageMethodAttribute))).FlagName)] = processingMethod;
+                ProcessingMethods[((MessageMethodAttribute) processingMethod.GetCustomAttribute(typeof(MessageMethodAttribute))).Flag] = processingMethod;
             }
         }
     }
 
     public class HostMessageProcessor : JeffistanceMessageProcessor
     {
-        [MessageMethod("Greeting")]
+        [MessageMethod(JeffistanceFlags.Greeting)]
         private void GreetingFlagMethod(Message message)
         {
             Host host = (Host) GameState.GetGameState().CurrentUser;
@@ -44,7 +44,7 @@ namespace Jeffistance.Services.MessageProcessing
             host.AddUser(user);
         }
 
-        [MessageMethod("Broadcast")]
+        [MessageMethod(JeffistanceFlags.Broadcast)]
         private void BroadcastFlagMethod(Message message)
         {
             Host host = (Host) GameState.GetGameState().CurrentUser;
@@ -52,7 +52,7 @@ namespace Jeffistance.Services.MessageProcessing
             host.Broadcast(message);
         }
 
-        [MessageMethod("Chat")]
+        [MessageMethod(JeffistanceFlags.Chat)]
         private void ChatFlagMethod(Message message)
         {
             Host host = (Host) GameState.GetGameState().CurrentUser;
@@ -63,7 +63,7 @@ namespace Jeffistance.Services.MessageProcessing
 
     public class UserMessageProcessor : JeffistanceMessageProcessor
     {
-        [MessageMethod("Update")]
+        [MessageMethod(JeffistanceFlags.Update)]
         private void UpdateFlagMethod(Message message)
         {
             GameState gameState = GameState.GetGameState();
@@ -79,11 +79,11 @@ namespace Jeffistance.Services.MessageProcessing
     [AttributeUsage(AttributeTargets.Method)]
     public class MessageMethodAttribute : Attribute
     {
-        public string FlagName;
+        public JeffistanceFlags Flag;
 
-        public MessageMethodAttribute(string flagName)
+        public MessageMethodAttribute(JeffistanceFlags flag)
         {
-            FlagName = flagName;
+            Flag = flag;
         }
     }
 }   

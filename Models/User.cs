@@ -13,30 +13,15 @@ namespace Jeffistance.Models
         public override bool Equals(object u2){return ID == ((User)u2).ID;}
         public override int GetHashCode(){ return ID.GetHashCode();}
 
-        public bool IsHost = false;
-        public const int DEFAULT_PORT = 7700;
-
-        public const string DEFAULT_HOST_USERNAME = "Host";
-
-        public const string DEFAULT_USER_USERNAME = "Guest";
-
         public int ID;
         public string Name {get; set;}
+        public bool IsHost {get; set;}
 
         public ClientConnection Connection { get; set; }
 
-        public UserMessageProcessor Processor { get; set;}
-
-        public Permissions Perms { get; set; }
-
-        public User(string username)
+        public User()
         {
-            if(username == null){
-                Name = DEFAULT_USER_USERNAME;
-            }
-            Name = username;
-            Processor = new UserMessageProcessor();
-            Perms = new Permissions();
+
         }
 
         protected User(SerializationInfo info, StreamingContext context)
@@ -52,13 +37,37 @@ namespace Jeffistance.Models
             info.AddValue("IsHost", IsHost);
             info.AddValue("id", ID);
         }
+    }
+
+    [Serializable]
+    public class LocalUser : User
+    {
+        public const int DEFAULT_PORT = 7700;
+
+        public const string DEFAULT_HOST_USERNAME = "Host";
+
+        public const string DEFAULT_USER_USERNAME = "Guest";
+
+        public JeffistanceMessageProcessor Processor { get; set;}
+
+        public Permissions Perms { get; set; }
+
+        public LocalUser(string username)
+        {
+            if(username == null){
+                Name = DEFAULT_USER_USERNAME;
+            }
+            Name = username;
+            Processor = new UserMessageProcessor();
+            Perms = new Permissions();
+        }
 
         public void Connect(string ip, int port=DEFAULT_PORT)
         {
             Connection = new ClientConnection(ip, port);
             Connection.OnMessageReceived += OnMessageReceived;
             Message greetingMessage = new Message($"{Name} has joined from {Connection.IPAddress}.", JeffistanceFlags.Greeting);
-            greetingMessage["User"] = this;
+            greetingMessage["User"] = ((User)this);
             Send(greetingMessage);
         }
 
@@ -81,12 +90,12 @@ namespace Jeffistance.Models
         {
             Message message = (Message) args.Message;
             message.Sender = args.Sender;
-            Processor.ProcessMessage(message);
+            Processor?.ProcessMessage(message);
         }
     }
 
     [Serializable]
-    public class Host : User
+    public class Host : LocalUser
     {
         public ServerConnection Server {get; set;}
 
@@ -107,16 +116,15 @@ namespace Jeffistance.Models
             };
             UserList = new List<User>();
             Server.OnMessageReceived += OnMessageReceived;
+            Server.OnConnection += OnConnection;
             Server.Run();
             Processor = new HostMessageProcessor();
             if(!dedicated)
             {
-                Connect(NetworkUtilities.GetLocalIPAddress(), port);
-                Processor.ProcessingMethods = (Processor + new UserMessageProcessor()).ProcessingMethods;
+                ((LocalUser)this).Connect(NetworkUtilities.GetLocalIPAddress(), port);
+                //Processor.ProcessingMethods = (Processor + new UserMessageProcessor()).ProcessingMethods;
             }
         }
-
-        protected Host(SerializationInfo info, StreamingContext context) : base(info, context){}
 
         public new void Disconnect()
         {
@@ -153,6 +161,11 @@ namespace Jeffistance.Models
         {
             base.OnMessageReceived(sender, args);
             Processor.ProcessMessage((Message)args.Message);
+        }
+
+        public void OnConnection(object sender, ConnectionArgs args)
+        {
+
         }
     }
 }

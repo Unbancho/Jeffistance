@@ -12,7 +12,7 @@ namespace Jeffistance.Models
         public event PropertyChangedEventHandler PropertyChanged;
         private static GameState _currentGameState;
 
-        public User CurrentUser { get; set; }
+        public LocalUser CurrentUser { get; set; }
 
         private List<User> _userList;
         public List<User> UserList
@@ -23,7 +23,27 @@ namespace Jeffistance.Models
 
         public ViewModelBase CurrentWindow {get; set; }
 
-        public string Log { get { return ((IChatView)CurrentWindow).ChatView.Log; } set {((IChatView)CurrentWindow).ChatView.WriteLineInLog(value+"\n"); } }
+        public string Log { 
+            get 
+            {
+                try
+                { 
+                    return ((IChatView)CurrentWindow).ChatView.Log;
+                }
+                catch(System.InvalidCastException)
+                {
+                    return null;
+                }
+            } 
+            set 
+            {
+                try
+                {
+                    ((IChatView)CurrentWindow).ChatView.WriteLineInLog(value+"\n");
+                }
+                catch(System.InvalidCastException){}
+            } 
+        }
 
         private GameState()
         {

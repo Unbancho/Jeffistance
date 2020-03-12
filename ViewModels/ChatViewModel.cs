@@ -30,7 +30,7 @@ namespace Jeffistance.ViewModels
 
         public void OnSendClicked()
         {
-            User user = GameState.GetGameState().CurrentUser;
+            LocalUser user = GameState.GetGameState().CurrentUser;
             MessageContent = user.Name + ": " + MessageContent;
             Message chatText = new Message(MessageContent, JeffistanceFlags.Chat, JeffistanceFlags.Broadcast);
             user.Send(chatText);
