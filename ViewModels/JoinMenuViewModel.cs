@@ -3,14 +3,14 @@ using System.Net;
 using System.Reactive;
 using ReactiveUI;
 using Jeffistance.Models;
-using Jeffistance.Services;
+using ModusOperandi.Networking;
 
 namespace Jeffistance.ViewModels
 {
     public class JoinMenuViewModel : ViewModelBase
     {
         MainWindowViewModel parent;
-        int port = User.DEFAULT_PORT;
+        int port = LocalUser.DEFAULT_PORT;
         string ipAddress = NetworkUtilities.GetLocalIPAddress();
 
         public string Username {get; set;}
@@ -63,9 +63,10 @@ namespace Jeffistance.ViewModels
         public void Join()
         {
             GameState gs = GameState.GetGameState();
-            gs.CurrentUser = new User(Username);
+            gs.CurrentUser = new LocalUser(Username);
             gs.CurrentUser.Connect(IpAddress, port);
             parent.Content = new LobbyViewModel(parent);
+            gs.CurrentWindow = parent.Content;
         }
     }
 }

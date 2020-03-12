@@ -9,7 +9,7 @@ using ReactiveUI;
 
 namespace Jeffistance.ViewModels
 {
-    public class LobbyViewModel : ViewModelBase
+    public class LobbyViewModel : ViewModelBase, IChatView
     {
         public ObservableCollection<User> Users {get;}
         bool showKickButton;
@@ -19,23 +19,32 @@ namespace Jeffistance.ViewModels
             set => this.RaiseAndSetIfChanged(ref showKickButton, value);
         }
         MainWindowViewModel parent;
+        private ChatViewModel _chatView;
+        public ChatViewModel ChatView 
+        {
+            get => _chatView;
+            set => this.RaiseAndSetIfChanged(ref _chatView, value);
+        }
 
         public LobbyViewModel(MainWindowViewModel parent)
         {
             this.parent = parent;
             GameState gs = GameState.GetGameState();
             ShowKickButton = gs.CurrentUser.Perms.CanKick;
-            Users = new ObservableCollection<User>(gs.CurrentUser.UserList);
-            gs.CurrentUser.PropertyChanged += OnUserPropertyChanged;
+            gs.UserList = new List<User>();
+            Users = new ObservableCollection<User>(gs.UserList);
+            gs.PropertyChanged += OnGameStatePropertyChanged;
+            this.ChatView = new ChatViewModel();
         }
 
-        private void OnUserPropertyChanged(object sender, PropertyChangedEventArgs args)
+        private void OnGameStatePropertyChanged(object sender, PropertyChangedEventArgs args)
         {
-            var property = ((User) sender).GetType().GetProperty(args.PropertyName).GetValue(sender);
-            foreach (var item in ((List<User>) property).Except(Users))
-            { 
-                Dispatcher.UIThread.Post(()=> Users.Add(item));
-            }
+            var property = ((GameState) sender).GetType().GetProperty(args.PropertyName).GetValue(sender);
+            if(args.PropertyName == "UserList") // TODO: How can we do it not like this, help
+                foreach (var item in ((List<User>) property).Except(Users))
+                { 
+                    Dispatcher.UIThread.Post(()=> Users.Add(item));
+                }
         }
 
         public void OnKickEveryoneClicked()

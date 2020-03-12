@@ -8,6 +8,9 @@
     <Button DockPanel.Dock="Bottom" Command="{Binding Cancel}">Cancel</Button>
     <Button DockPanel.Dock="Bottom" Command="{Binding Ok}">Join</Button>
     <StackPanel Orientation = "Vertical" VerticalAlignment="Center" Height="100">
+      <StackPanel.KeyBindings>
+        <KeyBinding Command="{Binding Ok}" Gesture="Enter"/>
+      </StackPanel.KeyBindings>
       <TextBox AcceptsReturn="False"
             Text="{Binding Username}"
             Watermark="Username"
