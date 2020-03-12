@@ -42,6 +42,8 @@ namespace Jeffistance.Models
     [Serializable]
     public class LocalUser : User
     {
+
+        protected LocalUser(SerializationInfo info, StreamingContext context) : base(info, context){}
         public const int DEFAULT_PORT = 7700;
 
         public const string DEFAULT_HOST_USERNAME = "Host";
@@ -125,6 +127,8 @@ namespace Jeffistance.Models
                 //Processor.ProcessingMethods = (Processor + new UserMessageProcessor()).ProcessingMethods;
             }
         }
+
+        protected Host(SerializationInfo info, StreamingContext context) : base(info, context){}
 
         public new void Disconnect()
         {
