@@ -118,13 +118,11 @@ namespace Jeffistance.Models
             };
             UserList = new List<User>();
             Server.OnMessageReceived += OnMessageReceived;
-            Server.OnConnection += OnConnection;
             Server.Run();
             Processor = new HostMessageProcessor();
             if(!dedicated)
             {
                 ((LocalUser)this).Connect(NetworkUtilities.GetLocalIPAddress(), port);
-                //Processor.ProcessingMethods = (Processor + new UserMessageProcessor()).ProcessingMethods;
             }
         }
 
@@ -165,11 +163,6 @@ namespace Jeffistance.Models
         {
             base.OnMessageReceived(sender, args);
             Processor.ProcessMessage((Message)args.Message);
-        }
-
-        public void OnConnection(object sender, ConnectionArgs args)
-        {
-
         }
     }
 }
