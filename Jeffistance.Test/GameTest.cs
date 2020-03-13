@@ -170,7 +170,6 @@ namespace Jeffistance.Test
                 playerEventManager.VoteMission(2, true);
             }
             Assert.That(game.CurrentPhase, Is.EqualTo(Phase.GameEnd));
-            FactionFactory ff = new FactionFactory();
             Assert.That(game.Winner, Is.InstanceOf<ResistanceFaction>());
         }
 
@@ -187,7 +186,6 @@ namespace Jeffistance.Test
                 playerEventManager.VoteMission(2, false);
             }
             Assert.That(game.CurrentPhase, Is.EqualTo(Phase.GameEnd));
-            FactionFactory ff = new FactionFactory();
             Assert.That(game.Winner, Is.InstanceOf<SpiesFaction>());
         }
     }
@@ -204,7 +202,7 @@ namespace Jeffistance.Test
         }
 
         [Test]
-        public void PickLeaderTest([Range(1, 10)] int n)
+        public void TestPickLeader([Range(1, 10)] int n)
         {
             Player[] players = new Player[n];
             for (int i = 0; i < n; i++)
@@ -223,6 +221,26 @@ namespace Jeffistance.Test
             Assert.That(players[n-1].IsLeader, Is.True);
             gm.PickLeader(players);
             Assert.That(players[0].IsLeader, Is.True);
+        }
+
+        [Test]
+        public void TestAssignFactions([Range(5, 7)] int n)
+        {
+            Player[] players = new Player[n];
+            for (int i = 0; i < n; i++)
+            {
+                players[i] = new Player
+                {
+                    ID = i
+                };
+            }
+
+            gm.AssignFactions(players);
+
+            Assert.That(players,
+                Has.Exactly(gm.Factions[n][0]).Property("Faction").InstanceOf<ResistanceFaction>());
+            Assert.That(players,
+                Has.Exactly(gm.Factions[n][1]).Property("Faction").InstanceOf<SpiesFaction>());
         }
     }
 }

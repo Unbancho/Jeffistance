@@ -46,7 +46,8 @@ namespace Jeffistance.Models
             TeamSizes = new Dictionary<int, int[]>()
             {
                 {5, new int[] {2, 3, 2, 3, 3}},
-                {6, new int[] {2, 3, 4, 3, 4}}
+                {6, new int[] {2, 3, 4, 3, 4}},
+                {7, new int[] {2, 3, 3, 4, 4}}
             };
             CurrentTeamVotes = new Dictionary<int, bool>();
             CurrentMissionVotes = new Dictionary<int, bool>();
