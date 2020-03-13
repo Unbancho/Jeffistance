@@ -6,9 +6,12 @@ namespace Jeffistance.Views
 {
     public class JoinMenuView : UserControl
     {
+        public TextBox UsernameTextBox => this.FindControl<TextBox>("UsernameTextBox");
+
         public JoinMenuView()
         {
             InitializeComponent();
+            UsernameTextBox.Initialized += (sender, args) => UsernameTextBox.Focus();
         }
 
         private void InitializeComponent()
