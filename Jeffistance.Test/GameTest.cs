@@ -128,6 +128,68 @@ namespace Jeffistance.Test
 
             Assert.That(game.CurrentPhase, Is.EqualTo(Phase.TeamPicking));
         }
+
+        [Test]
+        public void TestVoteMissionSuccess()
+        {
+            game.Start(players);
+            playerEventManager.PickTeam(new int[] {0, 1, 2});
+            playerEventManager.VoteMission(0, true);
+            playerEventManager.VoteMission(1, true);
+            playerEventManager.VoteMission(2, true);
+
+            Assert.That(game.CurrentPhase, Is.EqualTo(Phase.TeamPicking));
+            Assert.That(game.ResistanceWinCount, Is.EqualTo(1));
+            Assert.That(game.CurrentRound, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void TestVoteMissionFailure()
+        {
+            game.Start(players);
+            playerEventManager.PickTeam(new int[] {0, 1, 2});
+            playerEventManager.VoteMission(0, true);
+            playerEventManager.VoteMission(1, false);
+            playerEventManager.VoteMission(2, true);
+
+            Assert.That(game.CurrentPhase, Is.EqualTo(Phase.TeamPicking));
+            Assert.That(game.SpiesWinCount, Is.EqualTo(1));
+            Assert.That(game.CurrentRound, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void TestResistanceVictory()
+        {
+            game.Start(players);
+
+            for (int i = 0; i < 3; i++)
+            {
+                playerEventManager.PickTeam(new int[] {0, 1, 2});
+                playerEventManager.VoteMission(0, true);
+                playerEventManager.VoteMission(1, true);
+                playerEventManager.VoteMission(2, true);
+            }
+            Assert.That(game.CurrentPhase, Is.EqualTo(Phase.GameEnd));
+            FactionFactory ff = new FactionFactory();
+            Assert.That(game.Winner, Is.InstanceOf<ResistanceFaction>());
+        }
+
+        [Test]
+        public void TestSpiesVictory()
+        {
+            game.Start(players);
+
+            for (int i = 0; i < 3; i++)
+            {
+                playerEventManager.PickTeam(new int[] {0, 1, 2});
+                playerEventManager.VoteMission(0, false);
+                playerEventManager.VoteMission(1, false);
+                playerEventManager.VoteMission(2, false);
+            }
+            Assert.That(game.CurrentPhase, Is.EqualTo(Phase.GameEnd));
+            FactionFactory ff = new FactionFactory();
+            Assert.That(game.Winner, Is.InstanceOf<SpiesFaction>());
+        }
     }
 
     [TestFixture]

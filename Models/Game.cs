@@ -11,7 +11,8 @@ namespace Jeffistance.Models
         LeaderPicking,
         TeamPicking,
         TeamVoting,
-        MissionVoting
+        MissionVoting,
+        GameEnd
     }
 
     public class Game
@@ -26,9 +27,14 @@ namespace Jeffistance.Models
         public Dictionary<int, int[]> TeamSizes { get; set; }
         public int NextTeamSize { get; private set; }
         public int CurrentRound { get; private set; }
+        public int MaxRound { get; private set; } = 4;
         public int FailureCount { get; private set; }
-        public Dictionary<int, bool> CurrentVotes { get; private set; }
+        public int ResistanceWinCount { get; private set; }
+        public int SpiesWinCount { get; private set; }
+        public Dictionary<int, bool> CurrentTeamVotes { get; private set; }
+        public Dictionary<int, bool> CurrentMissionVotes { get; private set; }
         public IGamemode Gamemode { get; set; }
+        public IFaction Winner { get; private set; }
 
         public Game(IGamemode gm, PlayerEventManager pem)
         {
@@ -36,12 +42,14 @@ namespace Jeffistance.Models
             playerEventManager = pem;
             playerEventManager.OnTeamPicked += OnTeamPicked;
             playerEventManager.OnTeamVoted += OnTeamVoted;
+            playerEventManager.OnMissionVoted += OnMissionVoted;
             TeamSizes = new Dictionary<int, int[]>()
             {
                 {5, new int[] {2, 3, 2, 3, 3}},
                 {6, new int[] {2, 3, 4, 3, 4}}
             };
-            CurrentVotes = new Dictionary<int, bool>();
+            CurrentTeamVotes = new Dictionary<int, bool>();
+            CurrentMissionVotes = new Dictionary<int, bool>();
         }
 
         public void Start(IEnumerable<Player> players)
@@ -49,8 +57,7 @@ namespace Jeffistance.Models
             InProgress = true;
             Players = new List<Player>(players);
             Setup();
-            PickLeader();
-            PickTeam();
+            NextRound();
         }
 
         private void Setup()
@@ -59,8 +66,25 @@ namespace Jeffistance.Models
             PreparePlayers();
             Gamemode.AssignFactions(Players);
             Gamemode.AssignRoles(Players);
-            CurrentRound = 0;
+            // -1 so first call to NextRound() sets it to 0
+            CurrentRound = -1;
+            ResistanceWinCount = 0;
+            SpiesWinCount = 0;
+        }
+
+        private void NextRound()
+        {
+            if (ResistanceWinCount == 3 || SpiesWinCount == 3)
+            {
+                EndGame();
+                return;
+            }
+            CurrentRound++;
             NextTeamSize = TeamSizes[Players.Count()][CurrentRound];
+            CurrentTeamVotes.Clear();
+            CurrentMissionVotes.Clear();
+            PickLeader();
+            PickTeam();
         }
 
         private void PreparePlayers()
@@ -71,6 +95,18 @@ namespace Jeffistance.Models
                 player.ID = i;
                 i++;
             }
+        }
+
+        private void EndGame()
+        {
+            CurrentPhase = Phase.GameEnd;
+            DetermineWinner();
+        }
+
+        private void DetermineWinner()
+        {
+            FactionFactory ff = new FactionFactory();
+            Winner = (ResistanceWinCount == 3) ? ff.GetResistance() : ff.GetSpies();
         }
 
         private void PickLeader()
@@ -90,12 +126,12 @@ namespace Jeffistance.Models
             CurrentPhase = Phase.TeamVoting;
         }
 
-        private void OnTeamVoted(TeamVotedArgs args)
+        private void OnTeamVoted(VoteArgs args)
         {
-            CurrentVotes.Add(args.VoterID, args.Vote);
-            if (CurrentVotes.Count() == Players.Count())
+            CurrentTeamVotes.Add(args.VoterID, args.Vote);
+            if (CurrentTeamVotes.Count() == Players.Count())
             {
-                ResolveTeamVoting(CurrentVotes.Values);
+                ResolveTeamVoting(CurrentTeamVotes.Values);
             }
         }
 
@@ -112,6 +148,28 @@ namespace Jeffistance.Models
                 FailureCount++;
                 PickLeader();
                 PickTeam();
+            }
+        }
+
+        private void OnMissionVoted(VoteArgs args)
+        {
+            CurrentMissionVotes.Add(args.VoterID, args.Vote);
+            if (CurrentMissionVotes.Count() == CurrentTeam.Count())
+            {
+                ResolveMissionVoting(CurrentMissionVotes.Values);
+                NextRound();
+            }
+        }
+
+        private void ResolveMissionVoting(IEnumerable<bool> votes)
+        {
+            if (votes.Any(vote => !vote))
+            {
+                SpiesWinCount++;
+            }
+            else
+            {
+                ResistanceWinCount++;
             }
         }
     }

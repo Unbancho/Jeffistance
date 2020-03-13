@@ -23,7 +23,7 @@ namespace Jeffistance.Models
         {
             foreach (var player in players)
             {
-                player.Faction = FactionFactory.MakeResistance();
+                player.Faction = FactionFactory.GetResistance();
             }
         }
 
