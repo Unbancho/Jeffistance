@@ -15,7 +15,8 @@
             Text="{Binding Username}"
             Watermark="Username"
             Height="30"
-            Width="300"/>
+            Width="300"
+            Name="UsernameTextBox"/>
       <TextBox AcceptsReturn="False"
               Text="{Binding IpAddress}"
               Watermark="Enter ip"
