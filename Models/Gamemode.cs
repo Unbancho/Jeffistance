@@ -36,38 +36,28 @@ namespace Jeffistance.Models
         {
             int resistanceCount = Factions[players.Count()][0];
             int spiesCount = Factions[players.Count()][1];
-            List<int> taken = new List<int>();
-            List<int> resistanceIDs = GetUniqueRandomInts(resistanceCount, 0, players.Count(), taken);
-            List<int> spiesIDs = GetUniqueRandomInts(spiesCount, 0, players.Count(), taken);
+            List<Player> playerList = new List<Player>(players);
+            ShufflePlayers(playerList);
 
-            foreach (var player in players.Where(p => resistanceIDs.Contains(p.ID)))
+            foreach (var player in playerList.Select((p, idx) => (p, idx)))
             {
-                player.Faction = FactionFactory.GetResistance();
-            }
-
-            foreach (var player in players.Where(p => spiesIDs.Contains(p.ID)))
-            {
-                player.Faction = FactionFactory.GetSpies();
+                player.p.Faction = player.idx < resistanceCount ?
+                FactionFactory.GetResistance() : FactionFactory.GetSpies();
             }
         }
 
-        private List<int> GetUniqueRandomInts(int n, int from, int to, List<int> taken)
+         private void ShufflePlayers(List<Player> list)
         {
-            Random random = new Random();
-            List<int> result = new List<int>();
-
-            for (int i = 0; i < n; i++)
-            {
-                int r = random.Next(from, to);
-                while(taken.Contains(r))
-                {
-                    r = random.Next(from, to);
-                }
-                taken.Add(r);
-                result.Add(r);
-            }
-
-            return result;
+            Random rng = new Random();
+            int n = list.Count;
+            while (n > 1)
+            {  
+                n--;  
+                int k = rng.Next(n + 1);  
+                Player p = list[k];  
+                list[k] = list[n];  
+                list[n] = p;  
+            }  
         }
 
         public void AssignRoles(IEnumerable<Player> players)
