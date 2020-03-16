@@ -29,6 +29,7 @@ namespace Jeffistance.Models
         public int CurrentRound { get; private set; }
         public int MaxRound { get; private set; } = 4;
         public int FailureCount { get; private set; }
+        public int MaxFailedVotes { get; private set; } = 5;
         public int ResistanceWinCount { get; private set; }
         public int SpiesWinCount { get; private set; }
         public Dictionary<int, bool> CurrentTeamVotes { get; private set; }
@@ -84,6 +85,7 @@ namespace Jeffistance.Models
             NextTeamSize = TeamSizes[Players.Count()][CurrentRound];
             CurrentTeamVotes.Clear();
             CurrentMissionVotes.Clear();
+            FailureCount = 0;
             PickLeader();
             PickTeam();
         }
@@ -107,7 +109,8 @@ namespace Jeffistance.Models
         private void DetermineWinner()
         {
             FactionFactory ff = new FactionFactory();
-            Winner = (ResistanceWinCount == 3) ? ff.GetResistance() : ff.GetSpies();
+            Winner = (SpiesWinCount == 3 || FailureCount == MaxFailedVotes) ?
+            ff.GetSpies() : ff.GetResistance();
         }
 
         private void PickLeader()
@@ -147,6 +150,12 @@ namespace Jeffistance.Models
             else
             {
                 FailureCount++;
+                if (FailureCount == MaxFailedVotes)
+                {
+                    EndGame();
+                    return;
+                }
+                CurrentTeamVotes.Clear();
                 PickLeader();
                 PickTeam();
             }

@@ -188,6 +188,23 @@ namespace Jeffistance.Test
             Assert.That(game.CurrentPhase, Is.EqualTo(Phase.GameEnd));
             Assert.That(game.Winner, Is.InstanceOf<SpiesFaction>());
         }
+
+        [Test]
+        public void TestMaxFailedVotes()
+        {
+            game.Start(players);
+
+            for (int i = 0; i < game.MaxFailedVotes; i++)
+            {
+                foreach (var player in players)
+                {
+                    playerEventManager.PickTeam(new int[] {0, 1});
+                    playerEventManager.VoteTeam(player.ID, false);
+                }
+            }
+            Assert.That(game.CurrentPhase, Is.EqualTo(Phase.GameEnd));
+            Assert.That(game.Winner, Is.InstanceOf<SpiesFaction>());
+        }
     }
 
     [TestFixture]
