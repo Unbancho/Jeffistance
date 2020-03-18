@@ -5,20 +5,11 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:views="clr-namespace:Jeffistance.Views"
              x:Class="Jeffistance.Views.LobbyView">
-<<<<<<< HEAD
-  <Grid ColumnDefinitions="9*,1*" RowDefinitions="10*" Margin="4">
-    <Grid ColumnDefinitions="10*" RowDefinitions="10*,1*" Margin="4">
-      <Button Grid.Row="1" Grid.Column="0" Content="Kick Everyone" Command="{Binding OnKickEveryoneClicked}"
-              IsVisible="{Binding ShowKickButton}"/>
-    </Grid>
-    <ListBox Grid.Row="0" Grid.Column="1" Items="{Binding Users}">
-=======
   <Grid ColumnDefinitions="9*,1*" RowDefinitions="9*,0.5*" Margin="4">
     <views:ChatView Grid.Row="0" Grid.Column="0" Content="{Binding ChatView}"/>
     <Button Grid.Row="1" Grid.Column="0" Content="Kick Everyone" Command="{Binding OnKickEveryoneClicked}"
               IsVisible="{Binding ShowKickButton}"/>
     <ListBox Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Items="{Binding Users}">
->>>>>>> 68ea64698bbc5fb200a42e52dde8739a7e8abf8a
       <ListBox.ItemTemplate>
         <DataTemplate>
           <TextBlock Text="{Binding Name}"/>
