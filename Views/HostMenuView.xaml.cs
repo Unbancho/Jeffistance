@@ -6,9 +6,12 @@ namespace Jeffistance.Views
 {
     public class HostMenuView : UserControl
     {
+        public TextBox UsernameTextBox => this.FindControl<TextBox>("UsernameTextBox");
+
         public HostMenuView()
         {
             InitializeComponent();
+            UsernameTextBox.Initialized += (sender, args) => UsernameTextBox.Focus();
         }
 
         private void InitializeComponent()

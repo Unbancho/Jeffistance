@@ -1,36 +1,40 @@
 using System;
 using System.Reflection;
 using Jeffistance.Models;
-using Jeffistance.Services.Messaging;
+using ModusOperandi.Messaging;
+using ModusOperandi.Networking;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Jeffistance.Services.MessageProcessing
 {
 
     [Flags]
-    enum JeffistanceFlags // Have to be powers of 2 for bitwise operations.
+    public enum JeffistanceFlags // Have to be powers of 2 for bitwise operations. Is the bitshifting way better or worse? Leave your comments down below!
     {
-        Greeting = 1,
-        Broadcast = 2,
-        Update = 4
+        Greeting = 1 << 0,
+        Broadcast = 1 << 1,
+        Update = 1 << 2,
+        Chat = 1 << 3
     }
 
-    public class MessageProcessor
+    public class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>
     {
-        public void ProcessMessage(Message message)
+        public override Dictionary<JeffistanceFlags, MethodInfo> ProcessingMethods {get; set;}
+        public JeffistanceMessageProcessor()
         {
-            object[] parametersToPass = new object[]{message};
-            string flagName;
-            foreach (Enum flag in message.GetFlags())
+            ProcessingMethods = new Dictionary<JeffistanceFlags, MethodInfo>();
+            foreach (var processingMethod in GetType().GetMethods(BindingFlags.NonPublic|BindingFlags.Instance)
+                .Where(y => y.GetCustomAttributes().OfType<MessageMethodAttribute>().Any()))
             {
-                flagName = ((JeffistanceFlags) flag).ToString();
-                foreach (var method in message.GetFlaggedMethods(this, flagName))
-                {
-                    method.Invoke(this, parametersToPass);
-                }
+                ProcessingMethods[((MessageMethodAttribute) processingMethod.GetCustomAttribute(typeof(MessageMethodAttribute))).Flag] = processingMethod;
             }
         }
+    }
 
-        [MessageMethod("Greeting")]
+    public class HostMessageProcessor : JeffistanceMessageProcessor
+    {
+        [MessageMethod(JeffistanceFlags.Greeting)]
         private void GreetingFlagMethod(Message message)
         {
             Host host = (Host) GameState.GetGameState().CurrentUser;
@@ -40,25 +44,46 @@ namespace Jeffistance.Services.MessageProcessing
             host.AddUser(user);
         }
 
-        [MessageMethod("Broadcast")]
+        [MessageMethod(JeffistanceFlags.Broadcast)]
         private void BroadcastFlagMethod(Message message)
         {
             Host host = (Host) GameState.GetGameState().CurrentUser;
-            if(!message.HasFlag(JeffistanceFlags.Update)) message = new Message(message.Text);
+            message.SetFlags((JeffistanceFlags) message.Flag | ~JeffistanceFlags.Broadcast);
             host.Broadcast(message);
         }
 
-        [MessageMethod("Update")]
+        [MessageMethod(JeffistanceFlags.Chat)]
+        private void ChatFlagMethod(Message message)
+        {
+            Host host = (Host) GameState.GetGameState().CurrentUser;
+            message.SetFlags((JeffistanceFlags) message.Flag | JeffistanceFlags.Update & ~JeffistanceFlags.Chat);
+            message["Log"] = message.Text;
+        }
+    }
+
+    public class UserMessageProcessor : JeffistanceMessageProcessor
+    {
+        [MessageMethod(JeffistanceFlags.Update)]
         private void UpdateFlagMethod(Message message)
         {
-            User currentUser = GameState.GetGameState().CurrentUser;
-            object result;
-            while(message.TryPop(out result))
+            GameState gameState = GameState.GetGameState();
+            while(message.TryPop(out object result))
             {
                 (object obj, string name) = (ValueTuple<object, string>) result;
-                PropertyInfo pi = currentUser.GetType().GetProperty(name, BindingFlags.Instance|BindingFlags.Public);
-                pi.SetValue(currentUser, obj);
+                PropertyInfo pi = gameState.GetType().GetProperty(name);
+                pi?.SetValue(gameState, obj);
             }
         }
     }
-}
+
+    [AttributeUsage(AttributeTargets.Method)]
+    public class MessageMethodAttribute : Attribute
+    {
+        public JeffistanceFlags Flag;
+
+        public MessageMethodAttribute(JeffistanceFlags flag)
+        {
+            Flag = flag;
+        }
+    }
+}   
