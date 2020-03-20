@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using ModusOperandi.Networking;
 using ModusOperandi.Messaging;
 using Jeffistance.Services.MessageProcessing;
+using System.Runtime.CompilerServices;
+using System.ComponentModel;
 
 namespace Jeffistance.Models
 {
@@ -13,15 +15,23 @@ namespace Jeffistance.Models
         public override bool Equals(object u2){return ID == ((User)u2).ID;}
         public override int GetHashCode(){ return ID.GetHashCode();}
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public int ID;
         public string Name {get; set;}
         public bool IsHost {get; set;}
 
-        public ClientConnection Connection { get; set; }
+        public Permissions Perms { get; set; }
 
-        public User()
+        private ClientConnection _connection;
+        public ClientConnection Connection { get{ return _connection;} set{ _connection = value; /*OnPropertyChanged();*/} }
+
+        public User(){}
+
+        public User(LocalUser localUser)
         {
-
+            Name = localUser.Name;
+            IsHost = localUser.IsHost;
         }
 
         protected User(SerializationInfo info, StreamingContext context)
@@ -39,105 +49,73 @@ namespace Jeffistance.Models
         }
     }
 
-    [Serializable]
     public class LocalUser : User
     {
-
-        protected LocalUser(SerializationInfo info, StreamingContext context) : base(info, context){}
-        public const int DEFAULT_PORT = 7700;
-
-        public const string DEFAULT_HOST_USERNAME = "Host";
-
-        public const string DEFAULT_USER_USERNAME = "Guest";
-
-        public JeffistanceMessageProcessor Processor { get; set;}
-
-        public Permissions Perms { get; set; }
-
         public LocalUser(string username)
         {
-            if(username == null){
-                Name = DEFAULT_USER_USERNAME;
-            }
             Name = username;
-            Processor = new UserMessageProcessor();
             Perms = new Permissions();
         }
 
-        public void Connect(string ip, int port=DEFAULT_PORT)
+        public void Connect(string ip, int port)
         {
+            MessageHandler messageHandler = GameState.GetGameState().MessageHandler;
             Connection = new ClientConnection(ip, port);
-            Connection.OnMessageReceived += OnMessageReceived;
+            Connection.OnMessageReceived += messageHandler.OnMessageReceived;
             Message greetingMessage = new Message($"{Name} has joined from {Connection.IPAddress}.", JeffistanceFlags.Greeting);
-            greetingMessage["User"] = ((User)this);
-            Send(greetingMessage);
+            greetingMessage["User"] = new User(this);
+            messageHandler.Send(greetingMessage);
         }
 
         public void Disconnect()
         {
             Connection.Stop();
         }
-
-        public void Send(Message message)
-        {
-            Connection.Send(message);
-        }
-
-        public void Send(string message)
-        {
-            Send(new Message(message, JeffistanceFlags.Broadcast));
-        }
-
-        public void OnMessageReceived(object sender, MessageReceivedArgs args)
-        {
-            Message message = (Message) args.Message;
-            message.Sender = args.Sender;
-            Processor?.ProcessMessage(message);
-        }
     }
 
-    [Serializable]
-    public class Host : LocalUser
+    public class Server
     {
-        public ServerConnection Server {get; set;}
-
-        public new HostMessageProcessor Processor {get; set;}
-
+        public LocalUser Host {get; set;}
+        public ServerConnection Connection {get; set;}
         public List<User> UserList {get; set;}
 
-        public Host(string username, int port=DEFAULT_PORT, bool dedicated=false):base(username)
+        public Server()
         {
-            if(username == null){
-                Name = DEFAULT_HOST_USERNAME;
-            }
-            IsHost = true;
-            Server = new ServerConnection(port);
-            Perms = new Permissions
-            {
-                CanKick = true
-            };
             UserList = new List<User>();
-            Server.OnMessageReceived += OnMessageReceived;
-            Server.Run();
-            Processor = new HostMessageProcessor();
-            if(!dedicated)
+            Host = new LocalUser("Server")
             {
-                ((LocalUser)this).Connect(NetworkUtilities.GetLocalIPAddress(), port);
-            }
+                IsHost = true,
+                Perms = new Permissions
+                {
+                    CanKick = true
+                }
+            };
         }
 
-        protected Host(SerializationInfo info, StreamingContext context) : base(info, context){}
-
-        public new void Disconnect()
+        public void ConnectHost(string username="Admin")
         {
-            base.Disconnect();
-            Server.Stop();
+            Host.Name = username;
+            Host.Connect(NetworkUtilities.GetLocalIPAddress(), Connection.PORT_NO);
+        }
+
+        public void Run(int port)
+        {
+            Connection = new ServerConnection(port);
+            Connection.Run();
+            Connection.OnMessageReceived += GameState.GetGameState().MessageHandler.OnMessageReceived;
+            Connection.Run();
+        }
+
+        public void Stop()
+        {
+            Host.Disconnect();
+            Connection.Stop();
         }
 
         public void Kick(User user)
         {
             UserList.Remove(user);
-            Server.Kick(user.Connection);
+            Connection.Kick(user.Connection);
         }
 
         public void AddUser(User user)
@@ -146,23 +124,7 @@ namespace Jeffistance.Models
             UserList.Add(user);
             Message updateList = new Message($"{user.Name} has joined.", JeffistanceFlags.Update);
             updateList["UserList"] = UserList;
-            Broadcast(updateList);
-        }
-
-        public void Broadcast(Message message)
-        {
-            Server.Broadcast(message);
-        }
-
-        public void Broadcast(string message)
-        {
-            Server.Broadcast(new Message(message));
-        }
-
-        public new void OnMessageReceived(object sender, MessageReceivedArgs args)
-        {
-            base.OnMessageReceived(sender, args);
-            Processor.ProcessMessage((Message)args.Message);
+            GameState.GetGameState().MessageHandler.Broadcast(updateList);
         }
     }
 }

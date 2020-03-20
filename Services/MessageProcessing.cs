@@ -18,7 +18,7 @@ namespace Jeffistance.Services.MessageProcessing
         Chat = 1 << 3
     }
 
-    public class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>
+    class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>
     {
         public override Dictionary<JeffistanceFlags, MethodInfo> ProcessingMethods {get; set;}
         public JeffistanceMessageProcessor()
@@ -27,42 +27,33 @@ namespace Jeffistance.Services.MessageProcessing
             foreach (var processingMethod in GetType().GetMethods(BindingFlags.NonPublic|BindingFlags.Instance)
                 .Where(y => y.GetCustomAttributes().OfType<MessageMethodAttribute>().Any()))
             {
-                ProcessingMethods[((MessageMethodAttribute) processingMethod.GetCustomAttribute(typeof(MessageMethodAttribute))).Flag] = processingMethod;
+                var attr = (MessageMethodAttribute) processingMethod.GetCustomAttribute(typeof(MessageMethodAttribute));
+                ProcessingMethods[attr.Flag] = processingMethod;
             }
         }
-    }
 
-    public class HostMessageProcessor : JeffistanceMessageProcessor
-    {
         [MessageMethod(JeffistanceFlags.Greeting)]
         private void GreetingFlagMethod(Message message)
         {
-            Host host = (Host) GameState.GetGameState().CurrentUser;
             User user = (User) message["User"];
             ClientConnection connection = (ClientConnection) message.Sender;
             user.Connection = connection;
-            host.AddUser(user);
+            GameState.GetGameState().Server?.AddUser(user);
         }
 
         [MessageMethod(JeffistanceFlags.Broadcast)]
         private void BroadcastFlagMethod(Message message)
         {
-            Host host = (Host) GameState.GetGameState().CurrentUser;
-            message.SetFlags((JeffistanceFlags) message.Flag | ~JeffistanceFlags.Broadcast);
-            host.Broadcast(message);
+            message.SetFlags((JeffistanceFlags) message.Flag & ~JeffistanceFlags.Broadcast);
+            GameState.GetGameState().MessageHandler.Broadcast(message);
         }
 
         [MessageMethod(JeffistanceFlags.Chat)]
         private void ChatFlagMethod(Message message)
         {
-            Host host = (Host) GameState.GetGameState().CurrentUser;
-            message.SetFlags((JeffistanceFlags) message.Flag | JeffistanceFlags.Update & ~JeffistanceFlags.Chat);
-            message["Log"] = message.Text;
+            message.SetFlags(((JeffistanceFlags) message.Flag | JeffistanceFlags.Update) & ~JeffistanceFlags.Chat);
         }
-    }
 
-    public class UserMessageProcessor : JeffistanceMessageProcessor
-    {
         [MessageMethod(JeffistanceFlags.Update)]
         private void UpdateFlagMethod(Message message)
         {
@@ -73,6 +64,7 @@ namespace Jeffistance.Services.MessageProcessing
                 PropertyInfo pi = gameState.GetType().GetProperty(name);
                 pi?.SetValue(gameState, obj);
             }
+            gameState.Log = message.Text;
         }
     }
 
@@ -84,6 +76,43 @@ namespace Jeffistance.Services.MessageProcessing
         public MessageMethodAttribute(JeffistanceFlags flag)
         {
             Flag = flag;
+        }
+    }
+
+    public class MessageHandler
+    {
+        JeffistanceMessageProcessor Processor;
+
+        public MessageHandler()
+        {
+            Processor = new JeffistanceMessageProcessor();
+        }
+
+        public void Broadcast(Message message)
+        {
+           GameState.GetGameState().Server?.Connection.Broadcast(message);
+        }
+
+        public void Broadcast(string message)
+        {
+            Broadcast(new Message(message));
+        }
+
+        public void Send(Message message)
+        {
+            ClientConnection connection = GameState.GetGameState().CurrentUser.Connection;
+            connection.Send(message);
+        }
+
+        public void Send(string message)
+        {
+            Send(new Message(message, JeffistanceFlags.Broadcast));
+        }
+
+        public void OnMessageReceived(object sender, MessageReceivedArgs args)
+        {
+            var message = (Message) args.Message;
+            Processor.ProcessMessage(message);
         }
     }
 }   

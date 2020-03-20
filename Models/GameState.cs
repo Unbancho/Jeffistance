@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Jeffistance.ViewModels;
+using Jeffistance.Services.MessageProcessing;
 
 namespace Jeffistance.Models
 {
@@ -12,6 +13,7 @@ namespace Jeffistance.Models
         public event PropertyChangedEventHandler PropertyChanged;
         private static GameState _currentGameState;
 
+        public Server Server {get; set;}
         public LocalUser CurrentUser { get; set; }
 
         private List<User> _userList;
@@ -23,12 +25,14 @@ namespace Jeffistance.Models
 
         public ViewModelBase CurrentWindow {get; set; }
 
+        public MessageHandler MessageHandler {get; set; }
+
         public string Log { 
             get 
             {
                 try
                 { 
-                    return ((IChatView)CurrentWindow).ChatView.Log;
+                    return ((IChatView)CurrentWindow)?.ChatView.Log;
                 }
                 catch(System.InvalidCastException)
                 {
@@ -39,7 +43,7 @@ namespace Jeffistance.Models
             {
                 try
                 {
-                    ((IChatView)CurrentWindow).ChatView.WriteLineInLog(value+"\n");
+                    ((IChatView)CurrentWindow)?.ChatView.WriteLineInLog(value+"\n");
                 }
                 catch(System.InvalidCastException){}
             } 

@@ -2,13 +2,14 @@ using System;
 using System.Reactive;
 using ReactiveUI;
 using Jeffistance.Models;
+using Jeffistance.Services.MessageProcessing;
 
 namespace Jeffistance.ViewModels
 {
     public class HostMenuViewModel : ViewModelBase
     {
         MainWindowViewModel parent;
-        int port = LocalUser.DEFAULT_PORT;
+        int port = 7700;
         
         //TODO Actual port validation
         public string Port
@@ -53,7 +54,12 @@ namespace Jeffistance.ViewModels
         public void Host()
         {
             GameState gs = GameState.GetGameState();
-            gs.CurrentUser = new Host(Username, port);
+            gs.MessageHandler = new MessageHandler();
+            Server server = new Server();
+            gs.Server = server;
+            server.Run(port);
+            gs.CurrentUser = server.Host;
+            server.ConnectHost();
             parent.Content = new LobbyViewModel(parent);
             gs.CurrentWindow = parent.Content;
         }

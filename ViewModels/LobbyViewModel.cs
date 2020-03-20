@@ -46,15 +46,5 @@ namespace Jeffistance.ViewModels
                     Dispatcher.UIThread.Post(()=> Users.Add(item));
                 }
         }
-
-        public void OnKickEveryoneClicked()
-        {
-            Host host = (Host) GameState.GetGameState().CurrentUser;
-            foreach(User u in host.UserList.ToList())
-            {
-                host.Kick(u);
-            }
-            Console.WriteLine(host.UserList.Count);
-        }
     }
 }
