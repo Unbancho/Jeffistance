@@ -30,11 +30,14 @@ namespace Jeffistance.ViewModels
 
         public void OnSendClicked()
         {
-            LocalUser user = GameState.GetGameState().CurrentUser;
-            MessageContent = user.Name + ": " + MessageContent;
-            Message chatText = new Message(MessageContent, JeffistanceFlags.Chat, JeffistanceFlags.Broadcast);
-            user.Send(chatText);
-            this.MessageContent = "";
+            if(MessageContent!=null && MessageContent.Trim() != ""){
+                LocalUser user = GameState.GetGameState().CurrentUser;
+                MessageContent = user.Name + ": " + MessageContent;
+                Message chatText = new Message(MessageContent, JeffistanceFlags.Chat, JeffistanceFlags.Broadcast);
+                user.Send(chatText);
+                this.MessageContent = "";
+            }
+            
         }
 
         public void WriteLineInLog(string msg)
