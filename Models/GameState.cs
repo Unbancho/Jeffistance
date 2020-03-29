@@ -39,7 +39,7 @@ namespace Jeffistance.Models
             {
                 try
                 {
-                    ((IChatView)CurrentWindow).ChatView.WriteLineInLog(value+"\n");
+                    ((IChatView)CurrentWindow).ChatView.WriteLineInLog(value);
                 }
                 catch(System.InvalidCastException){}
             } 

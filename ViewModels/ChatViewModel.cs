@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using Jeffistance.Models;
 using System;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using ReactiveUI;
 using ModusOperandi.Messaging;
 using Jeffistance.Services.MessageProcessing;
@@ -13,7 +14,7 @@ namespace Jeffistance.ViewModels
     {
         public ChatViewModel()
         {
-            chatMessageLog = new ObservableCollection <ChatMessageViewModel>();
+            ChatMessageLog = new ObservableCollection <ChatMessageViewModel>();
         }
 
         string messageContent;
@@ -42,19 +43,21 @@ namespace Jeffistance.ViewModels
             if(MessageContent!=null && MessageContent.Trim() != ""){
                 LocalUser user = GameState.GetGameState().CurrentUser;
                 MessageContent = user.Name + ": " + MessageContent;
-                ChatMessageViewModel c = new ChatMessageViewModel(ChatMessageLog.Count.ToString(),  MessageContent);
-                this.ChatMessageLog.Add(c);
-
                 Message chatText = new Message(MessageContent, JeffistanceFlags.Chat, JeffistanceFlags.Broadcast);
                 user.Send(chatText);
-
                 this.MessageContent = "";
             }
         }
 
         public void WriteLineInLog(string msg)
         {
-            this.Log = this.Log + msg + "\n";
+            ChatMessageViewModel c = new ChatMessageViewModel(ChatMessageLog.Count.ToString(),  msg, this);
+            Dispatcher.UIThread.Post(()=> this.ChatMessageLog.Add(c));
+        }
+
+        public void RemoveChatMessage(ChatMessageViewModel message)
+        {
+            Dispatcher.UIThread.Post(()=> this.ChatMessageLog.Remove(message));
         }
 
     }
