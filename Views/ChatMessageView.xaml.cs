@@ -3,10 +3,10 @@ using Avalonia.Markup.Xaml;
 
 namespace Jeffistance.Views
 {
-    public class ChatView : UserControl
+    public class ChatMessageView : UserControl
     {
         
-        public ChatView()
+        public ChatMessageView()
         {
             this.InitializeComponent();
         }

@@ -13,10 +13,19 @@ namespace Jeffistance.ViewModels
     {
         public ChatViewModel()
         {
+            chatMessageLog = new ObservableCollection <ChatMessageViewModel>();
         }
 
         string messageContent;
         string chatLog;
+
+        ObservableCollection<ChatMessageViewModel> chatMessageLog;
+
+        public ObservableCollection <ChatMessageViewModel> ChatMessageLog
+        {
+            get => chatMessageLog;
+            set => this.RaiseAndSetIfChanged(ref chatMessageLog, value);
+        }
 
         public string Log
         {
@@ -33,11 +42,14 @@ namespace Jeffistance.ViewModels
             if(MessageContent!=null && MessageContent.Trim() != ""){
                 LocalUser user = GameState.GetGameState().CurrentUser;
                 MessageContent = user.Name + ": " + MessageContent;
+                ChatMessageViewModel c = new ChatMessageViewModel(ChatMessageLog.Count.ToString(),  MessageContent);
+                this.ChatMessageLog.Add(c);
+
                 Message chatText = new Message(MessageContent, JeffistanceFlags.Chat, JeffistanceFlags.Broadcast);
                 user.Send(chatText);
+
                 this.MessageContent = "";
             }
-            
         }
 
         public void WriteLineInLog(string msg)
