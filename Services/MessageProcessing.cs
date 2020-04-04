@@ -37,7 +37,7 @@ namespace Jeffistance.Services.MessageProcessing
         [MessageMethod(JeffistanceFlags.Greeting)]
         private void GreetingFlagMethod(Message message)
         {
-            Host host = (Host) GameState.GetGameState().CurrentUser;
+            Host host = (Host) AppState.GetAppState().CurrentUser;
             User user = (User) message["User"];
             ClientConnection connection = (ClientConnection) message.Sender;
             user.Connection = connection;
@@ -47,7 +47,7 @@ namespace Jeffistance.Services.MessageProcessing
         [MessageMethod(JeffistanceFlags.Broadcast)]
         private void BroadcastFlagMethod(Message message)
         {
-            Host host = (Host) GameState.GetGameState().CurrentUser;
+            Host host = (Host) AppState.GetAppState().CurrentUser;
             message.SetFlags((JeffistanceFlags) message.Flag | ~JeffistanceFlags.Broadcast);
             host.Broadcast(message);
         }
@@ -55,7 +55,7 @@ namespace Jeffistance.Services.MessageProcessing
         [MessageMethod(JeffistanceFlags.Chat)]
         private void ChatFlagMethod(Message message)
         {
-            Host host = (Host) GameState.GetGameState().CurrentUser;
+            Host host = (Host) AppState.GetAppState().CurrentUser;
             message.SetFlags((JeffistanceFlags) message.Flag | JeffistanceFlags.Update & ~JeffistanceFlags.Chat);
             message["Log"] = message.Text;
         }
@@ -66,7 +66,7 @@ namespace Jeffistance.Services.MessageProcessing
         [MessageMethod(JeffistanceFlags.Update)]
         private void UpdateFlagMethod(Message message)
         {
-            GameState gameState = GameState.GetGameState();
+            AppState gameState = AppState.GetAppState();
             while(message.TryPop(out object result))
             {
                 (object obj, string name) = (ValueTuple<object, string>) result;

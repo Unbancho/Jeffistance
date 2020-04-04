@@ -29,7 +29,7 @@ namespace Jeffistance.ViewModels
         public LobbyViewModel(MainWindowViewModel parent)
         {
             this.parent = parent;
-            GameState gs = GameState.GetGameState();
+            AppState gs = AppState.GetAppState();
             ShowKickButton = gs.CurrentUser.Perms.CanKick;
             gs.UserList = new List<User>();
             Users = new ObservableCollection<User>(gs.UserList);
@@ -39,7 +39,7 @@ namespace Jeffistance.ViewModels
 
         private void OnGameStatePropertyChanged(object sender, PropertyChangedEventArgs args)
         {
-            var property = ((GameState) sender).GetType().GetProperty(args.PropertyName).GetValue(sender);
+            var property = ((AppState) sender).GetType().GetProperty(args.PropertyName).GetValue(sender);
             if(args.PropertyName == "UserList") // TODO: How can we do it not like this, help
                 foreach (var item in ((List<User>) property).Except(Users))
                 { 
@@ -49,7 +49,7 @@ namespace Jeffistance.ViewModels
 
         public void OnKickEveryoneClicked()
         {
-            Host host = (Host) GameState.GetGameState().CurrentUser;
+            Host host = (Host) AppState.GetAppState().CurrentUser;
             foreach(User u in host.UserList.ToList())
             {
                 host.Kick(u);

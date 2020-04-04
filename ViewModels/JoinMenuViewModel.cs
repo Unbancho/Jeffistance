@@ -62,7 +62,7 @@ namespace Jeffistance.ViewModels
 
         public void Join()
         {
-            GameState gs = GameState.GetGameState();
+            AppState gs = AppState.GetAppState();
             gs.CurrentUser = new LocalUser(Username);
             gs.CurrentUser.Connect(IpAddress, port);
             parent.Content = new LobbyViewModel(parent);

@@ -6,11 +6,11 @@ using Jeffistance.ViewModels;
 
 namespace Jeffistance.Models
 {
-    public class GameState: INotifyPropertyChanged
+    public class AppState: INotifyPropertyChanged
     {
 
         public event PropertyChangedEventHandler PropertyChanged;
-        private static GameState _currentGameState;
+        private static AppState _currentAppState;
 
         public LocalUser CurrentUser { get; set; }
 
@@ -45,14 +45,14 @@ namespace Jeffistance.Models
             } 
         }
 
-        private GameState()
+        private AppState()
         {
 
         }
 
-        public static GameState GetGameState()
+        public static AppState GetAppState()
         {
-            return _currentGameState ??= new GameState();
+            return _currentAppState ??= new AppState();
         }
 
         private void OnPropertyChanged([CallerMemberName] String propertyName = "")
