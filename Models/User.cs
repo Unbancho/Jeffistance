@@ -92,8 +92,9 @@ namespace Jeffistance.Models
             };
         }
 
-        public void ConnectHost(string username="Admin")
+        public void ConnectHost(string username)
         {
+            username = string.IsNullOrWhiteSpace(username) ? "Admin" : username;
             Host.Name = username;
             Host.Connect(NetworkUtilities.GetLocalIPAddress(), Connection.PORT_NO);
         }
