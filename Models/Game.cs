@@ -20,27 +20,50 @@ namespace Jeffistance.Models
         private PlayerEventManager playerEventManager;
 
         public bool InProgress = false;
-        public List<Player> Players { get; private set; }
-        public Player CurrentLeader { get; private set; }
-        public Phase CurrentPhase { get; set; } = Phase.Standby;
-        public IEnumerable<Player> CurrentTeam { get; private set; }
-        public Dictionary<int, int[]> TeamSizes { get; set; }
-        public int NextTeamSize { get; private set; }
-        public int CurrentRound { get; private set; }
-        public int MaxRound { get; private set; } = 4;
-        public int FailureCount { get; private set; }
+        public List<Player> Players {
+            get => CurrentState.Players;
+            private set => CurrentState.Players = value; }
+        public Player CurrentLeader {
+            get => CurrentState.CurrentLeader;
+            private set => CurrentState.CurrentLeader = value; }
+        public Phase CurrentPhase {
+            get => CurrentState.CurrentPhase;
+            private set => CurrentState.CurrentPhase = value; }
+        public IEnumerable<Player> CurrentTeam {
+            get => CurrentState.CurrentTeam;
+            private set => CurrentState.CurrentTeam = value; }
+        public Dictionary<int, int[]> TeamSizes {
+            get => CurrentState.TeamSizes;
+            private set => CurrentState.TeamSizes = value; }
+        public int NextTeamSize {
+            get => CurrentState.NextTeamSize;
+            private set => CurrentState.NextTeamSize = value; }
+        public int CurrentRound {
+            get => CurrentState.CurrentRound;
+            private set => CurrentState.CurrentRound = value; }
+        public int FailedVoteCount {
+            get => CurrentState.FailedVoteCount;
+            private set => CurrentState.FailedVoteCount = value; }
         public int MaxFailedVotes { get; private set; } = 5;
-        public int ResistanceWinCount { get; private set; }
-        public int SpiesWinCount { get; private set; }
+        public int ResistanceWinCount {
+            get => CurrentState.ResistanceWinCount;
+            private set => CurrentState.ResistanceWinCount = value; }
+        public int SpiesWinCount {
+            get => CurrentState.SpiesWinCount;
+            private set => CurrentState.SpiesWinCount = value; }
         public Dictionary<int, bool> CurrentTeamVotes { get; private set; }
         public Dictionary<int, bool> CurrentMissionVotes { get; private set; }
         public IGamemode Gamemode { get; set; }
-        public IFaction Winner { get; private set; }
+        public GameState CurrentState { get; private set; }
+        public IFaction Winner {
+            get => CurrentState.Winner;
+            private set => CurrentState.Winner = value; }
 
         public Game(IGamemode gm, PlayerEventManager pem)
         {
             Gamemode = gm;
             playerEventManager = pem;
+            CurrentState = new GameState();
             playerEventManager.OnTeamPicked += OnTeamPicked;
             playerEventManager.OnTeamVoted += OnTeamVoted;
             playerEventManager.OnMissionVoted += OnMissionVoted;
@@ -52,6 +75,7 @@ namespace Jeffistance.Models
             };
             CurrentTeamVotes = new Dictionary<int, bool>();
             CurrentMissionVotes = new Dictionary<int, bool>();
+            CurrentPhase = Phase.Standby;
         }
 
         public void Start(IEnumerable<Player> players)
@@ -85,7 +109,7 @@ namespace Jeffistance.Models
             NextTeamSize = TeamSizes[Players.Count()][CurrentRound];
             CurrentTeamVotes.Clear();
             CurrentMissionVotes.Clear();
-            FailureCount = 0;
+            FailedVoteCount = 0;
             PickLeader();
             PickTeam();
         }
@@ -109,7 +133,7 @@ namespace Jeffistance.Models
         private void DetermineWinner()
         {
             FactionFactory ff = new FactionFactory();
-            Winner = (SpiesWinCount == 3 || FailureCount == MaxFailedVotes) ?
+            Winner = (SpiesWinCount == 3 || FailedVoteCount == MaxFailedVotes) ?
             ff.GetSpies() : ff.GetResistance();
         }
 
@@ -149,8 +173,8 @@ namespace Jeffistance.Models
             }
             else
             {
-                FailureCount++;
-                if (FailureCount == MaxFailedVotes)
+                FailedVoteCount++;
+                if (FailedVoteCount == MaxFailedVotes)
                 {
                     EndGame();
                     return;

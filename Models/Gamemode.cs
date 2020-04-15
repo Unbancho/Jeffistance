@@ -46,7 +46,7 @@ namespace Jeffistance.Models
             }
         }
 
-         private void ShufflePlayers(List<Player> list)
+        private void ShufflePlayers(List<Player> list)
         {
             Random rng = new Random();
             int n = list.Count;
