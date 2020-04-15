@@ -1,67 +1,25 @@
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Jeffistance.ViewModels;
-using Jeffistance.Services.MessageProcessing;
 
 namespace Jeffistance.Models
 {
-    public class GameState: INotifyPropertyChanged
+    public class GameState
     {
+        public List<Player> Players { get; set; }
+        public Phase CurrentPhase { get; set; }
+        public Player CurrentLeader { get; set; }
+        public IEnumerable<Player> CurrentTeam { get; set; }
+        public Dictionary<int, int[]> TeamSizes { get; set; }
+        public int NextTeamSize { get; set; }
+        public int CurrentRound { get; set; }
+        public int FailedVoteCount { get; set; }
+        public int ResistanceWinCount { get; set; }
+        public int SpiesWinCount { get; set; }
+        public IFaction Winner { get; set; }
+        public Dictionary<int, bool> RevealedTeamVotes { get; set; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        private static GameState _currentGameState;
-
-        public Server Server {get; set;}
-        public LocalUser CurrentUser { get; set; }
-
-        private List<User> _userList;
-        public List<User> UserList
+        public GameState()
         {
-            get{ return _userList;}
-            set{ _userList = value; OnPropertyChanged();}
-        }
-
-        public ViewModelBase CurrentWindow {get; set; }
-
-        public MessageHandler MessageHandler {get; set; }
-
-        public string Log { 
-            get 
-            {
-                try
-                { 
-                    return ((IChatView)CurrentWindow)?.ChatView.Log;
-                }
-                catch(System.InvalidCastException)
-                {
-                    return null;
-                }
-            } 
-            set 
-            {
-                try
-                {
-                    ((IChatView)CurrentWindow)?.ChatView.WriteLineInLog(value+"\n");
-                }
-                catch(System.InvalidCastException){}
-            } 
-        }
-
-        private GameState()
-        {
-
-        }
-
-        public static GameState GetGameState()
-        {
-            return _currentGameState ??= new GameState();
-        }
-
-        private void OnPropertyChanged([CallerMemberName] String propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            RevealedTeamVotes = new Dictionary<int, bool>();
         }
     }
 }

@@ -53,7 +53,7 @@ namespace Jeffistance.ViewModels
 
         public void Host()
         {
-            GameState gs = GameState.GetGameState();
+            AppState gs = AppState.GetAppState();
             gs.MessageHandler = new MessageHandler();
             Server server = new Server();
             gs.Server = server;

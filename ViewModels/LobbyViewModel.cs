@@ -29,17 +29,17 @@ namespace Jeffistance.ViewModels
         public LobbyViewModel(MainWindowViewModel parent)
         {
             this.parent = parent;
-            GameState gs = GameState.GetGameState();
+            AppState gs = AppState.GetAppState();
             ShowKickButton = gs.CurrentUser.Perms.CanKick;
             gs.UserList = new List<User>();
             Users = new ObservableCollection<User>(gs.UserList);
-            gs.PropertyChanged += OnGameStatePropertyChanged;
+            gs.PropertyChanged += OnAppStatePropertyChanged;
             this.ChatView = new ChatViewModel();
         }
 
-        private void OnGameStatePropertyChanged(object sender, PropertyChangedEventArgs args)
+        private void OnAppStatePropertyChanged(object sender, PropertyChangedEventArgs args)
         {
-            var property = ((GameState) sender).GetType().GetProperty(args.PropertyName).GetValue(sender);
+            var property = ((AppState) sender).GetType().GetProperty(args.PropertyName).GetValue(sender);
             if(args.PropertyName == "UserList") // TODO: How can we do it not like this, help
                 foreach (var item in ((List<User>) property).Except(Users))
                 { 

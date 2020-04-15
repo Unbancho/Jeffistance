@@ -59,7 +59,7 @@ namespace Jeffistance.Models
 
         public void Connect(string ip, int port)
         {
-            MessageHandler messageHandler = GameState.GetGameState().MessageHandler;
+            MessageHandler messageHandler = AppState.GetAppState().MessageHandler;
             Connection = new ClientConnection(ip, port);
             Connection.OnMessageReceived += messageHandler.OnMessageReceived;
             Message greetingMessage = new Message($"{Name} has joined from {Connection.IPAddress}.", JeffistanceFlags.Greeting);
@@ -102,7 +102,7 @@ namespace Jeffistance.Models
         {
             Connection = new ServerConnection(port);
             Connection.Run();
-            Connection.OnMessageReceived += GameState.GetGameState().MessageHandler.OnMessageReceived;
+            Connection.OnMessageReceived += AppState.GetAppState().MessageHandler.OnMessageReceived;
             Connection.Run();
         }
 
@@ -124,7 +124,7 @@ namespace Jeffistance.Models
             UserList.Add(user);
             Message updateList = new Message($"{user.Name} has joined.", JeffistanceFlags.Update);
             updateList["UserList"] = UserList;
-            GameState.GetGameState().MessageHandler.Broadcast(updateList);
+            AppState.GetAppState().MessageHandler.Broadcast(updateList);
         }
     }
 }

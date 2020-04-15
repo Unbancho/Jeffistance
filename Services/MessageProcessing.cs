@@ -38,14 +38,14 @@ namespace Jeffistance.Services.MessageProcessing
             User user = (User) message["User"];
             ClientConnection connection = (ClientConnection) message.Sender;
             user.Connection = connection;
-            GameState.GetGameState().Server?.AddUser(user);
+            AppState.GetAppState().Server?.AddUser(user);
         }
 
         [MessageMethod(JeffistanceFlags.Broadcast)]
         private void BroadcastFlagMethod(Message message)
         {
             message.SetFlags((JeffistanceFlags) message.Flag & ~JeffistanceFlags.Broadcast);
-            GameState.GetGameState().MessageHandler.Broadcast(message);
+            AppState.GetAppState().MessageHandler.Broadcast(message);
         }
 
         [MessageMethod(JeffistanceFlags.Chat)]
@@ -57,14 +57,14 @@ namespace Jeffistance.Services.MessageProcessing
         [MessageMethod(JeffistanceFlags.Update)]
         private void UpdateFlagMethod(Message message)
         {
-            GameState gameState = GameState.GetGameState();
+            AppState appState = AppState.GetAppState();
             while(message.TryPop(out object result))
             {
                 (object obj, string name) = (ValueTuple<object, string>) result;
-                PropertyInfo pi = gameState.GetType().GetProperty(name);
-                pi?.SetValue(gameState, obj);
+                PropertyInfo pi = appState.GetType().GetProperty(name);
+                pi?.SetValue(appState, obj);
             }
-            gameState.Log = message.Text;
+            appState.Log = message.Text;
         }
     }
 
@@ -90,7 +90,7 @@ namespace Jeffistance.Services.MessageProcessing
 
         public void Broadcast(Message message)
         {
-           GameState.GetGameState().Server?.Connection.Broadcast(message);
+           AppState.GetAppState().Server?.Connection.Broadcast(message);
         }
 
         public void Broadcast(string message)
@@ -100,7 +100,7 @@ namespace Jeffistance.Services.MessageProcessing
 
         public void Send(Message message)
         {
-            ClientConnection connection = GameState.GetGameState().CurrentUser.Connection;
+            ClientConnection connection = AppState.GetAppState().CurrentUser.Connection;
             connection.Send(message);
         }
 

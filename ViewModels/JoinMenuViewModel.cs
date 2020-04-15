@@ -63,7 +63,7 @@ namespace Jeffistance.ViewModels
 
         public void Join()
         {
-            GameState gs = GameState.GetGameState();
+            AppState gs = AppState.GetAppState();
             gs.MessageHandler = new MessageHandler();
             gs.CurrentUser = new LocalUser(Username);
             gs.CurrentUser.Connect(IpAddress, port);
