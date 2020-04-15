@@ -33,11 +33,11 @@ namespace Jeffistance.ViewModels
             ShowKickButton = gs.CurrentUser.Perms.CanKick;
             gs.UserList = new List<User>();
             Users = new ObservableCollection<User>(gs.UserList);
-            gs.PropertyChanged += OnGameStatePropertyChanged;
+            gs.PropertyChanged += OnAppStatePropertyChanged;
             this.ChatView = new ChatViewModel();
         }
 
-        private void OnGameStatePropertyChanged(object sender, PropertyChangedEventArgs args)
+        private void OnAppStatePropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             var property = ((AppState) sender).GetType().GetProperty(args.PropertyName).GetValue(sender);
             if(args.PropertyName == "UserList") // TODO: How can we do it not like this, help
@@ -45,16 +45,6 @@ namespace Jeffistance.ViewModels
                 { 
                     Dispatcher.UIThread.Post(()=> Users.Add(item));
                 }
-        }
-
-        public void OnKickEveryoneClicked()
-        {
-            Host host = (Host) AppState.GetAppState().CurrentUser;
-            foreach(User u in host.UserList.ToList())
-            {
-                host.Kick(u);
-            }
-            Console.WriteLine(host.UserList.Count);
         }
     }
 }
