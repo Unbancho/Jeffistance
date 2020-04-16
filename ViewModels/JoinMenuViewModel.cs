@@ -13,13 +13,19 @@ namespace Jeffistance.ViewModels
         MainWindowViewModel parent;
         int port = 7700;
         string ipAddress = NetworkUtilities.GetLocalIPAddress();
+        private string username;
 
-        public string Username {get; set;}
+        public string Username
+        {
+            get => username;
+            set => this.RaiseAndSetIfChanged(ref username, value);
+        }
 
         public string Port
         {
             get => port.ToString();
-            set {
+            set
+            {
                 if (Int32.TryParse(value, out int result) && result >= 0 && result <= 65535)
                 {
                     this.RaiseAndSetIfChanged(ref port, result);
@@ -47,17 +53,21 @@ namespace Jeffistance.ViewModels
             var okEnabled = this.WhenAnyValue(
                 x => x.Port,
                 x => x.IpAddress,
-                (port, ip) => port != "-1" && IPAddress.TryParse(ip, out IPAddress _)
+                x => x.Username,
+                (port, ip, u) =>
+                port != "-1" && IPAddress.TryParse(ip, out IPAddress _) && !string.IsNullOrWhiteSpace(u)
             );
 
             Ok = ReactiveCommand.Create(
-                () => {
+                () =>
+                {
                     Console.WriteLine($"Joining {IpAddress}:{port}");
-                    Join();},
+                    Join();
+                },
                 okEnabled
             );
             Cancel = ReactiveCommand.Create(
-                () => {parent.Content = new MainMenuViewModel(parent);}
+                () => { parent.Content = new MainMenuViewModel(parent); }
             );
         }
 
