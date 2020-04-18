@@ -3,14 +3,13 @@ using Avalonia.Markup.Xaml;
 
 namespace Jeffistance.Views
 {
-    public class ChatView : UserControl
+    public class ChatMessageView : UserControl
     {
-        public TextBox MessageTextBox => this.FindControl<TextBox>("MessageContentBox");
-
-        public ChatView()
+        public TextBox UsernameTextBox => this.FindControl<TextBox>("MessageContentBox");
+        public Button EditButton => this.FindControl<Button>("EditButton");
+        public ChatMessageView()
         {
             this.InitializeComponent();
-            MessageTextBox.Initialized += (sender, args) => MessageTextBox.Focus();
         }
 
         private void InitializeComponent()
