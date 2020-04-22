@@ -15,7 +15,8 @@ namespace Jeffistance.Services.MessageProcessing
         Greeting = 1 << 0,
         Broadcast = 1 << 1,
         Update = 1 << 2,
-        Chat = 1 << 3
+        Chat = 1 << 3,
+        LobbyReady = 1 << 4
     }
 
     class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>
@@ -65,6 +66,13 @@ namespace Jeffistance.Services.MessageProcessing
                 pi?.SetValue(appState, obj);
             }
             appState.Log = message.Text;
+        }
+
+        [MessageMethod(JeffistanceFlags.LobbyReady)]
+        private void LobbyReadyFlagMethod(Message message)
+        {
+            AppState.GetAppState().CurrentLobby.UpdateReadyPlayers(
+                (int) message["ReadyID"]);
         }
     }
 

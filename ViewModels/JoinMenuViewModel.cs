@@ -77,7 +77,9 @@ namespace Jeffistance.ViewModels
             gs.MessageHandler = new MessageHandler();
             gs.CurrentUser = new LocalUser(Username);
             gs.CurrentUser.Connect(IpAddress, port);
-            parent.Content = new LobbyViewModel(parent);
+            LobbyViewModel lobby = new LobbyViewModel(parent);
+            parent.Content = lobby;
+            gs.CurrentLobby = lobby;
             gs.CurrentWindow = parent.Content;
         }
     }

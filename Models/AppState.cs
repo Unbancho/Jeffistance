@@ -27,6 +27,8 @@ namespace Jeffistance.Models
 
         public MessageHandler MessageHandler {get; set; }
 
+        public LobbyViewModel CurrentLobby { get; set; }
+
         public string Log { 
             get 
             {
