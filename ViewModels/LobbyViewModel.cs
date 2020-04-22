@@ -13,11 +13,27 @@ namespace Jeffistance.ViewModels
     {
         public ObservableCollection<User> Users {get;}
         bool showKickButton;
+        bool showReadyButton;
+        bool showStartButton;
+
         public bool ShowKickButton
         {
             get => showKickButton;
             set => this.RaiseAndSetIfChanged(ref showKickButton, value);
         }
+
+        public bool ShowReadyButton
+        {
+            get => showReadyButton;
+            set => this.RaiseAndSetIfChanged(ref showReadyButton, value);
+        }
+
+        public bool ShowStartButton
+        {
+            get => showStartButton;
+            set => this.RaiseAndSetIfChanged(ref showStartButton, value);
+        }
+
         MainWindowViewModel parent;
         private ChatViewModel _chatView;
         public ChatViewModel ChatView 
@@ -30,7 +46,11 @@ namespace Jeffistance.ViewModels
         {
             this.parent = parent;
             AppState gs = AppState.GetAppState();
+
             ShowKickButton = gs.CurrentUser.Perms.CanKick;
+            ShowReadyButton = !gs.CurrentUser.IsHost;
+            ShowStartButton = gs.CurrentUser.IsHost;
+
             gs.UserList = new List<User>();
             Users = new ObservableCollection<User>(gs.UserList);
             gs.PropertyChanged += OnAppStatePropertyChanged;
