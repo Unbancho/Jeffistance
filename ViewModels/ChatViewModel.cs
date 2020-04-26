@@ -20,6 +20,9 @@ namespace Jeffistance.ViewModels
         string messageContent;
         string chatLog;
 
+        EditMessageViewModel edmContent;
+        
+
         ObservableCollection<ChatMessageViewModel> chatMessageLog;
 
         public ObservableCollection <ChatMessageViewModel> ChatMessageLog
@@ -36,6 +39,10 @@ namespace Jeffistance.ViewModels
         public string MessageContent {
             get => messageContent;
             set => this.RaiseAndSetIfChanged(ref messageContent, value);
+        }
+        public EditMessageViewModel EDMContent {
+            get => edmContent;
+            set => this.RaiseAndSetIfChanged(ref edmContent, value);
         }
 
         public void OnSendClicked()
@@ -59,6 +66,6 @@ namespace Jeffistance.ViewModels
         {
             Dispatcher.UIThread.Post(()=> this.ChatMessageLog.Remove(message));
         }
-
+        
     }
 }

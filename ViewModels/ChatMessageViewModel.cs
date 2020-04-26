@@ -1,4 +1,6 @@
+using System.Reactive.Linq;
 using ReactiveUI;
+using System;
 
 namespace Jeffistance.ViewModels
 {
@@ -35,7 +37,23 @@ namespace Jeffistance.ViewModels
         }
         public void OnEditClicked()
         {
-            
+            var emvm = new EditMessageViewModel(Content, Parent);
+
+            Observable.Merge(emvm.OnOkButton, emvm.OnCancelClicked.Select(_ => (ChatMessageViewModel)null))
+                .Take(1)
+                .Subscribe(model =>
+                {
+                    if (model != null)
+                    {
+                        ChatMessageViewModel message = (ChatMessageViewModel) model;
+                        this.Content = message.content + " (Edited)";
+                    }
+
+                    Content = emvm.MessageContent;
+                });
+
+            Parent.EDMContent = emvm;
+            //Content = this.Content + " (edited)";
         }
         
     }

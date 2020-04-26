@@ -10,6 +10,7 @@ namespace Jeffistance.Views
         public ChatMessageView()
         {
             this.InitializeComponent();
+            UsernameTextBox.Focus();
         }
 
         private void InitializeComponent()
