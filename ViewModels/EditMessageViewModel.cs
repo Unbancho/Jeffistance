@@ -7,10 +7,17 @@ namespace Jeffistance.ViewModels
     {
         public EditMessageViewModel(string messageText, ChatViewModel parent)
         {
+            MessageContent = messageText;
+            var okEnabled = this.WhenAnyValue(
+                x => x.MessageContent,
+                x => !string.IsNullOrWhiteSpace(x));
+
             OnOkButton = ReactiveCommand.Create(
-                () => new ChatMessageViewModel ("test", messageText, parent));
+                () => new ChatMessageViewModel ("test", messageText, parent),
+                okEnabled);
+
             OnCancelClicked = ReactiveCommand.Create(() => { });
-            this.MessageContent = messageText;
+
         }
 
         string messageContent;

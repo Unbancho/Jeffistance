@@ -14,21 +14,18 @@ namespace Jeffistance.ViewModels
     {
         public ChatViewModel()
         {
-            ChatMessageLog = new ObservableCollection <ChatMessageViewModel>();
+            ChatContent = List = new ChatMessageListViewModel();
         }
 
         string messageContent;
         string chatLog;
 
-        EditMessageViewModel edmContent;
-        
+        ViewModelBase chatContent;
 
-        ObservableCollection<ChatMessageViewModel> chatMessageLog;
-
-        public ObservableCollection <ChatMessageViewModel> ChatMessageLog
+        public ViewModelBase ChatContent
         {
-            get => chatMessageLog;
-            set => this.RaiseAndSetIfChanged(ref chatMessageLog, value);
+            get => chatContent;
+            set => this.RaiseAndSetIfChanged(ref chatContent, value);
         }
 
         public string Log
@@ -40,9 +37,12 @@ namespace Jeffistance.ViewModels
             get => messageContent;
             set => this.RaiseAndSetIfChanged(ref messageContent, value);
         }
-        public EditMessageViewModel EDMContent {
-            get => edmContent;
-            set => this.RaiseAndSetIfChanged(ref edmContent, value);
+
+        public ChatMessageListViewModel list;
+
+        public ChatMessageListViewModel List {
+            get => list;
+            set => this.RaiseAndSetIfChanged(ref list, value);
         }
 
         public void OnSendClicked()
@@ -56,15 +56,23 @@ namespace Jeffistance.ViewModels
             }
         }
 
+        internal void RestoreList()
+        {
+            ChatContent = List;
+        }
+
         public void WriteLineInLog(string msg)
         {
-            ChatMessageViewModel c = new ChatMessageViewModel(ChatMessageLog.Count.ToString(),  msg, this);
-            Dispatcher.UIThread.Post(()=> this.ChatMessageLog.Add(c));
+            ChatMessageListViewModel ChatMessageLog = (ChatMessageListViewModel) ChatContent;
+            ChatMessageViewModel c = new ChatMessageViewModel(ChatMessageLog.Log.Count.ToString(),  msg, this);
+            Dispatcher.UIThread.Post(()=> ChatMessageLog.Log.Add(c));
+            ChatContent = List = ChatMessageLog;
         }
 
         public void RemoveChatMessage(ChatMessageViewModel message)
         {
-            Dispatcher.UIThread.Post(()=> this.ChatMessageLog.Remove(message));
+            ChatMessageListViewModel ChatMessageLog = (ChatMessageListViewModel) ChatContent;
+            Dispatcher.UIThread.Post(()=> ChatMessageLog.Log.Remove(message));
         }
         
     }

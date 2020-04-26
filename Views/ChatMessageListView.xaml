@@ -6,7 +6,7 @@
              xmlns:views="clr-namespace:Jeffistance.Views"
              x:Class="Jeffistance.Views.ChatMessageListView">
     <Grid ColumnDefinitions="8*,2*" RowDefinitions="9*,0.5*, 0.5*" Margin="4">
-        <ItemsControl Items="{Binding ChatMessageLog}" Grid.Row="0" Grid.Column="0"
+        <ItemsControl Items="{Binding Log}" Grid.Row="0" Grid.Column="0"
         ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.ColumnSpan="2"/>
   </Grid>
 </UserControl>

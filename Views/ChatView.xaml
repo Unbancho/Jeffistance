@@ -7,8 +7,7 @@
              xmlns:vm="clr-namespace:Jeffistance.ViewModels;assembly=Jeffistance"
              x:Class="Jeffistance.Views.ChatView">
   <Grid ColumnDefinitions="8*,2*" RowDefinitions="9*,0.5*" Margin="4">
-    <ItemsControl Items="{Binding ChatMessageLog}" Grid.Row="0" Grid.Column="0"
-     ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.ColumnSpan="2"/>
+    <UserControl Content="{Binding ChatContent}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"/>
     <!--
     <TextBox AcceptsReturn="False" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
      IsEnabled="False" Text="{Binding Log}" />

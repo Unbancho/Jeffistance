@@ -14,15 +14,15 @@ namespace Jeffistance.ViewModels
     {
         public ChatMessageListViewModel()
         {
-            ChatMessageLog = new ObservableCollection <ChatMessageViewModel>();
+           Log = new ObservableCollection <ChatMessageViewModel>();
         }
 
-        ObservableCollection<ChatMessageViewModel> chatMessageLog;
+        ObservableCollection<ChatMessageViewModel> log;
 
-        public ObservableCollection <ChatMessageViewModel> ChatMessageLog
+        public ObservableCollection <ChatMessageViewModel> Log
         {
-            get => chatMessageLog;
-            set => this.RaiseAndSetIfChanged(ref chatMessageLog, value);
+            get => log;
+            set => this.RaiseAndSetIfChanged(ref log, value);
         }
         
     }

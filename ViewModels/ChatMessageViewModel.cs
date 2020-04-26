@@ -46,13 +46,13 @@ namespace Jeffistance.ViewModels
                     if (model != null)
                     {
                         ChatMessageViewModel message = (ChatMessageViewModel) model;
-                        this.Content = message.content + " (Edited)";
+                        Content = message.content + " (Edited)";
                     }
 
-                    Content = emvm.MessageContent;
+                    Parent.RestoreList();
                 });
 
-            Parent.EDMContent = emvm;
+            Parent.ChatContent = emvm;
             //Content = this.Content + " (edited)";
         }
         
