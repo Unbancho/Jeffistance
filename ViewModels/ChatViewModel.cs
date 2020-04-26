@@ -47,11 +47,12 @@ namespace Jeffistance.ViewModels
 
         public void OnSendClicked()
         {
-            if(MessageContent!=null && MessageContent.Trim() != ""){
-                LocalUser user = GameState.GetGameState().CurrentUser;
+            if (MessageContent != null && MessageContent.Trim() != "")
+            {
+                LocalUser user = AppState.GetAppState().CurrentUser;
                 MessageContent = user.Name + ": " + MessageContent;
                 Message chatText = new Message(MessageContent, JeffistanceFlags.Chat, JeffistanceFlags.Broadcast);
-                user.Send(chatText);
+                user.Connection.Send(chatText);
                 this.MessageContent = "";
             }
         }

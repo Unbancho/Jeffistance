@@ -1,6 +1,8 @@
 using System.Reactive.Linq;
 using ReactiveUI;
 using System;
+using Avalonia.Controls;
+using Avalonia.VisualTree;
 
 namespace Jeffistance.ViewModels
 {
@@ -35,11 +37,11 @@ namespace Jeffistance.ViewModels
         {
             parent.RemoveChatMessage(this);
         }
-        public void OnEditClicked()
+        public void OnEditClicked(Control testControl)
         {
-            var emvm = new EditMessageViewModel(Content, Parent);
+            var emvm = new EditMessageViewModel(id, Content, Parent);
 
-            Observable.Merge(emvm.OnOkButton, emvm.OnCancelClicked.Select(_ => (ChatMessageViewModel)null))
+            Observable.Merge(emvm.OnOkClicked, emvm.OnCancelClicked.Select(_ => (ChatMessageViewModel)null))
                 .Take(1)
                 .Subscribe(model =>
                 {
@@ -52,8 +54,33 @@ namespace Jeffistance.ViewModels
                     Parent.RestoreList();
                 });
 
-            Parent.ChatContent = emvm;
+            /* This instead of just setting the chat content
+
+                    Window popupWindow = CreateEditWindow();
+                    popupWindow.ShowDialog((Window)control.GetVisualRoot());
+
+                    The only issue is, we need access to the main window, I did it by sending
+                    the control from the XAML and then accessing its visual root so uhhhh
+            */
+            //Parent.ChatContent = emvm;
+            Window editWindow = CreateEditWindow(emvm);
+            editWindow.ShowDialog((Window)testControl.GetVisualRoot());
             //Content = this.Content + " (edited)";
+        }
+
+        private Window CreateEditWindow(ViewModelBase windowContent)
+        {
+            Window window = new Window()
+            {
+                Title = "Edit",
+                ShowInTaskbar = false,
+                Height = 200,
+                Width = 200,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+            window.Content = windowContent;
+            
+            return window;
         }
         
     }

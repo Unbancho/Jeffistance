@@ -38,7 +38,7 @@
         </CheckBox>
       </MenuItem>
       <MenuItem Header="_Help">
-        <MenuItem Header="_About..."/>
+        <MenuItem Header="_About..." Command="{Binding AboutMenu}" CommandParameter="{Binding $parent[2]}"/>
         <Separator/>
         <MenuItem Header="_Version..."/>
       </MenuItem>

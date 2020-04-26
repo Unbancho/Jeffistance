@@ -5,19 +5,18 @@ namespace Jeffistance.ViewModels
 {
     public class EditMessageViewModel : ViewModelBase
     {
-        public EditMessageViewModel(string messageText, ChatViewModel parent)
+        public EditMessageViewModel(string id, string messageText, ChatViewModel parent)
         {
             MessageContent = messageText;
             var okEnabled = this.WhenAnyValue(
                 x => x.MessageContent,
                 x => !string.IsNullOrWhiteSpace(x));
 
-            OnOkButton = ReactiveCommand.Create(
-                () => new ChatMessageViewModel ("test", messageText, parent),
+            OnOkClicked = ReactiveCommand.Create(
+                () => new ChatMessageViewModel (id, MessageContent, parent),
                 okEnabled);
 
             OnCancelClicked = ReactiveCommand.Create(() => { });
-
         }
 
         string messageContent;
@@ -27,7 +26,7 @@ namespace Jeffistance.ViewModels
             set => this.RaiseAndSetIfChanged(ref messageContent, value);
         }
 
-        public ReactiveCommand<Unit, ChatMessageViewModel> OnOkButton { get; }
+        public ReactiveCommand<Unit, ChatMessageViewModel> OnOkClicked { get; }
         public ReactiveCommand<Unit, Unit> OnCancelClicked { get; }
 
     }

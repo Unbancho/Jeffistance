@@ -4,21 +4,28 @@ using System.Reactive;
 using ReactiveUI;
 using Jeffistance.Models;
 using ModusOperandi.Networking;
+using Jeffistance.Services.MessageProcessing;
 
 namespace Jeffistance.ViewModels
 {
     public class JoinMenuViewModel : ViewModelBase
     {
         MainWindowViewModel parent;
-        int port = LocalUser.DEFAULT_PORT;
+        int port = 7700;
         string ipAddress = NetworkUtilities.GetLocalIPAddress();
+        private string username;
 
-        public string Username {get; set;}
+        public string Username
+        {
+            get => username;
+            set => this.RaiseAndSetIfChanged(ref username, value);
+        }
 
         public string Port
         {
             get => port.ToString();
-            set {
+            set
+            {
                 if (Int32.TryParse(value, out int result) && result >= 0 && result <= 65535)
                 {
                     this.RaiseAndSetIfChanged(ref port, result);
@@ -46,23 +53,28 @@ namespace Jeffistance.ViewModels
             var okEnabled = this.WhenAnyValue(
                 x => x.Port,
                 x => x.IpAddress,
-                (port, ip) => port != "-1" && IPAddress.TryParse(ip, out IPAddress _)
+                x => x.Username,
+                (port, ip, u) =>
+                port != "-1" && IPAddress.TryParse(ip, out IPAddress _) && !string.IsNullOrWhiteSpace(u)
             );
 
             Ok = ReactiveCommand.Create(
-                () => {
+                () =>
+                {
                     Console.WriteLine($"Joining {IpAddress}:{port}");
-                    Join();},
+                    Join();
+                },
                 okEnabled
             );
             Cancel = ReactiveCommand.Create(
-                () => {parent.Content = new MainMenuViewModel(parent);}
+                () => { parent.Content = new MainMenuViewModel(parent); }
             );
         }
 
         public void Join()
         {
-            GameState gs = GameState.GetGameState();
+            AppState gs = AppState.GetAppState();
+            gs.MessageHandler = new MessageHandler();
             gs.CurrentUser = new LocalUser(Username);
             gs.CurrentUser.Connect(IpAddress, port);
             parent.Content = new LobbyViewModel(parent);
