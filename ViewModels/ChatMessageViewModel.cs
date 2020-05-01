@@ -8,18 +8,27 @@ namespace Jeffistance.ViewModels
 {
     public class ChatMessageViewModel : ViewModelBase
     {
-        public ChatMessageViewModel(string id, string content, ChatViewModel parent)
+        public ChatMessageViewModel(string username, Guid id, string content, ChatViewModel parent)
         {
             this.id = id;
             this.Content = content;
             this.Parent = parent;
+            this.Username = username;
         }
 
-        string id;
+        Guid id;
 
         string content;
 
+        string username;
+
         ChatViewModel parent;
+
+        public string Username
+        {
+            get => username;
+            set => this.RaiseAndSetIfChanged(ref username, value);
+        }
 
         public string Content
         {
@@ -37,9 +46,12 @@ namespace Jeffistance.ViewModels
         {
             parent.RemoveChatMessage(this);
         }
+
+        //public ReactiveCommand<Unit, Unit> OnEditClicked { get; }
+
         public void OnEditClicked(Control testControl)
         {
-            var emvm = new EditMessageViewModel(id, Content, Parent);
+            var emvm = new EditMessageViewModel(id, Content, Parent, Username);
 
             Observable.Merge(emvm.OnOkClicked, emvm.OnCancelClicked.Select(_ => (ChatMessageViewModel)null))
                 .Take(1)

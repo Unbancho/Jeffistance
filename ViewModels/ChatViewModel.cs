@@ -50,7 +50,6 @@ namespace Jeffistance.ViewModels
             if (MessageContent != null && MessageContent.Trim() != "")
             {
                 LocalUser user = AppState.GetAppState().CurrentUser;
-                MessageContent = user.Name + ": " + MessageContent;
                 Message chatText = new Message(MessageContent, JeffistanceFlags.Chat, JeffistanceFlags.Broadcast);
                 user.Connection.Send(chatText);
                 this.MessageContent = "";
@@ -62,10 +61,12 @@ namespace Jeffistance.ViewModels
             ChatContent = List;
         }
 
-        public void WriteLineInLog(string msg)
+        public void WriteLineInLog(string msg, string username)
         {
             ChatMessageListViewModel ChatMessageLog = (ChatMessageListViewModel) ChatContent;
-            ChatMessageViewModel c = new ChatMessageViewModel(ChatMessageLog.Log.Count.ToString(),  msg, this);
+
+            Guid guidId = Guid.NewGuid();
+            ChatMessageViewModel c = new ChatMessageViewModel(username, guidId,  msg, this);
             Dispatcher.UIThread.Post(()=> ChatMessageLog.Log.Add(c));
             ChatContent = List = ChatMessageLog;
         }

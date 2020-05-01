@@ -5,16 +5,18 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Jeffistance.Views.ChatMessageView">
   
-  <Grid ColumnDefinitions="9*,1*" RowDefinitions="5*,5*" Margin="4">
+  <Grid ColumnDefinitions="9*,1*" RowDefinitions="1*,4.5*,4.5*" Margin="4">
     <Grid.Styles>
       <Style Selector="TextBox.h1">
           <Setter Property="Foreground" Value="White"/>
         </Style>
     </Grid.Styles>
-    <TextBox AcceptsReturn="False" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
+    <TextBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+     IsEnabled="False" Text="{Binding Username}" Classes="h1" TextWrapping="Wrap"/>
+    <TextBox AcceptsReturn="False" Grid.Row="1" Grid.Column="0" Grid.RowSpan="2"
      IsEnabled="False" Text="{Binding Content}" Name="MessageContentBox" Classes="h1" TextWrapping="Wrap"/>
-    <Button Grid.Row="0" Grid.Column="1" Command="{Binding OnDeleteClicked}">X</Button>
-    <Button Grid.Row="1" Grid.Column="1" Command="{Binding OnEditClicked}"
+    <Button Grid.Row="1" Grid.Column="1" Command="{Binding OnDeleteClicked}">X</Button>
+    <Button Grid.Row="2" Grid.Column="1" Command="{Binding OnEditClicked}"
             Name="EditButton"
             CommandParameter="{Binding $parent}">
             E

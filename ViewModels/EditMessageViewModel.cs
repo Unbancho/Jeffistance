@@ -1,11 +1,12 @@
 using ReactiveUI;
 using System.Reactive;
+using System;
 
 namespace Jeffistance.ViewModels
 {
     public class EditMessageViewModel : ViewModelBase
     {
-        public EditMessageViewModel(string id, string messageText, ChatViewModel parent)
+        public EditMessageViewModel(Guid id, string messageText, ChatViewModel parent, string username)
         {
             MessageContent = messageText;
             var okEnabled = this.WhenAnyValue(
@@ -13,7 +14,7 @@ namespace Jeffistance.ViewModels
                 x => !string.IsNullOrWhiteSpace(x));
 
             OnOkClicked = ReactiveCommand.Create(
-                () => new ChatMessageViewModel (id, MessageContent, parent),
+                () => new ChatMessageViewModel (username, id, MessageContent, parent),
                 okEnabled);
 
             OnCancelClicked = ReactiveCommand.Create(() => { });
