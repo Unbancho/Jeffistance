@@ -3,6 +3,8 @@ using ReactiveUI;
 using System;
 using Avalonia.Controls;
 using Avalonia.VisualTree;
+using System.Reactive;
+using Jeffistance.Models;
 
 namespace Jeffistance.ViewModels
 {
@@ -14,7 +16,15 @@ namespace Jeffistance.ViewModels
             this.Content = content;
             this.Parent = parent;
             this.Username = username;
+
+            var isAuthor = this.WhenAnyValue(
+                x => x.Username,
+                x => x == AppState.GetAppState().CurrentUser.Name);
+
+            OnEditClicked = ReactiveCommand.Create<Control>(OnEditClickedMethod, isAuthor);
+            OnDeleteClicked = ReactiveCommand.Create(OnDeleteClickedMethod, isAuthor);
         }
+
 
         Guid id;
 
@@ -42,14 +52,15 @@ namespace Jeffistance.ViewModels
             set => this.RaiseAndSetIfChanged(ref parent, value);
         }
 
-        public void OnDeleteClicked()
+        public ReactiveCommand<Unit, Unit> OnDeleteClicked { get; }
+        public void OnDeleteClickedMethod()
         {
             parent.RemoveChatMessage(this);
         }
 
-        //public ReactiveCommand<Unit, Unit> OnEditClicked { get; }
-
-        public void OnEditClicked(Control testControl)
+        public ReactiveCommand<Control, Unit> OnEditClicked { get; }
+        
+        public void OnEditClickedMethod(Control testControl)
         {
             var emvm = new EditMessageViewModel(id, Content, Parent, Username);
 
@@ -65,19 +76,17 @@ namespace Jeffistance.ViewModels
 
                     Parent.RestoreList();
                 });
-
-            /* This instead of just setting the chat content
+                    /*
+                     This instead of just setting the chat content
 
                     Window popupWindow = CreateEditWindow();
                     popupWindow.ShowDialog((Window)control.GetVisualRoot());
 
                     The only issue is, we need access to the main window, I did it by sending
                     the control from the XAML and then accessing its visual root so uhhhh
-            */
-            //Parent.ChatContent = emvm;
+                    */
             Window editWindow = CreateEditWindow(emvm);
             editWindow.ShowDialog((Window)testControl.GetVisualRoot());
-            //Content = this.Content + " (edited)";
         }
 
         private Window CreateEditWindow(ViewModelBase windowContent)

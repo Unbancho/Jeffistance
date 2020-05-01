@@ -51,6 +51,7 @@ namespace Jeffistance.ViewModels
             {
                 LocalUser user = AppState.GetAppState().CurrentUser;
                 Message chatText = new Message(MessageContent, JeffistanceFlags.Chat, JeffistanceFlags.Broadcast);
+                chatText.PackedObjects.Add("username", user.Name);
                 user.Connection.Send(chatText);
                 this.MessageContent = "";
             }

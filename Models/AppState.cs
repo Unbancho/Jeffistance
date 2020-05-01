@@ -27,27 +27,7 @@ namespace Jeffistance.Models
 
         public MessageHandler MessageHandler {get; set; }
 
-        public string Log { 
-            get 
-            {
-                try
-                { 
-                    return ((IChatView)CurrentWindow)?.ChatView.Log;
-                }
-                catch(System.InvalidCastException)
-                {
-                    return null;
-                }
-            } 
-            set 
-            {
-                try
-                {
-                    ((IChatView)CurrentWindow)?.ChatView.WriteLineInLog(value, CurrentUser.Name);
-                }
-                catch(System.InvalidCastException){}
-            } 
-        }
+        
 
         private AppState()
         {
@@ -62,6 +42,14 @@ namespace Jeffistance.Models
         private void OnPropertyChanged([CallerMemberName] String propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        internal void Log(string text, string name)
+        {
+            if(name==null){
+                name = AppState.GetAppState().CurrentUser.Name;
+            }
+            ((IChatView)CurrentWindow)?.ChatView.WriteLineInLog(text, name);
         }
     }
 }
