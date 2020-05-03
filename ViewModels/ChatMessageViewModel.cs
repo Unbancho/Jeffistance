@@ -34,6 +34,8 @@ namespace Jeffistance.ViewModels
 
         ChatViewModel parent;
 
+        bool edited {get; set;}
+
         public string Username
         {
             get => username;
@@ -63,7 +65,8 @@ namespace Jeffistance.ViewModels
         public void OnEditClickedMethod(Control testControl)
         {
             var emvm = new EditMessageViewModel(id, Content, Parent, Username);
-
+            Window editWindow = CreateEditWindow(emvm);
+            editWindow.ShowDialog((Window)testControl.GetVisualRoot());
             Observable.Merge(emvm.OnOkClicked, emvm.OnCancelClicked.Select(_ => (ChatMessageViewModel)null))
                 .Take(1)
                 .Subscribe(model =>
@@ -71,22 +74,11 @@ namespace Jeffistance.ViewModels
                     if (model != null)
                     {
                         ChatMessageViewModel message = (ChatMessageViewModel) model;
-                        Content = message.content + " (Edited)";
+                        edited = true;
+                        Content = message.content;
                     }
-
-                    //Parent.RestoreList();
+                    editWindow.Close();
                 });
-                    /*
-                     This instead of just setting the chat content
-
-                    Window popupWindow = CreateEditWindow();
-                    popupWindow.ShowDialog((Window)control.GetVisualRoot());
-
-                    The only issue is, we need access to the main window, I did it by sending
-                    the control from the XAML and then accessing its visual root so uhhhh
-                    */
-            Window editWindow = CreateEditWindow(emvm);
-            editWindow.ShowDialog((Window)testControl.GetVisualRoot());
         }
 
         private Window CreateEditWindow(ViewModelBase windowContent)
@@ -95,8 +87,8 @@ namespace Jeffistance.ViewModels
             {
                 Title = "Edit",
                 ShowInTaskbar = false,
-                Height = 200,
-                Width = 200,
+                Height = 100,
+                Width = 400,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
             window.Content = windowContent;

@@ -64,11 +64,7 @@ namespace Jeffistance.Services.MessageProcessing
                 PropertyInfo pi = appState.GetType().GetProperty(name);
                 pi?.SetValue(appState, obj);
             }
-            string username = null;
-            if(message.PackedObjects.Count!=0){
-                username = (string) message.PackedObjects["username"];
-            }
-            appState.Log(message.Text, username);
+            appState.Log(message.Text,(String) message.Sender);
         }
     }
 

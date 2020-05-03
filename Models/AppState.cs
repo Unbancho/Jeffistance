@@ -51,5 +51,6 @@ namespace Jeffistance.Models
             }
             ((IChatView)CurrentWindow)?.ChatView.WriteLineInLog(text, name);
         }
+        
     }
 }

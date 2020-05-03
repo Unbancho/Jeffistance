@@ -7,7 +7,8 @@
              xmlns:vm="clr-namespace:Jeffistance.ViewModels;assembly=Jeffistance"
              x:Class="Jeffistance.Views.ChatView">
   <Grid ColumnDefinitions="8*,2*" RowDefinitions="9*,0.5*" Margin="4">
-    <ItemsControl Items="{Binding Log}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"/>
+    <!--TODO change ListBox to ControlUser and somehow make it scroll-->
+    <ListBox Items="{Binding Log}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
     <TextBox AcceptsReturn="False" Grid.Row="1" Grid.Column="0" Text="{Binding MessageContent}" Name="MessageContentBox"/>
     <Button Grid.Row="1" Grid.Column="1" Command="{Binding OnSendClicked}" IsDefault="True">Send</Button>
   </Grid>
