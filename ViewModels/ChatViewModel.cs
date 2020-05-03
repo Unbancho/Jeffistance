@@ -52,7 +52,7 @@ namespace Jeffistance.ViewModels
 
         public void WriteLineInLog(string msg)
         {
-            ChatMessageViewModel c = new ChatMessageViewModel(ChatMessageLog.Count.ToString(),  msg, this);
+            ChatMessageViewModel c = new ChatMessageViewModel(Guid.NewGuid(),  msg, this);
             Dispatcher.UIThread.Post(()=> this.ChatMessageLog.Add(c));
         }
 
