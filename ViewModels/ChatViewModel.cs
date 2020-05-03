@@ -55,9 +55,8 @@ namespace Jeffistance.ViewModels
 
         public void WriteLineInLog(string msg, string username)
         {
-            Guid guidId = Guid.NewGuid();
-            ChatMessageViewModel c = new ChatMessageViewModel(username, guidId,  msg, this);
-            Dispatcher.UIThread.Post(()=> Log.Add(c));
+            ChatMessageViewModel c = new ChatMessageViewModel(Guid.NewGuid(),  msg, this);
+            Dispatcher.UIThread.Post(()=> this.ChatMessageLog.Add(c));
         }
 
         public void RemoveChatMessage(ChatMessageViewModel message)
