@@ -7,11 +7,7 @@
              xmlns:vm="clr-namespace:Jeffistance.ViewModels;assembly=Jeffistance"
              x:Class="Jeffistance.Views.ChatView">
   <Grid ColumnDefinitions="8*,2*" RowDefinitions="9*,0.5*" Margin="4">
-    <UserControl Content="{Binding ChatContent}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"/>
-    <!--
-    <TextBox AcceptsReturn="False" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
-     IsEnabled="False" Text="{Binding Log}" />
-     -->
+    <ItemsControl Items="{Binding Log}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"/>
     <TextBox AcceptsReturn="False" Grid.Row="1" Grid.Column="0" Text="{Binding MessageContent}" Name="MessageContentBox"/>
     <Button Grid.Row="1" Grid.Column="1" Command="{Binding OnSendClicked}" IsDefault="True">Send</Button>
   </Grid>

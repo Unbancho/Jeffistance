@@ -74,7 +74,7 @@ namespace Jeffistance.ViewModels
                         Content = message.content + " (Edited)";
                     }
 
-                    Parent.RestoreList();
+                    //Parent.RestoreList();
                 });
                     /*
                      This instead of just setting the chat content
