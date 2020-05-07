@@ -12,6 +12,22 @@
             ],
             "problemMatcher": "$msCompile",
             "group": "build"
+        },
+        {
+            "label": "test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "${workspaceFolder}/Jeffistance.Test/bin/Debug/netcoreapp3.1/Jeffistance.Test.dll"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile",
+            "dependsOrder": "sequence",
+            "dependsOn": ["build tests"]
         }
     ]
 }
