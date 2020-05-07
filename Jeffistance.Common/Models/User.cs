@@ -15,7 +15,7 @@ namespace Jeffistance.Common.Models
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public int ID;
+        public Guid ID;
         public string Name {get; set;}
         public bool IsHost {get; set;}
 
@@ -35,14 +35,14 @@ namespace Jeffistance.Common.Models
         {
             Name = info.GetString("Name");
             IsHost = info.GetBoolean("IsHost");
-            ID = info.GetInt32("id");
+            ID = Guid.Parse(info.GetString("id"));
         }
 
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("Name", Name);
             info.AddValue("IsHost", IsHost);
-            info.AddValue("id", ID);
+            info.AddValue("id", ID.ToString());
         }
     }
 

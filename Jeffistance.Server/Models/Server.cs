@@ -1,10 +1,10 @@
-    
 using ModusOperandi.Networking;
 using ModusOperandi.Messaging;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
 using Jeffistance.JeffServer.Services.MessageProcessing;
 using System.Collections.Generic;
+using System;
 
 namespace Jeffistance.JeffServer.Models
 {
@@ -61,7 +61,7 @@ namespace Jeffistance.JeffServer.Models
 
         public void AddUser(User user)
         {
-            user.ID =  UserList.Count;
+            user.ID =  Guid.NewGuid();
             UserList.Add(user);
             Message updateList = new Message($"{user.Name} has joined.", JeffistanceFlags.Update);
             updateList["UserList"] = UserList;
