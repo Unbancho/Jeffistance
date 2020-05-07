@@ -1,7 +1,6 @@
 ﻿using ReactiveUI;
 
 using Jeffistance.Client;
-using System.Collections.Generic;
 
 namespace Jeffistance.ViewModels
 {

@@ -13,8 +13,6 @@ namespace Jeffistance.Common.Models
         public override bool Equals(object u2){return ID == ((User)u2).ID;}
         public override int GetHashCode(){ return ID.GetHashCode();}
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public Guid ID;
         public string Name {get; set;}
         public bool IsHost {get; set;}
