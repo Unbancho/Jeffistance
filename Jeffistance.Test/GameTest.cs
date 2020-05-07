@@ -1,6 +1,6 @@
 using NUnit.Framework;
-using Jeffistance.Models;
-using Jeffistance.Services;
+using Jeffistance.Common.Models;
+using Jeffistance.Common.Services.PlayerEventManager;
 using System.Linq;
 using System.Collections.Generic;
 
