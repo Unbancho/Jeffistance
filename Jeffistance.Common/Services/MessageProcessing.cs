@@ -90,7 +90,9 @@ namespace Jeffistance.Common.Services.MessageProcessing
         public void OnMessageReceived(object sender, MessageReceivedArgs args)
         {
             var message = (Message) args.Message;
-            Processor.ProcessMessage(message);
+            message.Sender = args.Sender;
+            if(message != null)
+                Processor.ProcessMessage(message);
         }
     }
 }   

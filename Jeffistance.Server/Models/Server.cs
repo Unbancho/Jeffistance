@@ -4,6 +4,8 @@ using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
 using Jeffistance.JeffServer.Services.MessageProcessing;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System;
 
 namespace Jeffistance.JeffServer.Models
@@ -14,12 +16,12 @@ namespace Jeffistance.JeffServer.Models
 
         public LocalUser Host {get; set;}
         private ServerConnection Connection {get; set;}
-        public List<User> UserList {get; set;}
+        public ObservableCollection<User> UserList {get; set;} = new ObservableCollection<User>();
+        private Dictionary<ClientConnection, User> UserConnectionDictionary = new Dictionary<ClientConnection, User>();
         public MessageHandler MessageHandler {get; set;}
 
         public Server()
         {
-            UserList = new List<User>();
             Host = new LocalUser("Server")
             {
                 IsHost = true,
@@ -43,6 +45,8 @@ namespace Jeffistance.JeffServer.Models
         {
             Connection = new ServerConnection(port);
             MessageHandler = new MessageHandler(new ServerMessageProcessor(this), Connection);
+            UserList.CollectionChanged += OnUserListChanged;
+            Connection.OnDisconnection += OnUserDisconnect;
             Connection.OnMessageReceived += MessageHandler.OnMessageReceived;
             Connection.Run();
         }
@@ -62,15 +66,39 @@ namespace Jeffistance.JeffServer.Models
         public void AddUser(User user)
         {
             user.ID =  Guid.NewGuid();
+            if(user.Connection != null)
+                UserConnectionDictionary[user.Connection] = user;
             UserList.Add(user);
-            Message updateList = new Message($"{user.Name} has joined.", JeffistanceFlags.Update);
-            updateList["UserList"] = UserList;
-            MessageHandler.Broadcast(updateList);
+        }
+
+        public void OnUserDisconnect(object obj, DisconnectionArgs args)
+        {
+            UserList.Remove(UserConnectionDictionary[args.Client]);
         }
 
         public void Broadcast(Message message)
         {
             Connection.Broadcast(message);
+        }
+
+        private void OnUserListChanged(object obj, NotifyCollectionChangedEventArgs args)
+        {
+            string messageText;
+            switch (args.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    messageText = $"{((User)args.NewItems[0]).Name} has joined.";
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    messageText = $"{((User)args.OldItems[0]).Name} has left.";
+                    break;
+                default:
+                    messageText = "";
+                    break;
+            }
+            Message updateList = new Message(messageText, JeffistanceFlags.Update);
+            updateList["UserList"] = new List<User>(UserList);
+            MessageHandler.Broadcast(updateList);
         }
     }
 }

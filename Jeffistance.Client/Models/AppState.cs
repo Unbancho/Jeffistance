@@ -22,7 +22,11 @@ namespace Jeffistance.Client.Models
         public List<User> UserList
         {
             get{ return _userList;}
-            set{ _userList = value; OnPropertyChanged();}
+            set
+            { 
+                _userList = value; 
+                OnPropertyChanged();
+            }
         }
 
         public ViewModelBase CurrentWindow {get; set; }
@@ -51,10 +55,7 @@ namespace Jeffistance.Client.Models
             } 
         }
 
-        private AppState()
-        {
-
-        }
+        private AppState(){}
 
         public static AppState GetAppState()
         {

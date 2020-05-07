@@ -41,10 +41,21 @@ namespace Jeffistance.Client.ViewModels
         {
             var property = ((AppState) sender).GetType().GetProperty(args.PropertyName).GetValue(sender);
             if(args.PropertyName == "UserList") // TODO: How can we do it not like this, help
-                foreach (var item in ((List<User>) property).Except(Users))
-                { 
-                    Dispatcher.UIThread.Post(()=> Users.Add(item));
-                }
+            {
+                SyncUserList((List<User>) property);
+            }
+        }
+
+        private void SyncUserList(List<User> updatedList)
+        {
+            foreach (var item in updatedList.Except(Users))
+            { 
+                Dispatcher.UIThread.Post(()=> Users.Add(item));
+            }
+            foreach (var item in Users.Except(updatedList))
+            {
+                Dispatcher.UIThread.Post(()=> Users.Remove(item));
+            }
         }
     }
 }
