@@ -1,8 +1,6 @@
 ﻿using ReactiveUI;
 
-using Jeffistance.Client;
-
-namespace Jeffistance.ViewModels
+namespace Jeffistance.Client.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {

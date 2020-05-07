@@ -7,7 +7,7 @@ using Jeffistance.Client.Models;
 using Jeffistance.Common.Models;
 using ReactiveUI;
 
-namespace Jeffistance.ViewModels
+namespace Jeffistance.Client.ViewModels
 {
     public class LobbyViewModel : ViewModelBase, IChatView
     {

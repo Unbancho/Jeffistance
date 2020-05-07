@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Jeffistance.ViewModels;
+using Jeffistance.Client.ViewModels;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
 using Jeffistance.JeffServer.Models;

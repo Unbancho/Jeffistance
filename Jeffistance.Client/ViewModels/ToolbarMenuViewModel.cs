@@ -4,7 +4,7 @@ using Avalonia.Media;
 using Avalonia.VisualTree;
 using ReactiveUI;
 
-namespace Jeffistance.ViewModels
+namespace Jeffistance.Client.ViewModels
 {
     public class ToolbarMenuViewModel: ViewModelBase
     {

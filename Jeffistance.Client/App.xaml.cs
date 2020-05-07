@@ -1,8 +1,8 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Jeffistance.ViewModels;
-using Jeffistance.Views;
+using Jeffistance.Client.ViewModels;
+using Jeffistance.Client.Views;
 
 using System;
 

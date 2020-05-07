@@ -4,7 +4,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Interactivity;
 using System.ComponentModel;
 
-namespace Jeffistance.Views
+namespace Jeffistance.Client.Views
 {
     public class MainWindow : Window
     {

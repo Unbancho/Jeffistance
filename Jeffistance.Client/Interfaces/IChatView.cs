@@ -1,4 +1,4 @@
-using Jeffistance.ViewModels;
+using Jeffistance.Client.ViewModels;
 
 interface IChatView
 {

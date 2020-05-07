@@ -9,7 +9,7 @@ using ModusOperandi.Messaging;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
 
-namespace Jeffistance.ViewModels
+namespace Jeffistance.Client.ViewModels
 {
     public class ChatViewModel : ViewModelBase
     {

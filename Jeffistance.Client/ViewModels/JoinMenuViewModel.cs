@@ -8,7 +8,7 @@ using ModusOperandi.Networking;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Client.Services.MessageProcessing;
 
-namespace Jeffistance.ViewModels
+namespace Jeffistance.Client.ViewModels
 {
     public class JoinMenuViewModel : ViewModelBase
     {

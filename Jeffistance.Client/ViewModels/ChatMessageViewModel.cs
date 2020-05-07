@@ -1,7 +1,7 @@
 using System;
 using ReactiveUI;
 
-namespace Jeffistance.ViewModels
+namespace Jeffistance.Client.ViewModels
 {
     public class ChatMessageViewModel : ViewModelBase
     {

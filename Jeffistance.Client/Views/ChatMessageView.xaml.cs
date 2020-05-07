@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace Jeffistance.Views
+namespace Jeffistance.Client.Views
 {
     public class ChatMessageView : UserControl
     {

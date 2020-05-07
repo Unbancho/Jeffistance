@@ -4,7 +4,7 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using Jeffistance.ViewModels;
+using Jeffistance.Client.ViewModels;
 
 namespace Jeffistance.Client
 {
