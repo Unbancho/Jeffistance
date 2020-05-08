@@ -37,7 +37,7 @@ namespace Jeffistance.JeffServer
             Server.Broadcast(new Message(message));
         }
 
-        public static void Kick(string username) // TODO: A way to get User by name, maybe a Dictionary
+        public static void Kick(string username)
         {
             User userToKick = Server.GetUser(username);
             if(userToKick != null)
