@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
+using Jeffistance.Common.ExtensionMethods;
 using System.Reflection;
 using ModusOperandi.Messaging;
 using Jeffistance.JeffServer.Models;
@@ -27,8 +27,8 @@ namespace Jeffistance.JeffServer
             string commandName = command[0];
             string[] args = command.Skip(1).ToArray();
             var methods = typeof(Program).GetMethods();
-            MethodInfo methodToInvoke = typeof(Program).GetMethod(Capitalize(commandName), bindingAttr:BindingFlags.Static | BindingFlags.Public);
-            methodToInvoke.Invoke(null, args);
+            MethodInfo methodToInvoke = typeof(Program).GetMethod(commandName.Capitalized(), bindingAttr:BindingFlags.Static | BindingFlags.Public);
+            methodToInvoke?.Invoke(null, args);
         }
 
         public static void Say(string message)
@@ -46,16 +46,6 @@ namespace Jeffistance.JeffServer
                     return;
                 }
             }
-        }
-
-        static string Capitalize(string s)
-        {
-            string capitalizedString = s[0].ToString().ToUpper();
-            foreach (char c in s.Skip(1))
-            {
-                capitalizedString += c.ToString().ToLower();
-            }
-            return capitalizedString;
         }
     }
 }
