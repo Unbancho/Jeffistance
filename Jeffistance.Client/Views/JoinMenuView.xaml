@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Jeffistance.Client.Views.JoinMenuView">
+  <DockPanel>
+    <Button DockPanel.Dock="Bottom" Command="{Binding Cancel}">Cancel</Button>
+    <Button DockPanel.Dock="Bottom" Command="{Binding Ok}">Join</Button>
+    <StackPanel Orientation = "Vertical" VerticalAlignment="Center" Height="100">
+      <StackPanel.KeyBindings>
+        <KeyBinding Command="{Binding Ok}" Gesture="Enter"/>
+      </StackPanel.KeyBindings>
+      <TextBox AcceptsReturn="False"
+            Text="{Binding Username}"
+            Watermark="Username"
+            Height="30"
+            Width="300"
+            Name="UsernameTextBox"/>
+      <TextBox AcceptsReturn="False"
+              Text="{Binding IpAddress}"
+              Watermark="Enter ip"
+              Height="30"
+              Width="300"/>
+      <TextBox AcceptsReturn="False"
+              Text="{Binding Port}"
+              Watermark="Enter port"
+              Height="30"
+              Width="300"/>
+    </StackPanel>
+  </DockPanel>
+</UserControl>

@@ -14,7 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Jeffistance.csproj" />
+    <ProjectReference Include="..\Jeffistance.Common\Jeffistance.Common.csproj" />
+    <ProjectReference Include="..\Jeffistance.Client\Jeffistance.Client.csproj" />
+    <ProjectReference Include="..\Jeffistance.Server\Jeffistance.Server.csproj" />
   </ItemGroup>
 
 </Project>
