@@ -1,7 +1,11 @@
 ﻿using System;
-using Jeffistance.JeffServer.Services.MessageProcessing;
-using Jeffistance.Common.Services.MessageProcessing;
+using System.Linq;
+using Jeffistance.Common.ExtensionMethods;
+using Jeffistance.Common.Models;
+using System.Reflection;
+using ModusOperandi.Messaging;
 using Jeffistance.JeffServer.Models;
+
 
 namespace Jeffistance.JeffServer
 {
@@ -20,7 +24,24 @@ namespace Jeffistance.JeffServer
 
         static void HandleInput(string input)
         {
-            Console.WriteLine($"{input}ed!\n");
+            string[] command = input.Split(' ');
+            string commandName = command[0];
+            string[] args = command.Skip(1).ToArray();
+            var methods = typeof(Program).GetMethods();
+            MethodInfo methodToInvoke = typeof(Program).GetMethod(commandName.Capitalized(), bindingAttr:BindingFlags.Static | BindingFlags.Public);
+            methodToInvoke?.Invoke(null, args);
+        }
+
+        public static void Say(string message)
+        {
+            Server.Broadcast(new Message(message));
+        }
+
+        public static void Kick(string username)
+        {
+            User userToKick = Server.GetUser(username);
+            if(userToKick != null)
+                Server.Kick(userToKick);
         }
     }
 }

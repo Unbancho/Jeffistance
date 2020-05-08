@@ -52,6 +52,7 @@ namespace Jeffistance.Client.ViewModels
             get => _autoScrollToggled;
             set => this.RaiseAndSetIfChanged(ref _autoScrollToggled, value);
         }
+
         public ReactiveCommand<Unit, Unit> ToggleAutoScroll { get; }
 
         public void OnSendClicked()
@@ -59,10 +60,9 @@ namespace Jeffistance.Client.ViewModels
             if (MessageContent != null && MessageContent.Trim() != "")
             {
                 LocalUser user = AppState.GetAppState().CurrentUser;
-                MessageContent = user.Name + ": " + MessageContent;
-                Message chatText = new Message(MessageContent, JeffistanceFlags.Chat);
-                user.Send(chatText);
-                this.MessageContent = "";
+                Message chatMessage = new Message($"{user.Name}: {MessageContent}", JeffistanceFlags.Chat);
+                user.Send(chatMessage);
+                MessageContent = "";
             }
         }
 
@@ -74,10 +74,11 @@ namespace Jeffistance.Client.ViewModels
                 ScrollToMessage(chatMessage);
         }
 
-        private void ScrollToMessage(ChatMessageViewModel chatMessage)
+        private void ScrollToMessage(ChatMessageViewModel chatMessage, bool selectMessage=false)
         {
             SelectedMessage = chatMessage;
-            SelectedMessage = null;
+            if(!selectMessage)
+                SelectedMessage = null;
         }
 
         public void RemoveChatMessage(ChatMessageViewModel message)

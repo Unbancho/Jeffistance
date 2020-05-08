@@ -15,6 +15,8 @@ namespace Jeffistance.Client.Models
         public event PropertyChangedEventHandler PropertyChanged;
         private static AppState _currentAppState;
 
+        public string[] Arguments {get; set;}
+
         public Server Server {get; set;}
         public LocalUser CurrentUser { get; set; }
 
@@ -36,25 +38,8 @@ namespace Jeffistance.Client.Models
         public MessageHandler MessageHandler {get; set; }
 
         public string Log { 
-            get 
-            {
-                try
-                { 
-                    return ((IChatView)CurrentWindow)?.ChatView.Log;
-                }
-                catch(System.InvalidCastException)
-                {
-                    return null;
-                }
-            } 
-            set 
-            {
-                try
-                {
-                    ((IChatView)CurrentWindow)?.ChatView.WriteLineInLog(value);
-                }
-                catch(System.InvalidCastException){}
-            } 
+            get {return (CurrentWindow as IChatView)?.ChatView.Log;} 
+            set {(CurrentWindow as IChatView)?.ChatView.WriteLineInLog(value);} 
         }
 
         private AppState(){}
