@@ -1,8 +1,6 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Jeffistance.Client.Models;
 using System;
-using Avalonia.Controls;
 using Avalonia.Threading;
 using ReactiveUI;
 using ModusOperandi.Messaging;
@@ -16,28 +14,36 @@ namespace Jeffistance.Client.ViewModels
         public ChatViewModel()
         {
             ChatMessageLog = new ObservableCollection <ChatMessageViewModel>();
+            AutoScroll = true;
         }
 
-        string messageContent;
-        string chatLog;
+        private string _messageContent;
+        private string _chatLog;
 
-        ObservableCollection<ChatMessageViewModel> chatMessageLog;
-
+        private ObservableCollection<ChatMessageViewModel> _chatMessageLog;
         public ObservableCollection <ChatMessageViewModel> ChatMessageLog
         {
-            get => chatMessageLog;
-            set => this.RaiseAndSetIfChanged(ref chatMessageLog, value);
+            get => _chatMessageLog;
+            set => this.RaiseAndSetIfChanged(ref _chatMessageLog, value);
         }
 
         public string Log
         {
-            get => chatLog;
-            set => this.RaiseAndSetIfChanged(ref chatLog, value);
+            get => _chatLog;
+            set => this.RaiseAndSetIfChanged(ref _chatLog, value);
         }
         public string MessageContent {
-            get => messageContent;
-            set => this.RaiseAndSetIfChanged(ref messageContent, value);
+            get => _messageContent;
+            set => this.RaiseAndSetIfChanged(ref _messageContent, value);
         }
+
+        private ChatMessageViewModel _selectedMessage;
+        public ChatMessageViewModel SelectedMessage{
+            get => _selectedMessage;
+            set => this.RaiseAndSetIfChanged(ref _selectedMessage, value);
+        }
+
+        public bool AutoScroll {get; set;}
 
         public void OnSendClicked()
         {
@@ -53,14 +59,23 @@ namespace Jeffistance.Client.ViewModels
 
         public void WriteLineInLog(string msg)
         {
-            ChatMessageViewModel c = new ChatMessageViewModel(Guid.NewGuid(),  msg, this);
-            Dispatcher.UIThread.Post(()=> this.ChatMessageLog.Add(c));
+            var chatMessage = new ChatMessageViewModel(Guid.NewGuid(),  msg, this);
+            Dispatcher.UIThread.Post(()=> ChatMessageLog.Add(chatMessage));
+            if(AutoScroll)
+                ScrollToMessage(chatMessage);
+        }
+
+        private void ScrollToMessage(ChatMessageViewModel chatMessage)
+        {
+            SelectedMessage = chatMessage;
+            SelectedMessage = null;
         }
 
         public void RemoveChatMessage(ChatMessageViewModel message)
         {
-            Dispatcher.UIThread.Post(()=> this.ChatMessageLog.Remove(message));
+            Dispatcher.UIThread.Post(()=> ChatMessageLog.Remove(message));
         }
 
     }
+
 }

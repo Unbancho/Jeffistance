@@ -7,7 +7,9 @@
              x:Class="Jeffistance.Client.Views.ChatView">
   <Grid ColumnDefinitions="8*,2*" RowDefinitions="9*,0.5*" Margin="4">
     <ListBox Items="{Binding ChatMessageLog}" Grid.Row="0" Grid.Column="0"
-    ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.ColumnSpan="2">
+      AutoScrollToSelectedItem="true"
+      SelectedItem="{Binding SelectedMessage}"
+      ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.ColumnSpan="2">
     </ListBox>
     <!--
     <TextBox AcceptsReturn="False" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
