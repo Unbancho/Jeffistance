@@ -10,6 +10,15 @@
       AutoScrollToSelectedItem="true"
       SelectedItem="{Binding SelectedMessage}"
       ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.ColumnSpan="2">
+      <ListBox.ContextMenu>
+        <ContextMenu>
+          <MenuItem Header="Scroll automatically" Command="{Binding ToggleAutoScroll}">
+            <MenuItem.Icon>
+              <CheckBox IsChecked="{Binding AutoScrollToggled}"/>
+            </MenuItem.Icon>
+          </MenuItem>
+        </ContextMenu>
+      </ListBox.ContextMenu>
     </ListBox>
     <!--
     <TextBox AcceptsReturn="False" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"

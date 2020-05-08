@@ -6,6 +6,7 @@ using ReactiveUI;
 using ModusOperandi.Messaging;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
+using System.Reactive;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -14,7 +15,10 @@ namespace Jeffistance.Client.ViewModels
         public ChatViewModel()
         {
             ChatMessageLog = new ObservableCollection <ChatMessageViewModel>();
-            AutoScroll = true;
+            AutoScrollToggled = true;
+            ToggleAutoScroll = ReactiveCommand.Create(
+                () => { AutoScrollToggled = !AutoScrollToggled; }
+            );
         }
 
         private string _messageContent;
@@ -43,7 +47,12 @@ namespace Jeffistance.Client.ViewModels
             set => this.RaiseAndSetIfChanged(ref _selectedMessage, value);
         }
 
-        public bool AutoScroll {get; set;}
+        private bool _autoScrollToggled;
+        public bool AutoScrollToggled{
+            get => _autoScrollToggled;
+            set => this.RaiseAndSetIfChanged(ref _autoScrollToggled, value);
+        }
+        public ReactiveCommand<Unit, Unit> ToggleAutoScroll { get; }
 
         public void OnSendClicked()
         {
@@ -61,7 +70,7 @@ namespace Jeffistance.Client.ViewModels
         {
             var chatMessage = new ChatMessageViewModel(Guid.NewGuid(),  msg, this);
             Dispatcher.UIThread.Post(()=> ChatMessageLog.Add(chatMessage));
-            if(AutoScroll)
+            if(AutoScrollToggled)
                 ScrollToMessage(chatMessage);
         }
 
