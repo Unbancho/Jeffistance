@@ -1,7 +1,10 @@
 ﻿using System;
-using Jeffistance.JeffServer.Services.MessageProcessing;
-using Jeffistance.Common.Services.MessageProcessing;
+using System.Linq;
+using System.Collections.Generic;
+using System.Reflection;
+using ModusOperandi.Messaging;
 using Jeffistance.JeffServer.Models;
+
 
 namespace Jeffistance.JeffServer
 {
@@ -20,7 +23,39 @@ namespace Jeffistance.JeffServer
 
         static void HandleInput(string input)
         {
-            Console.WriteLine($"{input}ed!\n");
+            string[] command = input.Split(' ');
+            string commandName = command[0];
+            string[] args = command.Skip(1).ToArray();
+            var methods = typeof(Program).GetMethods();
+            MethodInfo methodToInvoke = typeof(Program).GetMethod(Capitalize(commandName), bindingAttr:BindingFlags.Static | BindingFlags.Public);
+            methodToInvoke.Invoke(null, args);
+        }
+
+        public static void Say(string message)
+        {
+            Server.Broadcast(new Message(message));
+        }
+
+        public static void Kick(string username) // TODO: A way to get User by name, maybe a Dictionary
+        {
+            foreach (var user in Server.UserList)
+            {
+                if(username == user.Name.ToLower())
+                {
+                    Server.Kick(user);
+                    return;
+                }
+            }
+        }
+
+        static string Capitalize(string s)
+        {
+            string capitalizedString = s[0].ToString().ToUpper();
+            foreach (char c in s.Skip(1))
+            {
+                capitalizedString += c.ToString().ToLower();
+            }
+            return capitalizedString;
         }
     }
 }
