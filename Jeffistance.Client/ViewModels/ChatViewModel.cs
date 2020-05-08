@@ -15,17 +15,9 @@ namespace Jeffistance.Client.ViewModels
     {
         public ChatViewModel()
         {
-            
-           Log = new ObservableCollection <ChatMessageViewModel>();
+           ChatMessageLog = new ObservableCollection <ChatMessageViewModel>();
         }
 
-        ObservableCollection<ChatMessageViewModel> log;
-
-        public ObservableCollection <ChatMessageViewModel> Log
-        {
-            get => log;
-            set => this.RaiseAndSetIfChanged(ref log, value);
-        }
         string messageContent;
 
         public string MessageContent {
@@ -62,7 +54,7 @@ namespace Jeffistance.Client.ViewModels
 
         public void RemoveChatMessage(ChatMessageViewModel message)
         {
-            Dispatcher.UIThread.Post(()=> Log.Remove(message));
+            Dispatcher.UIThread.Post(()=> ChatMessageLog.Remove(message));
         }
         
     }

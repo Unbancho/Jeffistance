@@ -1,9 +1,8 @@
 using ReactiveUI;
 using System.Reactive;
 using System;
-using Avalonia.Controls;
 
-namespace Jeffistance.ViewModels
+namespace Jeffistance.Client.ViewModels
 {
     public class EditMessageViewModel : ViewModelBase
     {
@@ -36,8 +35,7 @@ namespace Jeffistance.ViewModels
         public ReactiveCommand<Unit, Unit> OnCancelClicked { get; }
 
         public ChatMessageViewModel OnOkClickedMethod(){
-            
-            return new ChatMessageViewModel (_username, _id, MessageContent, _parent);
+            return new ChatMessageViewModel (_id, MessageContent, _parent);
         }
 
     }

@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace Jeffistance.Client
+namespace Jeffistance.Client.Views
 {
     public class JeffView : UserControl
     {
