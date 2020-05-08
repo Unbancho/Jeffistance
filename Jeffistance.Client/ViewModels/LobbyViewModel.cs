@@ -5,6 +5,7 @@ using System.Reactive;
 using Avalonia.Threading;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using Jeffistance.Client.Models;
 using Jeffistance.Common.Models;
 using ReactiveUI;
@@ -15,10 +16,12 @@ namespace Jeffistance.Client.ViewModels
 {
     public class LobbyViewModel : ViewModelBase, IChatView
     {
-        public ObservableCollection<User> Users {get;}
+        public ObservableCollection<User> Users { get; }
+        public List<Guid> ReadyUserIDs { get; }
         bool showKickButton;
         bool showReadyButton;
         bool showStartButton;
+        bool canStart;
 
         public bool ShowKickButton
         {
@@ -37,6 +40,13 @@ namespace Jeffistance.Client.ViewModels
             get => showStartButton;
             set => this.RaiseAndSetIfChanged(ref showStartButton, value);
         }
+
+        public bool CanStart
+        {
+            get => canStart;
+            set => this.RaiseAndSetIfChanged(ref canStart, value);
+        }
+
         MainWindowViewModel parent;
         private ChatViewModel _chatView;
         public ChatViewModel ChatView 
@@ -59,10 +69,18 @@ namespace Jeffistance.Client.ViewModels
 
             gs.UserList = new List<User>();
             Users = new ObservableCollection<User>(gs.UserList);
+            Users.CollectionChanged += UsersUpdated;
+            ReadyUserIDs = new List<Guid>();
+
             gs.PropertyChanged += OnAppStatePropertyChanged;
             this.ChatView = new ChatViewModel();
 
             ReadyUser = ReactiveCommand.Create(OnReadyClicked);
+
+            var startEnabled = this.WhenAnyValue(
+                x => x.CanStart
+            );
+            StartGame = ReactiveCommand.Create(OnStartClicked, startEnabled);
         }
 
         private void OnAppStatePropertyChanged(object sender, PropertyChangedEventArgs args)
@@ -89,14 +107,61 @@ namespace Jeffistance.Client.ViewModels
         private void OnReadyClicked()
         {
             var user = AppState.GetAppState().CurrentUser;
-            Message message = new Message($"{user.Name} is now ready.", JeffistanceFlags.LobbyReady);
+            string messageText = "";
+            if (ReadyUserIDs.Contains(user.ID))
+            {
+                messageText = $"{user.Name} is no longer ready.";
+            }
+            else
+            {
+                messageText = $"{user.Name} is now ready.";
+            }
+            Message message = new Message(messageText, JeffistanceFlags.LobbyReady);
             message["UserID"] = user.ID.ToString();
             user.Send(message);
         }
 
         public void AddReadyUser(Guid userID)
         {
-            Console.WriteLine($"Adding user {userID}");
+            if (ReadyUserIDs.Contains(userID))
+            {
+                ReadyUserIDs.Remove(userID);
+            }
+            else
+            {
+                ReadyUserIDs.Add(userID);
+            }
+            if (AppState.GetAppState().CurrentUser.IsHost)
+            {
+                Dispatcher.UIThread.Post(CheckIfAllReady);
+            }
+        }
+
+        private void CheckIfAllReady()
+        {
+            User currentUser = (User)AppState.GetAppState().CurrentUser;
+            if (Users.Where((u, i) => u.ID != currentUser.ID)
+                .All(user => ReadyUserIDs.Contains(user.ID)))
+            {
+                CanStart = true;
+            }
+            else
+            {
+                CanStart = false;
+            }
+        }
+
+        private void OnStartClicked()
+        {
+
+        }
+
+        private void UsersUpdated(object obj, NotifyCollectionChangedEventArgs args)
+        {
+            if (AppState.GetAppState().CurrentUser.IsHost)
+            {
+                Dispatcher.UIThread.Post(CheckIfAllReady);
+            }
         }
     }
 }

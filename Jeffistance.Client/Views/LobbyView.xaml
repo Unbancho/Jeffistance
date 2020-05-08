@@ -11,7 +11,7 @@
                 Grid.Row="1" Grid.Column="0" Margin="4" Spacing="10">
       <Button Content="Ready" MinWidth="200" Command="{Binding ReadyUser}"
               IsVisible="{Binding ShowReadyButton}"/>
-      <Button Content="Start Game" MinWidth="200"
+      <Button Content="Start Game" MinWidth="200" Command="{Binding StartGame}"
               IsVisible="{Binding ShowStartButton}"/>
       <Button Content="Kick Everyone" Command="{Binding OnKickEveryoneClicked}"
                 IsVisible="{Binding ShowKickButton}" MinWidth="200"/>
