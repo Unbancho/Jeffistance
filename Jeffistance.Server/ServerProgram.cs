@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Jeffistance.Common.ExtensionMethods;
+using Jeffistance.Common.Models;
 using System.Reflection;
 using ModusOperandi.Messaging;
 using Jeffistance.JeffServer.Models;
@@ -38,14 +39,9 @@ namespace Jeffistance.JeffServer
 
         public static void Kick(string username) // TODO: A way to get User by name, maybe a Dictionary
         {
-            foreach (var user in Server.UserList)
-            {
-                if(username == user.Name.ToLower())
-                {
-                    Server.Kick(user);
-                    return;
-                }
-            }
+            User userToKick = Server.GetUser(username);
+            if(userToKick != null)
+                Server.Kick(userToKick);
         }
     }
 }

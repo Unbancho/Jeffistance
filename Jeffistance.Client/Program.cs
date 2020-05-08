@@ -1,15 +1,10 @@
-﻿using System;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia;
 using Avalonia.Logging.Serilog;
 using Avalonia.ReactiveUI;
+using Jeffistance.Client.Models;
 
 namespace Jeffistance.Client
 {
-    public static class Arguments
-    {
-        public static string[] Args;
-    }
     class Program
     {
         // Initialization code. Don't use any Avalonia, third-party APIs or any
@@ -17,7 +12,7 @@ namespace Jeffistance.Client
         // yet and stuff might break.
         public static void Main(string[] args)
         {
-            Arguments.Args = args.Length > 0 ? args : new string[] {""};
+            AppState.GetAppState().Arguments = args.Length > 0 ? args : new string[] {""};
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
 

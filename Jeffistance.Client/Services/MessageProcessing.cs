@@ -10,8 +10,6 @@ namespace Jeffistance.Client.Services.MessageProcessing
     {
         public override void ProcessMessage(Message message)
         {
-            if(message == null)
-                return;
             base.ProcessMessage(message);
             LogMessage(message);
         }
