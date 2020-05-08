@@ -39,6 +39,11 @@
         "preLaunchTask": "build solution"
       },
       {
+        "name": "Console Server/Auto Join",
+        "configurations": ["Console Server", "Auto Join"],
+        "preLaunchTask": "build solution"
+      },
+      {
           "name": "Auto Host/Client",
           "configurations": ["Auto Host", "Client"],
           "preLaunchTask": "build solution"
