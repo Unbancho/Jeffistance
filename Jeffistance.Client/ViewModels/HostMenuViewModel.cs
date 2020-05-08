@@ -61,7 +61,9 @@ namespace Jeffistance.Client.ViewModels
             server.Run(port);
             gs.CurrentUser = server.Host;
             server.ConnectHost(Username, new ClientMessageProcessor());
-            parent.Content = new LobbyViewModel(parent);
+            LobbyViewModel lobby = new LobbyViewModel(parent);
+            parent.Content = lobby;
+            gs.CurrentLobby = lobby;
             gs.CurrentWindow = parent.Content;
         }
     }
