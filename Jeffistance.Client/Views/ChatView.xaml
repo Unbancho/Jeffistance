@@ -7,8 +7,24 @@
              xmlns:vm="clr-namespace:Jeffistance.Client.ViewModels;assembly=Jeffistance"
              x:Class="Jeffistance.Client.Views.ChatView">
   <Grid ColumnDefinitions="8*,2*" RowDefinitions="9*,0.5*" Margin="4">
-    <!--TODO change ListBox to ControlUser and somehow make it scroll-->
-    <ListBox Items="{Binding ChatMessageLog}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+    <ListBox Items="{Binding ChatMessageLog}" Grid.Row="0" Grid.Column="0"
+      AutoScrollToSelectedItem="true"
+      SelectedItem="{Binding SelectedMessage}"
+      ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.ColumnSpan="2">
+      <ListBox.ContextMenu>
+        <ContextMenu>
+          <MenuItem Header="Scroll automatically" Command="{Binding ToggleAutoScroll}">
+            <MenuItem.Icon>
+              <CheckBox IsChecked="{Binding AutoScrollToggled}"/>
+            </MenuItem.Icon>
+          </MenuItem>
+        </ContextMenu>
+      </ListBox.ContextMenu>
+    </ListBox>
+    <!--
+    <TextBox AcceptsReturn="False" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+     IsEnabled="False" Text="{Binding Log}" />
+     -->
     <TextBox AcceptsReturn="False" Grid.Row="1" Grid.Column="0" Text="{Binding MessageContent}" Name="MessageContentBox"/>
     <Button Grid.Row="1" Grid.Column="1" Command="{Binding OnSendClicked}" IsDefault="True">Send</Button>
   </Grid>

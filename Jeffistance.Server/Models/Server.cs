@@ -16,9 +16,13 @@ namespace Jeffistance.JeffServer.Models
 
         public LocalUser Host {get; set;}
         private ServerConnection Connection {get; set;}
-        public ObservableCollection<User> UserList {get; set;} = new ObservableCollection<User>();
+        private ObservableCollection<User> ObservableUserList {get; set;} = new ObservableCollection<User>();
+        public List<User> UserList {get {return new List<User> (ObservableUserList);}}
         private Dictionary<ClientConnection, User> UserConnectionDictionary = new Dictionary<ClientConnection, User>();
-        public MessageHandler MessageHandler {get; set;}
+        private Dictionary<string, User> UserNameDictionary = new Dictionary<string, User>();
+        private Dictionary<Guid, User> UserGuidDictionary = new Dictionary<Guid, User>();
+        private MessageHandler MessageHandler {get; set;}
+
 
         public Server()
         {
@@ -45,7 +49,7 @@ namespace Jeffistance.JeffServer.Models
         {
             Connection = new ServerConnection(port);
             MessageHandler = new MessageHandler(new ServerMessageProcessor(this), Connection);
-            UserList.CollectionChanged += OnUserListChanged;
+            ObservableUserList.CollectionChanged += OnUserListChanged;
             Connection.OnDisconnection += OnUserDisconnect;
             Connection.OnMessageReceived += MessageHandler.OnMessageReceived;
             Connection.Run();
@@ -59,21 +63,39 @@ namespace Jeffistance.JeffServer.Models
 
         public void Kick(User user)
         {
-            UserList.Remove(user);
+            ObservableUserList.Remove(user);
             Connection.Kick(user.Connection);
         }
 
         public void AddUser(User user)
         {
-            user.ID = Guid.NewGuid();
-            if(user.Connection != null)
-                UserConnectionDictionary[user.Connection] = user;
-            UserList.Add(user);
+            UserConnectionDictionary[user.Connection] = user;
+            UserNameDictionary[user.Name.ToLower()] = user;
+            UserGuidDictionary[user.ID] = user;
+            ObservableUserList.Add(user);
+        }
+
+        public User GetUser(string username)
+        {
+            UserNameDictionary.TryGetValue(username.ToLower(), out User user);
+            return user;
+        }
+
+        public User GetUser(Guid guid)
+        {
+            UserGuidDictionary.TryGetValue(guid, out User user);
+            return user;            
+        }
+
+        public User GetUser(ClientConnection connection)
+        {
+            UserConnectionDictionary.TryGetValue(connection, out User user);
+            return user;        
         }
 
         public void OnUserDisconnect(object obj, DisconnectionArgs args)
         {
-            UserList.Remove(UserConnectionDictionary[args.Client]);
+            ObservableUserList.Remove(GetUser(args.Client));
         }
 
         public void Broadcast(Message message)
@@ -97,7 +119,7 @@ namespace Jeffistance.JeffServer.Models
                     break;
             }
             Message updateList = new Message(messageText, JeffistanceFlags.Update);
-            updateList["UserList"] = new List<User>(UserList);
+            updateList["UserList"] = UserList;
             MessageHandler.Broadcast(updateList);
         }
     }

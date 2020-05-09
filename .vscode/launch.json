@@ -29,13 +29,19 @@
         "name": "Auto Join",
         "program": "${workspaceFolder}/Jeffistance.Client/bin/Debug/netcoreapp3.1/Jeffistance.Client.dll",
         "args": ["join"],
-        "console": "internalConsole"
+        "console": "internalConsole",
+        "preLaunchTask": "Delay"
     }
     ],
     "compounds": [
       {
         "name": "Console Server/Client",
         "configurations": ["Console Server","Client"],
+        "preLaunchTask": "build solution"
+      },
+      {
+        "name": "Console Server/Auto Join",
+        "configurations": ["Console Server", "Auto Join"],
         "preLaunchTask": "build solution"
       },
       {

@@ -13,7 +13,8 @@ namespace Jeffistance.Common.Services.MessageProcessing
     {
         Greeting = 1 << 0,
         Update = 1 << 2,
-        Chat = 1 << 3
+        Chat = 1 << 3,
+        LobbyReady = 1 << 4
     }
 
     public class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>
@@ -90,9 +91,12 @@ namespace Jeffistance.Common.Services.MessageProcessing
         public void OnMessageReceived(object sender, MessageReceivedArgs args)
         {
             var message = (Message) args.Message;
-            message.Sender = args.Sender;
-            if(message != null)
+            try
+            {
+                message.Sender = args.Sender;
                 Processor.ProcessMessage(message);
+            }
+            catch(NullReferenceException){}
         }
     }
 }   

@@ -3,8 +3,8 @@ using System.Reactive;
 using ReactiveUI;
 using Jeffistance.Client.Models;
 using Jeffistance.JeffServer.Models;
-using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Client.Services.MessageProcessing;
+using Jeffistance.Common.ExtensionMethods;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -18,7 +18,7 @@ namespace Jeffistance.Client.ViewModels
         {
             get => port.ToString();
             set {
-                if (Int32.TryParse(value, out int result) && result >= 0 && result <= 65535)
+                if (Int32.TryParse(value, out int result) && result.IsValidPort())
                 {
                     this.RaiseAndSetIfChanged(ref port, result);
                 }
@@ -61,7 +61,9 @@ namespace Jeffistance.Client.ViewModels
             server.Run(port);
             gs.CurrentUser = server.Host;
             server.ConnectHost(Username, new ClientMessageProcessor());
-            parent.Content = new LobbyViewModel(parent);
+            LobbyViewModel lobby = new LobbyViewModel(parent);
+            parent.Content = lobby;
+            gs.CurrentLobby = lobby;
             gs.CurrentWindow = parent.Content;
         }
     }

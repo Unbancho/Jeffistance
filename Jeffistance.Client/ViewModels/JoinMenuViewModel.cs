@@ -7,6 +7,7 @@ using Jeffistance.Common.Models;
 using ModusOperandi.Networking;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Client.Services.MessageProcessing;
+using Jeffistance.Common.ExtensionMethods;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -28,7 +29,7 @@ namespace Jeffistance.Client.ViewModels
             get => port.ToString();
             set
             {
-                if (Int32.TryParse(value, out int result) && result >= 0 && result <= 65535)
+                if (Int32.TryParse(value, out int result) && result.IsValidPort())
                 {
                     this.RaiseAndSetIfChanged(ref port, result);
                 }
@@ -80,7 +81,9 @@ namespace Jeffistance.Client.ViewModels
             appState.CurrentUser.Connect(IpAddress, port);
             appState.CurrentUser.AttachMessageHandler(new MessageHandler(new ClientMessageProcessor(), appState.CurrentUser.Connection));
             appState.CurrentUser.GreetServer();
-            parent.Content = new LobbyViewModel(parent);
+            LobbyViewModel lobby = new LobbyViewModel(parent);
+            parent.Content = lobby;
+            appState.CurrentLobby = lobby;
             appState.CurrentWindow = parent.Content;
         }
     }

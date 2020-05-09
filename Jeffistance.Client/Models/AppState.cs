@@ -15,6 +15,8 @@ namespace Jeffistance.Client.Models
         public event PropertyChangedEventHandler PropertyChanged;
         private static AppState _currentAppState;
 
+        public string[] Arguments {get; set;}
+
         public Server Server {get; set;}
         public LocalUser CurrentUser { get; set; }
 
@@ -29,11 +31,16 @@ namespace Jeffistance.Client.Models
             }
         }
 
-        public ViewModelBase CurrentWindow {get; set; }
+        public ViewModelBase CurrentWindow { get; set; }
+
+        public LobbyViewModel CurrentLobby { get; set; }
 
         public MessageHandler MessageHandler {get; set; }
 
-        
+        public string Log { 
+            get {return (CurrentWindow as IChatView)?.ChatView.Log;} 
+            set {(CurrentWindow as IChatView)?.ChatView.WriteLineInLog(value, null);} 
+        }
 
         private AppState(){}
 

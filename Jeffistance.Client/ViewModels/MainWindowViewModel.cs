@@ -1,4 +1,5 @@
 ﻿using ReactiveUI;
+using Jeffistance.Client.Models;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -15,7 +16,7 @@ namespace Jeffistance.Client.ViewModels
         public MainWindowViewModel()
         {
             Content = new MainMenuViewModel(this);
-            switch (Arguments.Args[0].ToLower())
+            switch (AppState.GetAppState().Arguments[0].ToLower())
             {
                 case "host":
                     ((MainMenuViewModel) Content).AutoHost();

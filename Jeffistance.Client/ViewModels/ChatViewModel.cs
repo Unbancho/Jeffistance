@@ -1,13 +1,12 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Jeffistance.Client.Models;
 using System;
-using Avalonia.Controls;
 using Avalonia.Threading;
 using ReactiveUI;
 using ModusOperandi.Messaging;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
+using System.Reactive;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -15,40 +14,70 @@ namespace Jeffistance.Client.ViewModels
     {
         public ChatViewModel()
         {
-           ChatMessageLog = new ObservableCollection <ChatMessageViewModel>();
+            ChatMessageLog = new ObservableCollection <ChatMessageViewModel>();
+            AutoScrollToggled = true;
+            ToggleAutoScroll = ReactiveCommand.Create(
+                () => { AutoScrollToggled = !AutoScrollToggled; }
+            );
         }
 
-        string messageContent;
+        private string _messageContent;
+        private string _chatLog;
 
-        public string MessageContent {
-            get => messageContent;
-            set => this.RaiseAndSetIfChanged(ref messageContent, value);
-        }
-
-        public ObservableCollection <ChatMessageViewModel> chatMessageLog;
-
+        private ObservableCollection<ChatMessageViewModel> _chatMessageLog;
         public ObservableCollection <ChatMessageViewModel> ChatMessageLog
         {
-            get => chatMessageLog;
-            set => this.RaiseAndSetIfChanged(ref chatMessageLog, value);
+            get => _chatMessageLog;
+            set => this.RaiseAndSetIfChanged(ref _chatMessageLog, value);
         }
+
+        public string Log
+        {
+            get => _chatLog;
+            set => this.RaiseAndSetIfChanged(ref _chatLog, value);
+        }
+        public string MessageContent {
+            get => _messageContent;
+            set => this.RaiseAndSetIfChanged(ref _messageContent, value);
+        }
+
+        private ChatMessageViewModel _selectedMessage;
+        public ChatMessageViewModel SelectedMessage{
+            get => _selectedMessage;
+            set => this.RaiseAndSetIfChanged(ref _selectedMessage, value);
+        }
+
+        private bool _autoScrollToggled;
+        public bool AutoScrollToggled{
+            get => _autoScrollToggled;
+            set => this.RaiseAndSetIfChanged(ref _autoScrollToggled, value);
+        }
+
+        public ReactiveCommand<Unit, Unit> ToggleAutoScroll { get; }
 
         public void OnSendClicked()
         {
             if (MessageContent != null && MessageContent.Trim() != "")
             {
                 LocalUser user = AppState.GetAppState().CurrentUser;
-                MessageContent = user.Name + ": " + MessageContent;
-                Message chatText = new Message(MessageContent, JeffistanceFlags.Chat);
-                //chatText.Sender = user.Name; //TODO Remove after sender is automatically setted in MO's constructor
-                user.Send(chatText);
-                this.MessageContent = "";
+                Message chatMessage = new Message($"{user.Name}: {MessageContent}", JeffistanceFlags.Chat);
+                user.Send(chatMessage);
+                MessageContent = "";
             }
         }
          public void WriteLineInLog(string msg, string username)
         {
-            ChatMessageViewModel c = new ChatMessageViewModel(Guid.NewGuid(),  msg, this, username);
-            Dispatcher.UIThread.Post(()=> this.ChatMessageLog.Add(c));
+            var chatMessage = new ChatMessageViewModel(Guid.NewGuid(), msg, this, username);
+            Dispatcher.UIThread.Post(()=> ChatMessageLog.Add(chatMessage));
+            if(AutoScrollToggled)
+                ScrollToMessage(chatMessage);
+        }
+
+        private void ScrollToMessage(ChatMessageViewModel chatMessage, bool selectMessage=false)
+        {
+            SelectedMessage = chatMessage;
+            if(!selectMessage)
+                SelectedMessage = null;
         }
 
         public void RemoveChatMessage(ChatMessageViewModel message)
@@ -57,4 +86,5 @@ namespace Jeffistance.Client.ViewModels
         }
         
     }
+
 }

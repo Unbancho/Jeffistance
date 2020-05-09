@@ -30,5 +30,11 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
             message.SetFlags(((JeffistanceFlags) message.Flag | JeffistanceFlags.Update) & ~JeffistanceFlags.Chat);
             Server.Broadcast(message);
         }
+
+        [MessageMethod(JeffistanceFlags.LobbyReady)]
+        private void LobbyReadyFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
     }
 }

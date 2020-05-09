@@ -27,6 +27,7 @@ namespace Jeffistance.Common.Models
         {
             Name = localUser.Name;
             IsHost = localUser.IsHost;
+            ID = localUser.ID;
         }
 
         protected User(SerializationInfo info, StreamingContext context)
@@ -52,6 +53,7 @@ namespace Jeffistance.Common.Models
         {
             Name = username;
             Perms = new Permissions();
+            ID = Guid.NewGuid();
         }
 
         public void Connect(string ip, int port)
