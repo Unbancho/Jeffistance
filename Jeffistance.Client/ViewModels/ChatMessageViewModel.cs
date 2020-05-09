@@ -10,7 +10,7 @@ namespace Jeffistance.Client.ViewModels
 {
     public class ChatMessageViewModel : ViewModelBase
     {
-        public ChatMessageViewModel(Guid id, string content, ChatViewModel parent)
+        public ChatMessageViewModel(Guid id, string content, ChatViewModel parent, string username)
         {
             this.id = id;
             this.Content = content;

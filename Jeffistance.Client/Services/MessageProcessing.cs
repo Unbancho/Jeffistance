@@ -19,7 +19,7 @@ namespace Jeffistance.Client.Services.MessageProcessing
         public override void LogMessage(Message message)
         {
             var appState = AppState.GetAppState();
-            appState.Log(message.Text, null);
+            appState.Log(message.Text, (string) message.Sender);
         }
 
         [MessageMethod(JeffistanceFlags.Update)]

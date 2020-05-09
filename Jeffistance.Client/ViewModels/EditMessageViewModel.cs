@@ -35,7 +35,7 @@ namespace Jeffistance.Client.ViewModels
         public ReactiveCommand<Unit, Unit> OnCancelClicked { get; }
 
         public ChatMessageViewModel OnOkClickedMethod(){
-            return new ChatMessageViewModel (_id, MessageContent, _parent);
+            return new ChatMessageViewModel (_id, MessageContent, _parent, _username);
         }
 
     }

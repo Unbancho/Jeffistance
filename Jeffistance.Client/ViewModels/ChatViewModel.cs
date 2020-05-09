@@ -40,13 +40,14 @@ namespace Jeffistance.Client.ViewModels
                 LocalUser user = AppState.GetAppState().CurrentUser;
                 MessageContent = user.Name + ": " + MessageContent;
                 Message chatText = new Message(MessageContent, JeffistanceFlags.Chat);
+                //chatText.Sender = user.Name; //TODO Remove after sender is automatically setted in MO's constructor
                 user.Send(chatText);
                 this.MessageContent = "";
             }
         }
          public void WriteLineInLog(string msg, string username)
         {
-            ChatMessageViewModel c = new ChatMessageViewModel(Guid.NewGuid(),  msg, this);
+            ChatMessageViewModel c = new ChatMessageViewModel(Guid.NewGuid(),  msg, this, username);
             Dispatcher.UIThread.Post(()=> this.ChatMessageLog.Add(c));
         }
 
