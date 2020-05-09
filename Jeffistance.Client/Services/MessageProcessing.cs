@@ -32,7 +32,11 @@ namespace Jeffistance.Client.Services.MessageProcessing
             }
 
         }
+
+        [MessageMethod(JeffistanceFlags.LobbyReady)]
+        private void LobbyReadyFlagMethod(Message message)
+        {
+            AppState.GetAppState().CurrentLobby.AddReadyUser(Guid.Parse((string) message["UserID"]));
+        }
     }
-
 }
-

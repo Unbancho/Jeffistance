@@ -13,7 +13,8 @@ namespace Jeffistance.Common.Services.MessageProcessing
     {
         Greeting = 1 << 0,
         Update = 1 << 2,
-        Chat = 1 << 3
+        Chat = 1 << 3,
+        LobbyReady = 1 << 4
     }
 
     public class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>

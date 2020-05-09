@@ -81,7 +81,9 @@ namespace Jeffistance.Client.ViewModels
             appState.CurrentUser.Connect(IpAddress, port);
             appState.CurrentUser.AttachMessageHandler(new MessageHandler(new ClientMessageProcessor(), appState.CurrentUser.Connection));
             appState.CurrentUser.GreetServer();
-            parent.Content = new LobbyViewModel(parent);
+            LobbyViewModel lobby = new LobbyViewModel(parent);
+            parent.Content = lobby;
+            appState.CurrentLobby = lobby;
             appState.CurrentWindow = parent.Content;
         }
     }

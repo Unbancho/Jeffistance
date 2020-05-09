@@ -31,7 +31,9 @@ namespace Jeffistance.Client.Models
             }
         }
 
-        public ViewModelBase CurrentWindow {get; set; }
+        public ViewModelBase CurrentWindow { get; set; }
+
+        public LobbyViewModel CurrentLobby { get; set; }
 
         public MessageHandler MessageHandler {get; set; }
 

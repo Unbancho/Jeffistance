@@ -69,7 +69,6 @@ namespace Jeffistance.JeffServer.Models
 
         public void AddUser(User user)
         {
-            user.ID =  Guid.NewGuid();
             UserConnectionDictionary[user.Connection] = user;
             UserNameDictionary[user.Name.ToLower()] = user;
             UserGuidDictionary[user.ID] = user;
