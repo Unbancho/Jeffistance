@@ -27,7 +27,6 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
         [MessageMethod(JeffistanceFlags.Chat)]
         private void ChatFlagMethod(Message message)
         {
-            message.SetFlags(((JeffistanceFlags) message.Flag | JeffistanceFlags.Update) & ~JeffistanceFlags.Chat);
             Server.Broadcast(message);
         }
 

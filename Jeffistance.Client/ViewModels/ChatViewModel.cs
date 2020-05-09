@@ -60,7 +60,8 @@ namespace Jeffistance.Client.ViewModels
             if (MessageContent != null && MessageContent.Trim() != "")
             {
                 LocalUser user = AppState.GetAppState().CurrentUser;
-                Message chatMessage = new Message($"{user.Name}: {MessageContent}", JeffistanceFlags.Chat);
+                Message chatMessage = new Message(MessageContent, JeffistanceFlags.Chat);
+                chatMessage["UserID"] = user.ID.ToString();
                 user.Send(chatMessage);
                 MessageContent = "";
             }

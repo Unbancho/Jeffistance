@@ -116,7 +116,14 @@ namespace Jeffistance.Client.ViewModels
             {
                 messageText = $"{user.Name} is now ready.";
             }
-            Message message = new Message(messageText, JeffistanceFlags.LobbyReady);
+
+            // Send ready message
+            Message message = new Message(null, JeffistanceFlags.LobbyReady);
+            message["UserID"] = user.ID.ToString();
+            user.Send(message);
+
+            // Send "user is ready" to chat
+            message = new Message(messageText, JeffistanceFlags.Chat);
             message["UserID"] = user.ID.ToString();
             user.Send(message);
         }

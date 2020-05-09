@@ -79,9 +79,14 @@ namespace Jeffistance.Common.Models
 
         public void GreetServer()
         {
-            Message greetingMessage = new Message($"{Name} has joined from {Connection.IPAddress}.", JeffistanceFlags.Greeting);
-            greetingMessage["User"] = new User(this);
+            Message greetingMessage = new Message(null, JeffistanceFlags.Greeting);
+            var user = new User(this);
+            greetingMessage["User"] = user;
             Send(greetingMessage);
+
+            Message greetingChat = new Message(
+                $"{Name} has joined from {Connection.IPAddress}.", JeffistanceFlags.Chat);
+            Send(greetingChat);
         }
 
         public void Disconnect()

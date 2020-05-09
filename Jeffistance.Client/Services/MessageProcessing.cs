@@ -3,6 +3,7 @@ using System.Reflection;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Client.Models;
 using ModusOperandi.Messaging;
+using Jeffistance.Common.Models;
 
 namespace Jeffistance.Client.Services.MessageProcessing
 {
@@ -11,7 +12,8 @@ namespace Jeffistance.Client.Services.MessageProcessing
         public override void ProcessMessage(Message message)
         {
             base.ProcessMessage(message);
-            LogMessage(message);
+            // Why Bancho
+            // LogMessage(message);
         }
 
         public override void LogMessage(Message message)
@@ -37,6 +39,24 @@ namespace Jeffistance.Client.Services.MessageProcessing
         private void LobbyReadyFlagMethod(Message message)
         {
             AppState.GetAppState().CurrentLobby.AddReadyUser(Guid.Parse((string) message["UserID"]));
+        }
+
+        [MessageMethod(JeffistanceFlags.Chat)]
+        private void ChatFlagMessage(Message message)
+        {
+            // do chat things
+            AppState appState = AppState.GetAppState();
+            User user = null;
+            
+            if(message.TryPop(out object userId, "UserID"))
+            {
+                user = appState.GetUserByID((string) userId);
+                appState.Log(message.Text, user.Name);
+            }
+            else
+            {   
+                appState.Log(message.Text, "");
+            }
         }
     }
 }

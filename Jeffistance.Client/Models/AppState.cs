@@ -6,6 +6,7 @@ using Jeffistance.Client.ViewModels;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
 using Jeffistance.JeffServer.Models;
+using System.Linq;
 
 namespace Jeffistance.Client.Models
 {
@@ -37,11 +38,6 @@ namespace Jeffistance.Client.Models
 
         public MessageHandler MessageHandler {get; set; }
 
-        public string Log { 
-            get {return (CurrentWindow as IChatView)?.ChatView.Log;} 
-            set {(CurrentWindow as IChatView)?.ChatView.WriteLineInLog(value, null);} 
-        }
-
         private AppState(){}
 
         public static AppState GetAppState()
@@ -60,6 +56,16 @@ namespace Jeffistance.Client.Models
                 name = AppState.GetAppState().CurrentUser.Name;
             }
             ((IChatView)CurrentWindow)?.ChatView.WriteLineInLog(text, name);
+        }
+
+        public User GetUserByID(Guid userID)
+        {
+            return UserList.FirstOrDefault((user) => user.ID == userID);
+        }
+
+        public User GetUserByID(string userID)
+        {
+            return GetUserByID(Guid.Parse(userID));
         }
         
     }
