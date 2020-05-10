@@ -122,9 +122,11 @@ namespace Jeffistance.Client.ViewModels
             message["UserID"] = user.ID.ToString();
             user.Send(message);
 
-            // Send "user is ready" to chat
+            // Sends user ready state to chat
             message = new Message(messageText, JeffistanceFlags.Chat);
-            message["UserID"] = user.ID.ToString();
+            // Doesnt need an author, since its information
+            //message["UserID"] = user.ID.ToString();
+            message["MessageID"] = Guid.NewGuid().ToString();
             user.Send(message);
         }
 

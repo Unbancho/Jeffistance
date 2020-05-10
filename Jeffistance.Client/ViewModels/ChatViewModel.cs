@@ -62,13 +62,14 @@ namespace Jeffistance.Client.ViewModels
                 LocalUser user = AppState.GetAppState().CurrentUser;
                 Message chatMessage = new Message(MessageContent, JeffistanceFlags.Chat);
                 chatMessage["UserID"] = user.ID.ToString();
+                chatMessage["MessageID"] = Guid.NewGuid().ToString();
                 user.Send(chatMessage);
                 MessageContent = "";
             }
         }
-         public void WriteLineInLog(string msg, string username)
+         public void WriteLineInLog(string msg, string username, Guid msgId)
         {
-            var chatMessage = new ChatMessageViewModel(Guid.NewGuid(), msg, this, username);
+            var chatMessage = new ChatMessageViewModel(msgId, msg, this, username);
             Dispatcher.UIThread.Post(()=> ChatMessageLog.Add(chatMessage));
             if(AutoScrollToggled)
                 ScrollToMessage(chatMessage);
@@ -85,7 +86,33 @@ namespace Jeffistance.Client.ViewModels
         {
             Dispatcher.UIThread.Post(()=> ChatMessageLog.Remove(message));
         }
+
+        public void DeleteMessage(string msgId)
+        {
+            Guid id = Guid.Parse(msgId);
+            ChatMessageViewModel cmvm = FindMessage(id);
+            RemoveChatMessage(cmvm);
+        }
         
+        public void EditMessage(string msgId, string newText)
+        {
+            Guid id = Guid.Parse(msgId);
+            ChatMessageViewModel cmvm = FindMessage(id);
+            cmvm.Content = newText + " (Edited)";
+            cmvm.edited = true;
+        }
+
+        public ChatMessageViewModel FindMessage(Guid id)
+        {
+            foreach(ChatMessageViewModel c in ChatMessageLog)
+            {
+                if(c.id == id)
+                {
+                    return c;
+                }
+            }
+            return null;
+        }
     }
 
 }

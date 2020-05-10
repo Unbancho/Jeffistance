@@ -86,6 +86,7 @@ namespace Jeffistance.Common.Models
 
             Message greetingChat = new Message(
                 $"{Name} has joined from {Connection.IPAddress}.", JeffistanceFlags.Chat);
+            greetingChat["MessageID"] = Guid.NewGuid().ToString();
             Send(greetingChat);
         }
 

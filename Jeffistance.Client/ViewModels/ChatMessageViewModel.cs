@@ -5,6 +5,9 @@ using Avalonia.Controls;
 using Avalonia.VisualTree;
 using System.Reactive;
 using Jeffistance.Client.Models;
+using ModusOperandi.Messaging;
+using Jeffistance.Common.Services.MessageProcessing;
+using Jeffistance.Common.Models;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -25,7 +28,7 @@ namespace Jeffistance.Client.ViewModels
             OnDeleteClicked = ReactiveCommand.Create(OnDeleteClickedMethod, isAuthor);
         }
 
-        Guid id;
+        public Guid id {get; set;}
 
         string content;
 
@@ -33,7 +36,7 @@ namespace Jeffistance.Client.ViewModels
 
         ChatViewModel parent;
 
-        bool edited {get; set;}
+        public bool edited {get; set;}
 
         public string Username
         {
@@ -44,6 +47,7 @@ namespace Jeffistance.Client.ViewModels
         public string Content
         {
             get => content;
+
             set => this.RaiseAndSetIfChanged(ref content, value);
         }
 
@@ -56,14 +60,17 @@ namespace Jeffistance.Client.ViewModels
         public ReactiveCommand<Unit, Unit> OnDeleteClicked { get; }
         public void OnDeleteClickedMethod()
         {
-            parent.RemoveChatMessage(this);
+            LocalUser user = AppState.GetAppState().CurrentUser;
+            Message chatMessage = new Message(Content, JeffistanceFlags.DeleteChatMessage);
+            chatMessage["MessageID"] = id.ToString();
+            user.Send(chatMessage);
         }
 
         public ReactiveCommand<Control, Unit> OnEditClicked { get; }
         
         public void OnEditClickedMethod(Control testControl)
         {
-            var emvm = new EditMessageViewModel(id, Content, Parent, Username);
+            var emvm = new EditMessageViewModel(id, edited?Content.Substring(0, Content.Length - 9): Content, Parent, Username);
             Window editWindow = CreateEditWindow(emvm);
             editWindow.ShowDialog((Window)testControl.GetVisualRoot());
             Observable.Merge(emvm.OnOkClicked, emvm.OnCancelClicked.Select(_ => (ChatMessageViewModel)null))
@@ -73,8 +80,14 @@ namespace Jeffistance.Client.ViewModels
                     if (model != null)
                     {
                         ChatMessageViewModel message = (ChatMessageViewModel) model;
-                        edited = true;
+                        //edited = true;
                         Content = message.content;
+
+                        LocalUser user = AppState.GetAppState().CurrentUser;
+                        Message chatMessage = new Message(Content, JeffistanceFlags.EditChatMessage);
+                        chatMessage["MessageID"] = model.id.ToString();
+                        chatMessage["NewText"] = Content;
+                        user.Send(chatMessage);
                     }
                     editWindow.Close();
                 });

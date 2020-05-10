@@ -50,12 +50,27 @@ namespace Jeffistance.Client.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        internal void Log(string text, string name)
+        internal void Log(string text, string name, string msgId)
         {
+            /*
             if(name==null){
-                name = AppState.GetAppState().CurrentUser.Name;
+                name = "Server Announcer";
             }
-            ((IChatView)CurrentWindow)?.ChatView.WriteLineInLog(text, name);
+            */
+            //If no msg id is passed through the Message, then a local one is generated
+            Guid id = Guid.NewGuid();
+            if(msgId != null){
+                id = Guid.Parse(msgId);
+            }
+            ((IChatView)CurrentWindow)?.ChatView.WriteLineInLog(text, name, id);
+        }
+        internal void DeleteChatMessage(string msgId)
+        {
+            ((IChatView)CurrentWindow)?.ChatView.DeleteMessage(msgId);
+        }
+        internal void EditChatMessage(string msgId, string newText)
+        {
+            ((IChatView)CurrentWindow)?.ChatView.EditMessage(msgId, newText);
         }
 
         public User GetUserByID(Guid userID)

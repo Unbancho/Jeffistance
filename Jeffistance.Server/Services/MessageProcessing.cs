@@ -35,5 +35,20 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
         {
             Server.Broadcast(message);
         }
+
+        [MessageMethod(JeffistanceFlags.EditChatMessage)]
+        private void EditChatMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+        
+        [MessageMethod(JeffistanceFlags.DeleteChatMessage)]
+        private void DeleteChatMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        
+
     }
 }

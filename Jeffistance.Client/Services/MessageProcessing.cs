@@ -12,16 +12,8 @@ namespace Jeffistance.Client.Services.MessageProcessing
         public override void ProcessMessage(Message message)
         {
             base.ProcessMessage(message);
-            // Why Bancho
-            // LogMessage(message);
         }
-
-        public override void LogMessage(Message message)
-        {
-            var appState = AppState.GetAppState();
-            appState.Log(message.Text, (string) message.Sender);
-        }
-
+        
         [MessageMethod(JeffistanceFlags.Update)]
         private void UpdateFlagMethod(Message message)
         {
@@ -44,19 +36,36 @@ namespace Jeffistance.Client.Services.MessageProcessing
         [MessageMethod(JeffistanceFlags.Chat)]
         private void ChatFlagMessage(Message message)
         {
-            // do chat things
             AppState appState = AppState.GetAppState();
-            User user = null;
-            
+            string username = null;
+            string MessageID = null;
+            if(message.TryPop(out object msgId, "MessageID"))
+            {
+                MessageID = (string) msgId;
+            }
+             
             if(message.TryPop(out object userId, "UserID"))
             {
-                user = appState.GetUserByID((string) userId);
-                appState.Log(message.Text, user.Name);
+                username = appState.GetUserByID((string) userId).Name;
             }
-            else
-            {   
-                appState.Log(message.Text, "");
-            }
+            appState.Log(message.Text, username, MessageID);
+        }
+
+        [MessageMethod(JeffistanceFlags.EditChatMessage)]
+        private void EditChatMessageFlagMethod(Message message)
+        {
+            AppState appState = AppState.GetAppState();
+            string msgId = (string) message["MessageID"];
+            string newText = (string) message["NewText"];
+            appState.EditChatMessage(msgId, newText);
+        }
+        
+        [MessageMethod(JeffistanceFlags.DeleteChatMessage)]
+        private void DeleteChatMessageFlagMethod(Message message)
+        {
+            AppState appState = AppState.GetAppState();
+            string msgId = (string) message["MessageID"];
+            appState.DeleteChatMessage(msgId);
         }
     }
 }
