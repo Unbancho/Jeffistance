@@ -7,6 +7,7 @@ using ModusOperandi.Messaging;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
 using System.Reactive;
+using System.Collections.Generic;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -15,6 +16,7 @@ namespace Jeffistance.Client.ViewModels
         public ChatViewModel()
         {
             ChatMessageLog = new ObservableCollection <ChatMessageViewModel>();
+            chatMessageDictionary = new Dictionary<string, ChatMessageViewModel>();
             AutoScrollToggled = true;
             ToggleAutoScroll = ReactiveCommand.Create(
                 () => { AutoScrollToggled = !AutoScrollToggled; }
@@ -22,7 +24,8 @@ namespace Jeffistance.Client.ViewModels
         }
 
         private string _messageContent;
-        private string _chatLog;
+
+        public Dictionary<string, ChatMessageViewModel> chatMessageDictionary;
 
         private ObservableCollection<ChatMessageViewModel> _chatMessageLog;
         public ObservableCollection <ChatMessageViewModel> ChatMessageLog
@@ -31,11 +34,6 @@ namespace Jeffistance.Client.ViewModels
             set => this.RaiseAndSetIfChanged(ref _chatMessageLog, value);
         }
 
-        public string Log
-        {
-            get => _chatLog;
-            set => this.RaiseAndSetIfChanged(ref _chatLog, value);
-        }
         public string MessageContent {
             get => _messageContent;
             set => this.RaiseAndSetIfChanged(ref _messageContent, value);
@@ -67,10 +65,11 @@ namespace Jeffistance.Client.ViewModels
                 MessageContent = "";
             }
         }
-         public void WriteLineInLog(string msg, string username, Guid msgId)
+         public void WriteLineInLog(string msg, string username, string msgId)
         {
             var chatMessage = new ChatMessageViewModel(msgId, msg, this, username);
             Dispatcher.UIThread.Post(()=> ChatMessageLog.Add(chatMessage));
+            chatMessageDictionary.Add(chatMessage.id, chatMessage);
             if(AutoScrollToggled)
                 ScrollToMessage(chatMessage);
         }
@@ -82,34 +81,37 @@ namespace Jeffistance.Client.ViewModels
                 SelectedMessage = null;
         }
 
-        public void RemoveChatMessage(ChatMessageViewModel message)
-        {
-            Dispatcher.UIThread.Post(()=> ChatMessageLog.Remove(message));
-        }
 
         public void DeleteMessage(string msgId)
         {
-            Guid id = Guid.Parse(msgId);
-            ChatMessageViewModel cmvm = FindMessage(id);
-            RemoveChatMessage(cmvm);
+            ChatMessageViewModel cmvm = FindMessage(msgId);
+            chatMessageDictionary.Remove(msgId);
+            Dispatcher.UIThread.Post(()=> ChatMessageLog.Remove(cmvm));
         }
         
         public void EditMessage(string msgId, string newText)
         {
-            Guid id = Guid.Parse(msgId);
-            ChatMessageViewModel cmvm = FindMessage(id);
+            ChatMessageViewModel cmvm = FindMessage(msgId);
             cmvm.Content = newText + " (Edited)";
             cmvm.edited = true;
         }
 
-        public ChatMessageViewModel FindMessage(Guid id)
-        {
+        public ObservableCollection<ChatMessageViewModel> FindTextInMessage(string txt){
+            ObservableCollection<ChatMessageViewModel> filteredMessages = new ObservableCollection <ChatMessageViewModel>();
             foreach(ChatMessageViewModel c in ChatMessageLog)
             {
-                if(c.id == id)
+                if(c.Content.Contains(txt))
                 {
-                    return c;
+                   filteredMessages.Add(c);
                 }
+            }
+            return filteredMessages;
+        }
+
+        public ChatMessageViewModel FindMessage(string id)
+        {
+            if(chatMessageDictionary.ContainsKey(id)){
+                return chatMessageDictionary[id];
             }
             return null;
         }

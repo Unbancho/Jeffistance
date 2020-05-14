@@ -58,19 +58,19 @@ namespace Jeffistance.Client.Models
             }
             */
             //If no msg id is passed through the Message, then a local one is generated
-            Guid id = Guid.NewGuid();
+            string id = Guid.NewGuid().ToString();
             if(msgId != null){
-                id = Guid.Parse(msgId);
+                id = msgId;
             }
-            ((IChatView)CurrentWindow)?.ChatView.WriteLineInLog(text, name, id);
+            (CurrentWindow as IChatView)?.ChatView.WriteLineInLog(text, name, id);
         }
         internal void DeleteChatMessage(string msgId)
         {
-            ((IChatView)CurrentWindow)?.ChatView.DeleteMessage(msgId);
+            (CurrentWindow as IChatView)?.ChatView.DeleteMessage(msgId);
         }
         internal void EditChatMessage(string msgId, string newText)
         {
-            ((IChatView)CurrentWindow)?.ChatView.EditMessage(msgId, newText);
+            (CurrentWindow as IChatView)?.ChatView.EditMessage(msgId, newText);
         }
 
         public User GetUserByID(Guid userID)

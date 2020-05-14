@@ -7,9 +7,9 @@ namespace Jeffistance.Client.ViewModels
     public class EditMessageViewModel : ViewModelBase
     {
         private string _username;
-        private Guid _id;
+        private string _id;
         private ChatViewModel _parent;
-        public EditMessageViewModel(Guid id, string messageText, ChatViewModel parent, string username)
+        public EditMessageViewModel(string id, string messageText, ChatViewModel parent, string username)
         {
             _username = username;
             _parent = parent;

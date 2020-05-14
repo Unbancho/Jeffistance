@@ -37,17 +37,12 @@ namespace Jeffistance.Client.Services.MessageProcessing
         private void ChatFlagMessage(Message message)
         {
             AppState appState = AppState.GetAppState();
-            string username = null;
-            string MessageID = null;
-            if(message.TryPop(out object msgId, "MessageID"))
-            {
-                MessageID = (string) msgId;
-            }
-             
-            if(message.TryPop(out object userId, "UserID"))
-            {
-                username = appState.GetUserByID((string) userId).Name;
-            }
+            
+            string username = message.TryPop(out object userId, "UserID")?
+            appState.GetUserByID((string) userId).Name : null;
+            string MessageID = message.TryPop(out object msgId, "MessageID")?
+            (string)msgId: null;
+            
             appState.Log(message.Text, username, MessageID);
         }
 

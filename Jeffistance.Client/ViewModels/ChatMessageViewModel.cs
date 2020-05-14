@@ -13,7 +13,7 @@ namespace Jeffistance.Client.ViewModels
 {
     public class ChatMessageViewModel : ViewModelBase
     {
-        public ChatMessageViewModel(Guid id, string content, ChatViewModel parent, string username)
+        public ChatMessageViewModel(string id, string content, ChatViewModel parent, string username)
         {
             this.id = id;
             this.Content = content;
@@ -28,7 +28,7 @@ namespace Jeffistance.Client.ViewModels
             OnDeleteClicked = ReactiveCommand.Create(OnDeleteClickedMethod, isAuthor);
         }
 
-        public Guid id {get; set;}
+        public string id {get; set;}
 
         string content;
 
