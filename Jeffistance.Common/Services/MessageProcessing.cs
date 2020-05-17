@@ -14,7 +14,9 @@ namespace Jeffistance.Common.Services.MessageProcessing
         Greeting = 1 << 0,
         Update = 1 << 2,
         Chat = 1 << 3,
-        LobbyReady = 1 << 4
+        LobbyReady = 1 << 4,    
+        EditChatMessage = 1 << 5,
+        DeleteChatMessage = 1 << 6
     }
 
     public class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>

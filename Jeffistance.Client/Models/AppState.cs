@@ -6,6 +6,7 @@ using Jeffistance.Client.ViewModels;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
 using Jeffistance.JeffServer.Models;
+using System.Linq;
 
 namespace Jeffistance.Client.Models
 {
@@ -37,11 +38,6 @@ namespace Jeffistance.Client.Models
 
         public MessageHandler MessageHandler {get; set; }
 
-        public string Log { 
-            get {return (CurrentWindow as IChatView)?.ChatView.Log;} 
-            set {(CurrentWindow as IChatView)?.ChatView.WriteLineInLog(value);} 
-        }
-
         private AppState(){}
 
         public static AppState GetAppState()
@@ -53,5 +49,39 @@ namespace Jeffistance.Client.Models
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        internal void Log(string text, string name, string msgId)
+        {
+            /*
+            if(name==null){
+                name = "Server Announcer";
+            }
+            */
+            //If no msg id is passed through the Message, then a local one is generated
+            string id = Guid.NewGuid().ToString();
+            if(msgId != null){
+                id = msgId;
+            }
+            (CurrentWindow as IChatView)?.ChatView.WriteLineInLog(text, name, id);
+        }
+        internal void DeleteChatMessage(string msgId)
+        {
+            (CurrentWindow as IChatView)?.ChatView.DeleteMessage(msgId);
+        }
+        internal void EditChatMessage(string msgId, string newText)
+        {
+            (CurrentWindow as IChatView)?.ChatView.EditMessage(msgId, newText);
+        }
+
+        public User GetUserByID(Guid userID)
+        {
+            return UserList.FirstOrDefault((user) => user.ID == userID);
+        }
+
+        public User GetUserByID(string userID)
+        {
+            return GetUserByID(Guid.Parse(userID));
+        }
+        
     }
 }

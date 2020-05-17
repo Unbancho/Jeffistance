@@ -7,6 +7,7 @@ using ModusOperandi.Messaging;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
 using System.Reactive;
+using System.Collections.Generic;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -15,6 +16,7 @@ namespace Jeffistance.Client.ViewModels
         public ChatViewModel()
         {
             ChatMessageLog = new ObservableCollection <ChatMessageViewModel>();
+            chatMessageDictionary = new Dictionary<string, ChatMessageViewModel>();
             AutoScrollToggled = true;
             ToggleAutoScroll = ReactiveCommand.Create(
                 () => { AutoScrollToggled = !AutoScrollToggled; }
@@ -22,7 +24,8 @@ namespace Jeffistance.Client.ViewModels
         }
 
         private string _messageContent;
-        private string _chatLog;
+
+        public Dictionary<string, ChatMessageViewModel> chatMessageDictionary;
 
         private ObservableCollection<ChatMessageViewModel> _chatMessageLog;
         public ObservableCollection <ChatMessageViewModel> ChatMessageLog
@@ -31,11 +34,6 @@ namespace Jeffistance.Client.ViewModels
             set => this.RaiseAndSetIfChanged(ref _chatMessageLog, value);
         }
 
-        public string Log
-        {
-            get => _chatLog;
-            set => this.RaiseAndSetIfChanged(ref _chatLog, value);
-        }
         public string MessageContent {
             get => _messageContent;
             set => this.RaiseAndSetIfChanged(ref _messageContent, value);
@@ -60,16 +58,18 @@ namespace Jeffistance.Client.ViewModels
             if (MessageContent != null && MessageContent.Trim() != "")
             {
                 LocalUser user = AppState.GetAppState().CurrentUser;
-                Message chatMessage = new Message($"{user.Name}: {MessageContent}", JeffistanceFlags.Chat);
+                Message chatMessage = new Message(MessageContent, JeffistanceFlags.Chat);
+                chatMessage["UserID"] = user.ID.ToString();
+                chatMessage["MessageID"] = Guid.NewGuid().ToString();
                 user.Send(chatMessage);
                 MessageContent = "";
             }
         }
-
-        public void WriteLineInLog(string msg)
+         public void WriteLineInLog(string msg, string username, string msgId)
         {
-            var chatMessage = new ChatMessageViewModel(Guid.NewGuid(),  msg, this);
+            var chatMessage = new ChatMessageViewModel(msgId, msg, this, username);
             Dispatcher.UIThread.Post(()=> ChatMessageLog.Add(chatMessage));
+            chatMessageDictionary.Add(chatMessage.id, chatMessage);
             if(AutoScrollToggled)
                 ScrollToMessage(chatMessage);
         }
@@ -81,11 +81,40 @@ namespace Jeffistance.Client.ViewModels
                 SelectedMessage = null;
         }
 
-        public void RemoveChatMessage(ChatMessageViewModel message)
+
+        public void DeleteMessage(string msgId)
         {
-            Dispatcher.UIThread.Post(()=> ChatMessageLog.Remove(message));
+            ChatMessageViewModel cmvm = FindMessage(msgId);
+            chatMessageDictionary.Remove(msgId);
+            Dispatcher.UIThread.Post(()=> ChatMessageLog.Remove(cmvm));
+        }
+        
+        public void EditMessage(string msgId, string newText)
+        {
+            ChatMessageViewModel cmvm = FindMessage(msgId);
+            cmvm.Content = newText + " (Edited)";
+            cmvm.edited = true;
         }
 
+        public ObservableCollection<ChatMessageViewModel> FindTextInMessage(string txt){
+            ObservableCollection<ChatMessageViewModel> filteredMessages = new ObservableCollection <ChatMessageViewModel>();
+            foreach(ChatMessageViewModel c in ChatMessageLog)
+            {
+                if(c.Content.Contains(txt))
+                {
+                   filteredMessages.Add(c);
+                }
+            }
+            return filteredMessages;
+        }
+
+        public ChatMessageViewModel FindMessage(string id)
+        {
+            if(chatMessageDictionary.ContainsKey(id)){
+                return chatMessageDictionary[id];
+            }
+            return null;
+        }
     }
 
 }
