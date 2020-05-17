@@ -23,19 +23,33 @@ namespace Jeffistance.Client.ViewModels
             return panelDesiredSize;
         }
 
-        private Point GetPoint(Point circleCenter, int childIndex, int childCount, Control child)
+        private Point GetPoint(Point circleCenter, int childIndex, int childCount, Control child, Size finalSize)
         {
-            double r = circleCenter.Y;
-            double angle = (childIndex * 360) / childCount;
-            double xp2 = circleCenter.X + r*Math.Sin(AnglesToRadians(angle));
-            if(angle > 0 && 180 > angle)
+            //Defining radius. Using half of the smallest side
+            double r;
+            if(finalSize.Height > finalSize.Width)
             {
-                xp2 = xp2 - child.DesiredSize.Width;
+                r = circleCenter.X;
             }
-            double yp2 = (0 + r*(1 - Math.Cos(AnglesToRadians(angle))));
-            if(270 > angle && angle > 90 )
+            else
             {
-                yp2 = yp2 - child.DesiredSize.Height;
+                r = circleCenter.Y;
+            }
+            //Dividing the angles for the number of players
+            double angle = (childIndex * 360) / childCount;
+
+            double ellipseX = finalSize.Width / (r + circleCenter.X);            
+            double xp2 = (circleCenter.X + r*Math.Sin(AnglesToRadians(angle))) - child.DesiredSize.Width/2;
+            double yp2 = (0 + r*(1 - Math.Cos(AnglesToRadians(angle)))) + child.DesiredSize.Height/2;
+
+            
+            if((angle < 180) && (xp2 + child.DesiredSize.Width >= finalSize.Width))
+            {
+                xp2 = xp2 - child.DesiredSize.Width - Math.Abs(finalSize.Width - xp2);
+            }
+            if((angle > 90) && (yp2 + child.DesiredSize.Height >= finalSize.Height))
+            {
+                yp2 = yp2 - child.DesiredSize.Height - Math.Abs(finalSize.Height - yp2);
             }
             return new Point(xp2, yp2);
         }
@@ -51,7 +65,7 @@ namespace Jeffistance.Client.ViewModels
             int childIndex = 0;
             foreach (Control child in Children)
             {
-                Point childPoint = GetPoint(circleCenter, childIndex, Children.Count, child);
+                Point childPoint = GetPoint(circleCenter, childIndex, Children.Count, child, finalSize);
                 //double x = circleCenter.X;
                 //double y = circleCenter.Y;
                 //Point childPoint = new Point(0,0);
