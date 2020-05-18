@@ -163,9 +163,7 @@ namespace Jeffistance.Client.ViewModels
         private void OnStartClicked()
         {
             AppState gs = AppState.GetAppState();
-            //TODO Change to gamescreenview
-            //GameScreenViewModel gameScreen =  new GameScreenViewModel();
-            PlayerAreaViewModel gameScreen = new PlayerAreaViewModel();
+            GameScreenViewModel gameScreen =  new GameScreenViewModel();
             parent.Content = gameScreen;
             gs.CurrentWindow = gameScreen;
         }

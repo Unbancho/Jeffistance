@@ -1,10 +1,9 @@
-using Avalonia.Controls;
 using ReactiveUI;
 using System.Collections.ObjectModel;
-using Avalonia.Media.Imaging;
-using Jeffistance.Client.Models;
 using System.Collections.Generic;
 using Jeffistance.Common.Models;
+using Jeffistance.Client.Views;
+using Jeffistance.Client.Models;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -34,8 +33,8 @@ namespace Jeffistance.Client.ViewModels
             List<User> userList = appState.UserList;
             foreach(User u in userList)
             {
-                PlayerAvatarViewModel pavm = new PlayerAvatarViewModel(u.Name);
-                CircularPanel.Children.Add(pavm);
+                PlayerAvatarView pav = new PlayerAvatarView(u.Name);
+                CircularPanel.Children.Add(pav);
             }
         }
     }

@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Jeffistance.Client.Views.GameScreenView"
+             xmlns:views="clr-namespace:Jeffistance.Client.Views"
+             xmlns:vm="clr-namespace:Jeffistance.Client.ViewModels;assembly=Jeffistance.Client">
+   <Grid ColumnDefinitions="9*,1*" RowDefinitions="4*,6*" Margin="4">
+      <UserControl Grid.Row="0" Grid.Column="0" Content="{Binding GameScreen}"/>
+      <UserControl Grid.Row="1" Grid.Column="0" Content="{Binding ChatView}"/>
+      <UserControl Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Content="{Binding Score}"/>
+   </Grid>
+</UserControl>

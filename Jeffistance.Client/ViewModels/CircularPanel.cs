@@ -49,9 +49,6 @@ namespace Jeffistance.Client.ViewModels
             foreach (Control child in Children)
             {
                 Point childPoint = GetPoint(circleCenter, childIndex, Children.Count, child);
-                //double x = circleCenter.X;
-                //double y = circleCenter.Y;
-                //Point childPoint = new Point(0,0);
                 child.Arrange(new Rect(childPoint, child.DesiredSize));
                 childIndex++;
             }

@@ -42,7 +42,6 @@ namespace Jeffistance.Client.Services.MessageProcessing
             appState.GetUserByID((string) userId).Name : null;
             string MessageID = message.TryPop(out object msgId, "MessageID")?
             (string)msgId: null;
-            
             appState.Log(message.Text, username, MessageID);
         }
 
