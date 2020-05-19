@@ -1,41 +1,21 @@
 using ReactiveUI;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using Jeffistance.Common.Models;
-using Jeffistance.Client.Views;
-using Jeffistance.Client.Models;
 
+//This class is not very necesary, but just in case we want to customize the player area further in the future im leaving it as is.
 namespace Jeffistance.Client.ViewModels
 {
     public class PlayerAreaViewModel : ViewModelBase
     {
-        private ObservableCollection <PlayerAreaViewModel> players;
-
-        public ObservableCollection <PlayerAreaViewModel> Players
-        {
-            get => players;
-            set => this.RaiseAndSetIfChanged(ref players, value);
-        }
-
-        private CircularPanel circularPanel;
+        private CircularPanel _circularPanel;
 
         public CircularPanel CircularPanel
         {
-            get => circularPanel;
-            set => this.RaiseAndSetIfChanged(ref circularPanel, value);
+            get => _circularPanel;
+            set => this.RaiseAndSetIfChanged(ref _circularPanel, value);
         }
 
         public PlayerAreaViewModel()
         {
             CircularPanel = new CircularPanel();
-            Players = new ObservableCollection <PlayerAreaViewModel>();
-            AppState appState = AppState.GetAppState();
-            List<User> userList = appState.UserList;
-            foreach(User u in userList)
-            {
-                PlayerAvatarView pav = new PlayerAvatarView(u.Name);
-                CircularPanel.Children.Add(pav);
-            }
         }
     }
 }

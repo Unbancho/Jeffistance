@@ -5,8 +5,8 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Jeffistance.Client.Views.PlayerAvatarView">
   <StackPanel>
-   <Image Name="avatar" Source="/Assets/Spy.png" Width="75" Height="75"/>
-   <TextBox Name="username" TextWrapping="Wrap" IsEnabled="False"
+   <Image Name="Avatar" Source="/Assets/Spy.png" Width="75" Height="75"/>
+   <TextBox Name="Username" TextWrapping="Wrap" IsEnabled="False"
             BorderThickness="0" FontSize="18"/>
   </StackPanel>
 </UserControl>

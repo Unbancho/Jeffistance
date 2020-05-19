@@ -16,7 +16,8 @@ namespace Jeffistance.Common.Services.MessageProcessing
         Chat = 1 << 3,
         LobbyReady = 1 << 4,    
         EditChatMessage = 1 << 5,
-        DeleteChatMessage = 1 << 6
+        DeleteChatMessage = 1 << 6,
+        JoinGameMessage = 1 << 7
     }
 
     public class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>

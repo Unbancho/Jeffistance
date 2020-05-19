@@ -1,43 +1,80 @@
+using System;
+using System.Collections.Generic;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Jeffistance.Client.Models;
 using Jeffistance.Client.Views;
+using Jeffistance.Common.Models;
 using ReactiveUI;
 
 namespace Jeffistance.Client.ViewModels
 {
     public class GameScreenViewModel : ViewModelBase, IChatView
     {
-        PlayerAreaViewModel gameScreen;
-        ChatViewModel chatView;
-        private StackPanel score;
+        private PlayerAreaViewModel _gameScreen;
+        private ChatViewModel _chatView;
+        private StackPanel _scorePanel;
+        //private Dictionary<int, ScoreNodeView> _scoreDictionary;
 
-        public StackPanel Score
-        {
-            get => score;
-            set => this.RaiseAndSetIfChanged(ref score, value);
-        }       
         public GameScreenViewModel()
         {
             GameScreen = new PlayerAreaViewModel();
+            //ScoreDictionary = new Dictionary<int, ScoreNodeView>();
             ChatView = new ChatViewModel();
-            Score = new StackPanel();
+            ScorePanel = new StackPanel();
+            AppState appState = AppState.GetAppState();
+
+            //Adding players
+            List<User> userList = appState.UserList;
+            foreach(User u in userList)
+            {
+                PlayerAvatarView pav = new PlayerAvatarView(u.Name, u.ID.ToString());
+                pav.PointerPressed += onAvatarClicked;
+                GameScreen.CircularPanel.Children.Add(pav);
+            }
+
+            //Adding score nodes
             for (int index = 1; index <= 5; index++)
             {               
                 ScoreNodeView snv = new ScoreNodeView();
-                Score.Children.Add(snv);
+                ScorePanel.Children.Add(snv);
+                //ScoreDictionary.Add(index, snv);
             }
         }
 
-         public PlayerAreaViewModel GameScreen
+
+
+        private void onAvatarClicked(object sender, PointerPressedEventArgs args)
         {
-            get => gameScreen;
-            set => this.RaiseAndSetIfChanged(ref gameScreen, value);
+            PlayerAvatarView player = (PlayerAvatarView) sender;
+            //player.avatar.Source =  new Bitmap("Jeffistance.Client\\Assets\\Vorebisu.png");;
+            Console.WriteLine(player.UserId);
+        }
+        
+        public StackPanel ScorePanel
+        {
+            get => _scorePanel;
+            set => this.RaiseAndSetIfChanged(ref _scorePanel, value);
+        }    
+        /*
+        public Dictionary<int, ScoreNodeView> ScoreDictionary
+        {
+            get => _scoreDictionary;
+            set => this.RaiseAndSetIfChanged(ref _scoreDictionary, value);
+        }   
+        */  
+        public PlayerAreaViewModel GameScreen
+        {
+            get => _gameScreen;
+            set => this.RaiseAndSetIfChanged(ref _gameScreen, value);
         }
 
         public ChatViewModel ChatView
         {
-            get => chatView;
-            set => this.RaiseAndSetIfChanged(ref chatView, value);
+            get => _chatView;
+            set => this.RaiseAndSetIfChanged(ref _chatView, value);
         }
+        
 
     }
 

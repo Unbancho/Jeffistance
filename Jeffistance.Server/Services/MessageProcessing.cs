@@ -48,6 +48,11 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
             Server.Broadcast(message);
         }
 
+        [MessageMethod(JeffistanceFlags.JoinGameMessage)]
+        private void JoinGameMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
         
 
     }

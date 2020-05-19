@@ -3,7 +3,8 @@ using System.Reflection;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Client.Models;
 using ModusOperandi.Messaging;
-using Jeffistance.Common.Models;
+using Jeffistance.Client.ViewModels;
+using Avalonia.Threading;
 
 namespace Jeffistance.Client.Services.MessageProcessing
 {
@@ -60,6 +61,13 @@ namespace Jeffistance.Client.Services.MessageProcessing
             AppState appState = AppState.GetAppState();
             string msgId = (string) message["MessageID"];
             appState.DeleteChatMessage(msgId);
+        }
+
+        [MessageMethod(JeffistanceFlags.JoinGameMessage)]
+        private void JoinGameMessageFlagMethod(Message message)
+        {
+            LobbyViewModel lobby = AppState.GetAppState().CurrentLobby;
+            Dispatcher.UIThread.Post(()=> lobby.MoveToGameScreen());
         }
     }
 }
