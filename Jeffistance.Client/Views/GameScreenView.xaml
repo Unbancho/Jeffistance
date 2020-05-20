@@ -7,7 +7,7 @@
              xmlns:views="clr-namespace:Jeffistance.Client.Views"
              xmlns:vm="clr-namespace:Jeffistance.Client.ViewModels;assembly=Jeffistance.Client">
    <Grid ColumnDefinitions="9*,1*" RowDefinitions="4*,6*" Margin="4">
-      <UserControl Grid.Row="0" Grid.Column="0" Content="{Binding GameScreen}"/>
+      <UserControl Grid.Row="0" Grid.Column="0" Content="{Binding PlayerArea}"/>
       <UserControl Grid.Row="1" Grid.Column="0" Content="{Binding ChatView}"/>
       <UserControl Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Content="{Binding ScorePanel}"/>
    </Grid>

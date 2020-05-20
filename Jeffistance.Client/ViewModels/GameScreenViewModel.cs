@@ -11,14 +11,14 @@ namespace Jeffistance.Client.ViewModels
 {
     public class GameScreenViewModel : ViewModelBase, IChatView
     {
-        private PlayerAreaViewModel _gameScreen;
+        private PlayerAreaViewModel _playerArea;
         private ChatViewModel _chatView;
         private StackPanel _scorePanel;
         //private Dictionary<int, ScoreNodeView> _scoreDictionary;
 
         public GameScreenViewModel()
         {
-            GameScreen = new PlayerAreaViewModel();
+            PlayerArea = new PlayerAreaViewModel();
             //ScoreDictionary = new Dictionary<int, ScoreNodeView>();
             ChatView = new ChatViewModel();
             ScorePanel = new StackPanel();
@@ -30,7 +30,7 @@ namespace Jeffistance.Client.ViewModels
             {
                 PlayerAvatarView pav = new PlayerAvatarView(u.Name, u.ID.ToString());
                 pav.PointerPressed += onAvatarClicked;
-                GameScreen.CircularPanel.Children.Add(pav);
+                PlayerArea.CircularPanel.Children.Add(pav);
             }
 
             //Adding score nodes
@@ -63,10 +63,10 @@ namespace Jeffistance.Client.ViewModels
             set => this.RaiseAndSetIfChanged(ref _scoreDictionary, value);
         }   
         */  
-        public PlayerAreaViewModel GameScreen
+        public PlayerAreaViewModel PlayerArea
         {
-            get => _gameScreen;
-            set => this.RaiseAndSetIfChanged(ref _gameScreen, value);
+            get => _playerArea;
+            set => this.RaiseAndSetIfChanged(ref _playerArea, value);
         }
 
         public ChatViewModel ChatView

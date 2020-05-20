@@ -9,16 +9,27 @@ namespace Jeffistance.Client.Views
     {
         
         private Image nodeImage;
+        
+        public ScoreState State;
         public ScoreNodeView()
         {
             InitializeComponent();
             nodeImage = this.FindControl<Image>("nodeImage");
             nodeImage.Source = new Bitmap("Jeffistance.Client\\Assets\\Skullbisu.png");
+            State = ScoreState.NoResult;
         }
 
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
         }
+
+        
+    public enum ScoreState
+    {
+        NoResult,
+        JeffistanceVictory,
+        SpyVictory
+    }
     }
 }

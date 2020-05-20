@@ -7,22 +7,6 @@ namespace Jeffistance.Client.ViewModels
     public class CircularPanel : Panel
     {
 
-        // Override the default Measure method of Panel
-        protected override Size MeasureOverride(Size availableSize)
-        {
-            var panelDesiredSize = new Size();
-
-            // In our example, we just have one child. 
-            // Report that our panel requires just the size of its only child.
-            foreach (var child in Children)
-            {
-                child.Measure(availableSize);
-                panelDesiredSize = child.DesiredSize;
-            }
-
-            return panelDesiredSize;
-        }
-
         private Point GetPoint(Point circleCenter, int childIndex, int childCount, Control child)
         {
             double rx = circleCenter.X - child.DesiredSize.Width;

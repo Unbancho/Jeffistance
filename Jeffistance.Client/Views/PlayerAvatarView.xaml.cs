@@ -11,8 +11,6 @@ namespace Jeffistance.Client.Views
         public bool Selected;
         public string UserId;
 
-        public ScoreState State;
-
         public PlayerAvatarView()
         {
         }
@@ -22,7 +20,6 @@ namespace Jeffistance.Client.Views
             InitializeComponent();
             Avatar = this.FindControl<Image>("Avatar");
             Username = this.FindControl<TextBox>("Username");
-            State = ScoreState.NoResult;
             Username.Text = playerName;
             UserId = userId;
         }
@@ -33,10 +30,4 @@ namespace Jeffistance.Client.Views
         }
     }
 
-    public enum ScoreState
-    {
-        NoResult,
-        JeffistanceVictory,
-        SpyVictory
-    }
 }
