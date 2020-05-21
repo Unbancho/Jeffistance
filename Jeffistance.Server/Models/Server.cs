@@ -2,6 +2,8 @@ using ModusOperandi.Networking;
 using ModusOperandi.Messaging;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
+using Jeffistance.Common.Services.IoC;
+using Jeffistance.JeffServer.Services;
 using Jeffistance.JeffServer.Services.MessageProcessing;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -26,6 +28,7 @@ namespace Jeffistance.JeffServer.Models
 
         public Server()
         {
+            RegisterServerDependencies();
             Host = new LocalUser("Server")
             {
                 IsHost = true,
@@ -34,6 +37,13 @@ namespace Jeffistance.JeffServer.Models
                     CanKick = true
                 }
             };
+        }
+
+        private void RegisterServerDependencies()
+        {
+            IoCManager.Register<IServerMessageFactory, ServerMessageFactory>();
+
+            IoCManager.BuildGraph();
         }
 
         public void ConnectHost(string username, JeffistanceMessageProcessor messageProcessor)
@@ -105,20 +115,26 @@ namespace Jeffistance.JeffServer.Models
 
         private void OnUserListChanged(object obj, NotifyCollectionChangedEventArgs args)
         {
-            string messageText;
-            switch (args.Action)
-            {
-                case NotifyCollectionChangedAction.Add:
-                    messageText = $"{((User)args.NewItems[0]).Name} has joined.";
-                    break;
-                case NotifyCollectionChangedAction.Remove:
-                    messageText = $"{((User)args.OldItems[0]).Name} has left.";
-                    break;
-                default:
-                    messageText = "";
-                    break;
-            }
-            Message updateList = new Message(messageText, JeffistanceFlags.Update);
+            // Greeting message also handles the greeting chat message
+            // TODO Figure out where to put the "user left" mesasge
+
+            // string messageText;
+            // switch (args.Action)
+            // {
+            //     case NotifyCollectionChangedAction.Add:
+            //         messageText = $"{((User)args.NewItems[0]).Name} has joined.";
+            //         break;
+            //     case NotifyCollectionChangedAction.Remove:
+            //         messageText = $"{((User)args.OldItems[0]).Name} has left.";
+            //         break;
+            //     default:
+            //         messageText = "";
+            //         break;
+            // }
+            
+            var messageFactory = IoCManager.Resolve<IServerMessageFactory>();
+
+            var updateList = messageFactory.MakeUpdateMessage();
             updateList["UserList"] = UserList;
             MessageHandler.Broadcast(updateList);
         }

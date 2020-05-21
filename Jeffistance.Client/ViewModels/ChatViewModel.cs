@@ -3,9 +3,9 @@ using Jeffistance.Client.Models;
 using System;
 using Avalonia.Threading;
 using ReactiveUI;
-using ModusOperandi.Messaging;
-using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
+using Jeffistance.Common.Services.IoC;
+using Jeffistance.Common.Services;
 using System.Reactive;
 using System.Collections.Generic;
 
@@ -55,13 +55,12 @@ namespace Jeffistance.Client.ViewModels
 
         public void OnSendClicked()
         {
-            if (MessageContent != null && MessageContent.Trim() != "")
+            if (!string.IsNullOrWhiteSpace(MessageContent))
             {
                 LocalUser user = AppState.GetAppState().CurrentUser;
-                Message chatMessage = new Message(MessageContent, JeffistanceFlags.Chat);
-                chatMessage["UserID"] = user.ID.ToString();
-                chatMessage["MessageID"] = Guid.NewGuid().ToString();
-                user.Send(chatMessage);
+                var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+                var message = messageFactory.MakeChatMessage(MessageContent, user.ID);
+                user.Send(message);
                 MessageContent = "";
             }
         }
