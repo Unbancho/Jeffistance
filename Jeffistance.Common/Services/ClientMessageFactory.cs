@@ -18,6 +18,8 @@ namespace Jeffistance.Common.Services
         Message MakeEditChatMessage(string content, string messageID);
 
         Message MakeDeleteChatMessage(string messageID);
+
+        Message MakeJoinGameMessage();
     }
 
     public class ClientMessageFactory : IClientMessageFactory
@@ -71,6 +73,11 @@ namespace Jeffistance.Common.Services
             var message = new Message(flags: JeffistanceFlags.DeleteChatMessage);
             message["MessageID"] = messageID;
             return message;
+        }
+        
+        public Message MakeJoinGameMessage()
+        {
+            return new Message(flags: JeffistanceFlags.JoinGameMessage);
         }
     }
 }

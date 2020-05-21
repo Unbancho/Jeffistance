@@ -162,7 +162,9 @@ namespace Jeffistance.Client.ViewModels
         {
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
-            Message message = new Message(null, JeffistanceFlags.JoinGameMessage);
+            var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+
+            var message = messageFactory.MakeJoinGameMessage();
             user.Send(message);
         }
 
