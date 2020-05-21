@@ -8,9 +8,9 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using Jeffistance.Client.Models;
 using Jeffistance.Common.Models;
+using Jeffistance.Common.Services.IoC;
+using Jeffistance.Common.Services;
 using ReactiveUI;
-using Jeffistance.Common.Services.MessageProcessing;
-using ModusOperandi.Messaging;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -88,7 +88,7 @@ namespace Jeffistance.Client.ViewModels
             var property = ((AppState) sender).GetType().GetProperty(args.PropertyName).GetValue(sender);
             if(args.PropertyName == "UserList") // TODO: How can we do it not like this, help
             {
-                SyncUserList((List<User>) property);
+                Dispatcher.UIThread.Post(() => SyncUserList((List<User>) property));
             }
         }
 
@@ -96,11 +96,12 @@ namespace Jeffistance.Client.ViewModels
         {
             foreach (var item in updatedList.Except(Users))
             { 
-                Dispatcher.UIThread.Post(()=> Users.Add(item));
+                Users.Add(item);
             }
-            foreach (var item in Users.Except(updatedList))
+
+            foreach (var item in Users.ToList().Except(updatedList))
             {
-                Dispatcher.UIThread.Post(()=> Users.Remove(item));
+                Users.Remove(item);
             }
         }
 
@@ -117,16 +118,13 @@ namespace Jeffistance.Client.ViewModels
                 messageText = $"{user.Name} is now ready.";
             }
 
+            var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
             // Send ready message
-            Message message = new Message(null, JeffistanceFlags.LobbyReady);
-            message["UserID"] = user.ID.ToString();
+            var message = messageFactory.MakeLobbyReadyMessage(user.ID);
             user.Send(message);
 
-            // Sends user ready state to chat
-            message = new Message(messageText, JeffistanceFlags.Chat);
-            // Doesnt need an author, since its information
-            //message["UserID"] = user.ID.ToString();
-            message["MessageID"] = Guid.NewGuid().ToString();
+            // Send user ready state to chat
+            message = messageFactory.MakeChatMessage(messageText);
             user.Send(message);
         }
 

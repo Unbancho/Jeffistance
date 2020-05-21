@@ -38,5 +38,10 @@ namespace Jeffistance.Common.Services.IoC
         {
             _dependencyCollection.BuildGraph();
         }
+
+        public static void Clear()
+        {
+            _dependencyCollection.Clear();
+        }
     }
 }

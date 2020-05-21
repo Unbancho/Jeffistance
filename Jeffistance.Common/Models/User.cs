@@ -3,6 +3,8 @@ using System.Runtime.Serialization;
 using ModusOperandi.Networking;
 using ModusOperandi.Messaging;
 using Jeffistance.Common.Services.MessageProcessing;
+using Jeffistance.Common.Services;
+using Jeffistance.Common.Services.IoC;
 using System.ComponentModel;
 
 namespace Jeffistance.Common.Models
@@ -79,15 +81,14 @@ namespace Jeffistance.Common.Models
 
         public void GreetServer()
         {
-            Message greetingMessage = new Message(null, JeffistanceFlags.Greeting);
-            var user = new User(this);
-            greetingMessage["User"] = user;
+            var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+
+            var greetingMessage = messageFactory.MakeGreetingMessage(new User(this));
             Send(greetingMessage);
 
-            Message greetingChat = new Message(
-                $"{Name} has joined from {Connection.IPAddress}.", JeffistanceFlags.Chat);
-            greetingChat["MessageID"] = Guid.NewGuid().ToString();
-            Send(greetingChat);
+            var greetingChatMessage = messageFactory.MakeChatMessage(
+                $"{Name} has joined from {Connection.IPAddress}.");
+            Send(greetingChatMessage);
         }
 
         public void Disconnect()
