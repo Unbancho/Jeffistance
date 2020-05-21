@@ -162,7 +162,18 @@ namespace Jeffistance.Client.ViewModels
 
         private void OnStartClicked()
         {
+            AppState gs = AppState.GetAppState();
+            var user = AppState.GetAppState().CurrentUser;
+            Message message = new Message(null, JeffistanceFlags.JoinGameMessage);
+            user.Send(message);
+        }
 
+        public void MoveToGameScreen()
+        {
+            AppState gs = AppState.GetAppState();
+            GameScreenViewModel gameScreen = new GameScreenViewModel();
+            parent.Content = gameScreen;
+            gs.CurrentWindow = gameScreen;
         }
 
         private void UsersUpdated(object obj, NotifyCollectionChangedEventArgs args)
