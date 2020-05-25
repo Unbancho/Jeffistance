@@ -91,5 +91,19 @@ namespace Jeffistance.Common.Services.IoC
                 }
             }
         }
+
+        /// <summary>
+        /// Clear all registered interfaces and implementations.
+        /// </summary>
+        public void Clear()
+        {
+            foreach (var service in _services.Values.OfType<IDisposable>().Distinct())
+            {
+                service.Dispose();
+            }
+
+            _services.Clear();
+            _resolveTypes.Clear();
+        }
     }
 }
