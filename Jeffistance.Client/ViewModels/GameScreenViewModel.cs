@@ -33,6 +33,15 @@ namespace Jeffistance.Client.ViewModels
                 PlayerArea.CircularPanel.Children.Add(pav);
             }
 
+            // REMOVE
+
+            for (int i = 0; i < 5; i++)
+            {
+                var pav = new PlayerAvatarView($"DebugBoyExtra{i}", i.ToString());
+                pav.PointerPressed += onAvatarClicked;
+                PlayerArea.CircularPanel.Children.Add(pav);
+            }
+
             //Adding score nodes
             for (int index = 1; index <= 5; index++)
             {               

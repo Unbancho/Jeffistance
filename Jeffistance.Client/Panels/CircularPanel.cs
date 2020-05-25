@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using System;
+using Jeffistance.Common.ExtensionMethods;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -9,22 +10,17 @@ namespace Jeffistance.Client.ViewModels
 
         private Point GetPoint(Point circleCenter, int childIndex, int childCount, Control child)
         {
-            double rx = circleCenter.X - child.DesiredSize.Width;
-            double ry = circleCenter.Y - child.DesiredSize.Height;
+            (double rx, double ry) = (circleCenter.X - child.DesiredSize.Width, circleCenter.Y - child.DesiredSize.Height);
 
             //Dividing the angles for the number of players
             double angle = (childIndex * 360) / childCount;
 
-            double xp2 = (circleCenter.X + rx * Math.Cos(AnglesToRadians(angle)) - child.DesiredSize.Width/2);
-            double yp2 = (circleCenter.Y + ry * Math.Sin(AnglesToRadians(angle)) - child.DesiredSize.Height/2);
+            double xp2 = (circleCenter.X + rx * Math.Cos(angle.ToRadians()) - child.DesiredSize.Width/2);
+            double yp2 = (circleCenter.Y + ry * Math.Sin(angle.ToRadians()) - child.DesiredSize.Height/2);
             
             return new Point(xp2, yp2);
         }
 
-        private double AnglesToRadians(double angle)
-        {
-            return (Math.PI / 180) * angle;
-        }
 
         protected override Size ArrangeOverride(Size finalSize)
         {
@@ -36,7 +32,6 @@ namespace Jeffistance.Client.ViewModels
                 child.Arrange(new Rect(childPoint, child.DesiredSize));
                 childIndex++;
             }
-            
             return finalSize; // Returns the final Arranged size
         }
     }
