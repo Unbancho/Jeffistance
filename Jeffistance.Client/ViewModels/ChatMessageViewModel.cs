@@ -8,6 +8,8 @@ using Jeffistance.Client.Models;
 using ModusOperandi.Messaging;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
+using Jeffistance.Common.Services.IoC;
+using Jeffistance.Common.Services;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -61,8 +63,9 @@ namespace Jeffistance.Client.ViewModels
         public void OnDeleteClickedMethod()
         {
             LocalUser user = AppState.GetAppState().CurrentUser;
-            Message chatMessage = new Message(Content, JeffistanceFlags.DeleteChatMessage);
-            chatMessage["MessageID"] = id.ToString();
+            var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+
+            var chatMessage = messageFactory.MakeDeleteChatMessage(id);
             user.Send(chatMessage);
         }
 
@@ -84,9 +87,9 @@ namespace Jeffistance.Client.ViewModels
                         Content = message.content;
 
                         LocalUser user = AppState.GetAppState().CurrentUser;
-                        Message chatMessage = new Message(Content, JeffistanceFlags.EditChatMessage);
-                        chatMessage["MessageID"] = model.id.ToString();
-                        chatMessage["NewText"] = Content;
+                        var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+
+                        var chatMessage = messageFactory.MakeEditChatMessage(Content, model.id);
                         user.Send(chatMessage);
                     }
                     editWindow.Close();

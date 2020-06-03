@@ -1,3 +1,5 @@
+using System;
+
 namespace Jeffistance.Common.ExtensionMethods
 {
     public static class IntegerExtensions
@@ -30,4 +32,12 @@ namespace Jeffistance.Common.ExtensionMethods
             return capitalizedString;
         }
     }
+
+    public static class DoubleExtensions
+    {
+        public static double ToRadians(this double angle)
+        {
+            return (Math.PI / 180) * angle;
+        }
+    }   
 }
