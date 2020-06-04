@@ -6,7 +6,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Jeffistance.Client.Views.ToolbarMenuView">
   
-  <Menu Background="Purple" Padding="4" FontSize="14" FontFamily="Inter UI">
+  <Menu Background="#487E91" Padding="4" FontSize="14" FontFamily="Inter UI">
     <MenuItem Header="_Game">
         <MenuItem Header="_Host..."/>
         <Separator/>
