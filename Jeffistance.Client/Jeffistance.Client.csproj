@@ -16,6 +16,12 @@
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Assets\background_1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\background_1.png" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.0" />
     <PackageReference Include="Avalonia.Desktop" Version="0.9.0" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.9.0" />
