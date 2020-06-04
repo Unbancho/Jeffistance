@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Jeffistance.Client.ViewModels;assembly=Jeffistance"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Jeffistance.Client.Views.ToolbarMenuView">
+  
+  <Menu Background="Purple" Padding="4" FontSize="14" FontFamily="Inter UI">
+    <MenuItem Header="_Game">
+        <MenuItem Header="_Host..."/>
+        <Separator/>
+        <MenuItem Header="_Join..."/>
+    </MenuItem>
+    <MenuItem Header="_Screen">
+        <MenuItem Header="_Ratio">
+        <MenuItem Header="_1920:1080"/>
+        <MenuItem Header="_800:640"/>
+        <MenuItem Header="_640:400"/>
+        </MenuItem>
+        <MenuItem Header="_Background..."/>
+    </MenuItem>
+    <MenuItem Header="_Audio">
+        <CheckBox BorderThickness="0"
+                IsHitTestVisible="False">
+        Alert
+        </CheckBox>
+        <Separator/>
+        <CheckBox IsChecked="True" BorderThickness="0"
+                IsHitTestVisible="False">
+        Music
+        </CheckBox>
+    </MenuItem>
+    <MenuItem Header="_Help">
+        <MenuItem Header="_About..."
+                  Command="{Binding AboutMenu}" CommandParameter="{Binding $parent[2]}"/>
+        <Separator/>
+        <MenuItem Header="_Version..."/>
+    </MenuItem>
+  </Menu>
+
+</UserControl>
