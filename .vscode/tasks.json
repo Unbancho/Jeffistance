@@ -2,55 +2,16 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "build solution",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Jeffistance.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile",
             "group": "build"
-        },
-        {
-            "label": "build tests",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/Jeffistance.Test/Jeffistance.Test.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile",
-            "group": "build"
-        },
-        {
-            "label": "publish",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "publish",
-                "${workspaceFolder}/Jeffistance.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "watch",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "watch",
-                "run",
-                "${workspaceFolder}/Jeffistance.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
         },
         {
             "label": "test",
@@ -67,6 +28,18 @@
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
             "dependsOn": ["build tests"]
+        },
+        {
+            "label": "Delay",
+            "type": "shell",
+            "windows": {
+            "command": "ping 127.0.0.1 -n 1"
+            },
+            "group": "none",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "new"
+            }
         }
     ]
 }
