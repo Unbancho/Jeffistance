@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Jeffistance.Common.Services.PlayerEventManager;
 using System.Linq;
+using System;
 
 namespace Jeffistance.Common.Models
 {
@@ -26,6 +27,20 @@ namespace Jeffistance.Common.Models
         public Player CurrentLeader {
             get => CurrentState.CurrentLeader;
             private set => CurrentState.CurrentLeader = value; }
+
+        public void StartTest()
+        {
+            List<Player> players = new List<Player>();
+            for (int i = 0; i < 5; i++)
+            {
+                players.Add(new Player());
+            }
+            InProgress = true;
+            Players = new List<Player>(players);
+            Setup();
+            NextRound();
+        }
+
         public Phase CurrentPhase {
             get => CurrentState.CurrentPhase;
             private set => CurrentState.CurrentPhase = value; }
@@ -69,6 +84,9 @@ namespace Jeffistance.Common.Models
             playerEventManager.OnMissionVoted += OnMissionVoted;
             TeamSizes = new Dictionary<int, int[]>()
             {
+                {2, new int[] {1, 1, 1, 1, 1}},
+                {3, new int[] {1, 2, 2, 3, 3}},
+                {4, new int[] {2, 2, 2, 3, 3}},
                 {5, new int[] {2, 3, 2, 3, 3}},
                 {6, new int[] {2, 3, 4, 3, 4}},
                 {7, new int[] {2, 3, 3, 4, 4}}
@@ -78,10 +96,19 @@ namespace Jeffistance.Common.Models
             CurrentPhase = Phase.Standby;
         }
 
-        public void Start(IEnumerable<Player> players)
+        public void Start(List<User> Users)
         {
+            Players = new List<Player>();
+            int i = 1;
+            foreach(User u in Users)
+            {
+                Player player = new Player();
+                player.ID = i;
+                player.UserID = u.ID.ToString();
+                i++;
+                Players.Add(player);
+            }
             InProgress = true;
-            Players = new List<Player>(players);
             Setup();
             NextRound();
         }

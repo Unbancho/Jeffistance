@@ -176,6 +176,21 @@ namespace Jeffistance.Client.ViewModels
             gs.CurrentWindow = gameScreen;
         }
 
+        public void SetupGame()
+        {
+            AppState gs = AppState.GetAppState();
+            if(gs.CurrentUser.IsHost)
+            {
+                List<User> Users = gs.UserList;
+                LocalUser me = AppState.GetAppState().CurrentUser;
+                GameScreenViewModel game = (gs.CurrentWindow as GameScreenViewModel);
+                game.Server.StartGame(Users);
+                var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+                var message = messageFactory.MakeGetPlayerInfoMessage(game.Server.Game.Players);
+                me.Send(message);
+            }
+        }
+
         private void UsersUpdated(object obj, NotifyCollectionChangedEventArgs args)
         {
             if (AppState.GetAppState().CurrentUser.IsHost)

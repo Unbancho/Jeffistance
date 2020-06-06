@@ -2,6 +2,7 @@ using System;
 using Jeffistance.Common.Services.MessageProcessing;
 using ModusOperandi.Messaging;
 using Jeffistance.Common.Models;
+using System.Collections.Generic;
 
 namespace Jeffistance.Common.Services
 {
@@ -20,6 +21,8 @@ namespace Jeffistance.Common.Services
         Message MakeDeleteChatMessage(string messageID);
 
         Message MakeJoinGameMessage();
+
+        Message MakeGetPlayerInfoMessage(List<Player> players);
     }
 
     public class ClientMessageFactory : IClientMessageFactory
@@ -78,6 +81,13 @@ namespace Jeffistance.Common.Services
         public Message MakeJoinGameMessage()
         {
             return new Message(flags: JeffistanceFlags.JoinGameMessage);
+        }
+
+        public Message MakeGetPlayerInfoMessage(List<Player> players)
+        {
+            var message = new Message(flags: JeffistanceFlags.GetPlayerInfoMessage);
+            message["Players"] = players;
+            return message;
         }
     }
 }

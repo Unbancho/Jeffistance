@@ -53,6 +53,12 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
         {
             Server.Broadcast(message);
         }
+
+        [MessageMethod(JeffistanceFlags.GetPlayerInfoMessage)]
+        private void GetPlayerInfoMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
         
 
     }

@@ -5,6 +5,8 @@ using Jeffistance.Client.Models;
 using ModusOperandi.Messaging;
 using Jeffistance.Client.ViewModels;
 using Avalonia.Threading;
+using System.Collections.Generic;
+using Jeffistance.Common.Models;
 
 namespace Jeffistance.Client.Services.MessageProcessing
 {
@@ -68,6 +70,16 @@ namespace Jeffistance.Client.Services.MessageProcessing
         {
             LobbyViewModel lobby = AppState.GetAppState().CurrentLobby;
             Dispatcher.UIThread.Post(()=> lobby.MoveToGameScreen());
+            Dispatcher.UIThread.Post(()=> lobby.SetupGame());
+        }
+
+        [MessageMethod(JeffistanceFlags.GetPlayerInfoMessage)]
+        private void GetPlayerInfoMessageFlagMethod(Message message)
+        {
+            AppState appState = AppState.GetAppState();
+            List<Player> players = (List<Player>) message["Players"];
+            Player me = players.Find(x => x.UserID == appState.CurrentUser.ID.ToString());
+            (appState.CurrentWindow as GameScreenViewModel).RoundBox = "You are in the " + me.Faction.Name + " team";
         }
     }
 }

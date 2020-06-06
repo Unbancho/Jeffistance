@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Jeffistance.Client.Models;
 using Jeffistance.Client.Views;
 using Jeffistance.Common.Models;
+using Jeffistance.JeffServer.Models;
 using ReactiveUI;
 
 namespace Jeffistance.Client.ViewModels
@@ -14,6 +15,10 @@ namespace Jeffistance.Client.ViewModels
         private PlayerAreaViewModel _playerArea;
         private ChatViewModel _chatView;
         private StackPanel _scorePanel;
+
+        private Server _server;
+
+        private String _roundBox;
         //private Dictionary<int, ScoreNodeView> _scoreDictionary;
 
         public GameScreenViewModel()
@@ -22,17 +27,18 @@ namespace Jeffistance.Client.ViewModels
             //ScoreDictionary = new Dictionary<int, ScoreNodeView>();
             ChatView = new ChatViewModel();
             ScorePanel = new StackPanel();
-            AppState appState = AppState.GetAppState();
-
+            
+            AppState ass = AppState.GetAppState();
+            Server = ass.Server;
+            List<User> Users = ass.UserList;
             //Adding players
-            List<User> userList = appState.UserList;
-            foreach(User u in userList)
+            //List<User> userList = AppState.UserList;
+            foreach(User u in Users)
             {
                 PlayerAvatarView pav = new PlayerAvatarView(u.Name, u.ID.ToString());
                 pav.PointerPressed += onAvatarClicked;
                 PlayerArea.CircularPanel.Children.Add(pav);
             }
-
             //Adding score nodes
             for (int index = 1; index <= 5; index++)
             {               
@@ -41,7 +47,6 @@ namespace Jeffistance.Client.ViewModels
                 //ScoreDictionary.Add(index, snv);
             }
         }
-
 
 
         private void onAvatarClicked(object sender, PointerPressedEventArgs args)
@@ -73,6 +78,17 @@ namespace Jeffistance.Client.ViewModels
         {
             get => _chatView;
             set => this.RaiseAndSetIfChanged(ref _chatView, value);
+        }
+        public String RoundBox
+        {
+            get => _roundBox;
+            set => this.RaiseAndSetIfChanged(ref _roundBox, value);
+        }
+
+        public Server Server
+        {
+            get => _server;
+            set => this.RaiseAndSetIfChanged(ref _server, value);
         }
         
 
