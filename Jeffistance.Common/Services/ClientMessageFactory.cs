@@ -23,6 +23,14 @@ namespace Jeffistance.Common.Services
         Message MakeJoinGameMessage();
 
         Message MakeGetPlayerInfoMessage(List<Player> players);
+
+        Message MakeGamePhaseReadyMessage(string UserID);
+
+        Message MakeAdvanceGamePhaseMessage();
+
+        Message MakePickTeamMessageMessage(List<string> playersInTeamIDs);
+
+        Message MakeDeclareLeaderMessage(int teamSize, string idUser);
     }
 
     public class ClientMessageFactory : IClientMessageFactory
@@ -87,6 +95,33 @@ namespace Jeffistance.Common.Services
         {
             var message = new Message(flags: JeffistanceFlags.GetPlayerInfoMessage);
             message["Players"] = players;
+            return message;
+        }
+
+        public Message MakeGamePhaseReadyMessage(string userID)
+        {
+            var message = new Message(flags: JeffistanceFlags.GamePhaseReadyMessage);
+            message["UserID"] = userID;
+            return message;
+        }
+
+        public Message MakeAdvanceGamePhaseMessage()
+        {
+            return new Message(flags: JeffistanceFlags.AdvanceGamePhaseMessage);
+        }
+
+        public Message MakePickTeamMessageMessage(List<string> playersInTeamIDs)
+        {
+            var message =  new Message(flags: JeffistanceFlags.PickTeamMessage);
+            message["PlayersInTeamIDs"] = playersInTeamIDs;
+            return message;
+        }
+
+        public Message MakeDeclareLeaderMessage(int teamSize, string idUser)
+        {
+            var message =  new Message(flags: JeffistanceFlags.DeclareLeaderMessage);
+            message["TeamSize"] = teamSize;
+            message["UserID"] = idUser;
             return message;
         }
     }

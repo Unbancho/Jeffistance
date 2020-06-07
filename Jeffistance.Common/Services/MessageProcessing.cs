@@ -18,7 +18,11 @@ namespace Jeffistance.Common.Services.MessageProcessing
         EditChatMessage = 1 << 5,
         DeleteChatMessage = 1 << 6,
         JoinGameMessage = 1 << 7,
-        GetPlayerInfoMessage = 1 << 8
+        GetPlayerInfoMessage = 1 << 8,
+        GamePhaseReadyMessage = 1 << 9,
+        AdvanceGamePhaseMessage = 1 << 10,
+        PickTeamMessage = 1 << 11,
+        DeclareLeaderMessage = 1 << 12
     }
 
     public class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>

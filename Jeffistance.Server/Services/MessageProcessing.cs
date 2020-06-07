@@ -59,7 +59,30 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
         {
             Server.Broadcast(message);
         }
-        
 
+        [MessageMethod(JeffistanceFlags.GamePhaseReadyMessage)]
+        private void GamePhaseReadyMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        [MessageMethod(JeffistanceFlags.AdvanceGamePhaseMessage)]
+        private void AdvanceGamePhaseMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        [MessageMethod(JeffistanceFlags.PickTeamMessage)]
+        private void PickTeamMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+        
+        [MessageMethod(JeffistanceFlags.DeclareLeaderMessage)]
+        private void DeclareLeaderMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+        
     }
 }

@@ -30,13 +30,7 @@ namespace Jeffistance.Common.Models
 
         public void StartTest()
         {
-            List<Player> players = new List<Player>();
-            for (int i = 0; i < 5; i++)
-            {
-                players.Add(new Player());
-            }
             InProgress = true;
-            Players = new List<Player>(players);
             Setup();
             NextRound();
         }
