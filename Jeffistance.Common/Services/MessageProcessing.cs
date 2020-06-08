@@ -22,7 +22,9 @@ namespace Jeffistance.Common.Services.MessageProcessing
         GamePhaseReadyMessage = 1 << 9,
         AdvanceGamePhaseMessage = 1 << 10,
         PickTeamMessage = 1 << 11,
-        DeclareLeaderMessage = 1 << 12
+        DeclareLeaderMessage = 1 << 12,
+        VoteMessage = 1 << 13,
+        StartMissionVotingMessage = 1 << 14,
     }
 
     public class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>

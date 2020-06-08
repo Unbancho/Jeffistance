@@ -96,7 +96,7 @@ namespace Jeffistance.Client.Services.MessageProcessing
             {
                 Game game = AppState.GetAppState().Server.Game;
                 int teamSize = game.NextTeamSize;
-                string leaderID = game.CurrentLeader.UserID;
+                string leaderID = game.CurrentLeaderID;
                 (AppState.GetAppState().CurrentWindow as GameScreenViewModel).DeclareLeader(teamSize, leaderID);
             }
         }
@@ -104,14 +104,15 @@ namespace Jeffistance.Client.Services.MessageProcessing
         [MessageMethod(JeffistanceFlags.PickTeamMessage)]
         private void PickTeamMessageFlagMethod(Message message)
         {
-            List<string> pickedUsers = (List<string>) message["PlayersInTeamIDs"];
             AppState appState = AppState.GetAppState();
             GameScreenViewModel gameScreen = (appState.CurrentWindow as GameScreenViewModel);
+            gameScreen.TeamPickedUsersIDs = (List<string>) message["PlayersInTeamIDs"];
             string leaderName = appState.UserList.Find(u => u.ID.ToString() == gameScreen.CurrentLeaderID).Name;
-            Dispatcher.UIThread.Post(()=>gameScreen.ShowSelectedPlayers(pickedUsers));
+            Dispatcher.UIThread.Post(()=>gameScreen.ShowSelectedPlayers());
             gameScreen.RoundBox = leaderName + " picked the following team. It's voting time";
             gameScreen.CurrentPhase = Phase.TeamVoting;
-            Dispatcher.UIThread.Post(()=> gameScreen.ChangeOKBtnState(true));
+            Dispatcher.UIThread.Post(()=> gameScreen.ChangeOKBtnState(false));
+            Dispatcher.UIThread.Post(()=> gameScreen.ChangeVotingBtnsState(true));
             User me = appState.CurrentUser;
             if(me.ID.ToString().Equals(gameScreen.CurrentLeaderID))
             {
@@ -144,7 +145,68 @@ namespace Jeffistance.Client.Services.MessageProcessing
                 leaderName + " is picking a team of " + teamSize + " for the next mission";
             }
         }
-        
-        
+
+        [MessageMethod(JeffistanceFlags.VoteMessage)]
+        private void VoteMessageFlagMethod(Message message)
+        {
+            AppState appState = AppState.GetAppState();
+            if(appState.CurrentUser.IsHost)
+            {
+                string userID = (string) message["UserID"];
+                bool vote = (bool) message["Vote"];
+                GameScreenViewModel gameScreen = (appState.CurrentWindow as GameScreenViewModel);
+                if(!gameScreen.GameState.TeamVote.ContainsKey(userID))
+                {
+                    gameScreen.GameState.TeamVote.Add(userID, vote);
+                }
+                else
+                {
+                    gameScreen.GameState.TeamVote[userID] = vote;
+                }
+                if(gameScreen.GameState.TeamVote.Count == appState.UserList.Count) //If everyone voted
+                {
+                    int yes = 0;
+                    int no = 0;
+                    foreach(bool b in gameScreen.GameState.TeamVote.Values)
+                    {
+                        if(b)
+                        {
+                            yes++;
+                        }
+                        else
+                        {
+                            no++;
+                        }
+                    }
+                    //Finish voting phase
+                    if(yes>no)
+                    {
+                        Dictionary<string, bool> voters = gameScreen.GameState.TeamVote;
+                        gameScreen.GameState.TeamVote = new Dictionary<string, bool>();
+                        gameScreen.StartMissionVoting(voters);
+                    }
+                    else
+                    {
+                        if(appState.Server.Game.FailedVoteCount == appState.Server.Game.MaxFailedVotes)
+                        {
+                            //random and to next turn
+                        }
+                        else
+                        {
+                            appState.Server.Game.FailedVoteCount++;
+                            gameScreen.GameState.TeamVote = new Dictionary<string, bool>();
+                            //change leader
+                            //repeat team voting phase
+                        }
+                    }
+                }
+            }
+        }
+
+        [MessageMethod(JeffistanceFlags.StartMissionVotingMessage)]
+        private void StartMissionVotingMessageFlagMethod(Message message)
+        {
+            
+        }
     }
 }

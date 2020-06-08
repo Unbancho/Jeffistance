@@ -27,7 +27,6 @@ namespace Jeffistance.Common.Models
         public Player CurrentLeader {
             get => CurrentState.CurrentLeader;
             private set => CurrentState.CurrentLeader = value; }
-
         public void StartTest()
         {
             InProgress = true;
@@ -52,7 +51,7 @@ namespace Jeffistance.Common.Models
             private set => CurrentState.CurrentRound = value; }
         public int FailedVoteCount {
             get => CurrentState.FailedVoteCount;
-            private set => CurrentState.FailedVoteCount = value; }
+            set => CurrentState.FailedVoteCount = value; }
         public int MaxFailedVotes { get; private set; } = 5;
         public int ResistanceWinCount {
             get => CurrentState.ResistanceWinCount;
@@ -64,6 +63,9 @@ namespace Jeffistance.Common.Models
         public Dictionary<int, bool> CurrentMissionVotes { get; private set; }
         public IGamemode Gamemode { get; set; }
         public GameState CurrentState { get; private set; }
+        public Dictionary<int, string> leaderList { get; private set; }
+        public int CurrentLeaderKey { get; private set; }
+        public string CurrentLeaderID { get; private set; }
         public IFaction Winner {
             get => CurrentState.Winner;
             private set => CurrentState.Winner = value; }
@@ -102,9 +104,33 @@ namespace Jeffistance.Common.Models
                 i++;
                 Players.Add(player);
             }
+            
             InProgress = true;
             Setup();
             NextRound();
+        }
+
+        //Creates a shuffled dictionary of users whos key goes from 0 to the number of players. The list will loop back to 0 to pick leader when everyone was a leader already
+        public void ShufflePlayersForLeader()
+        {
+            Random rng = new Random();
+            var ll = Players.OrderBy(a => rng.Next());
+            leaderList = new Dictionary<int, string>();
+            CurrentLeaderKey = 0;
+            int j = 0;
+            foreach(Player p in ll)
+            {
+                leaderList.Add(j, p.UserID);
+                j++;
+            }
+        }
+
+        public string NextLeaderId()
+        {
+            CurrentLeaderKey++;
+            CurrentPhase = Phase.LeaderPicking;
+            CurrentLeaderID = leaderList[CurrentLeaderKey];
+            return leaderList[CurrentLeaderKey];
         }
 
         private void Setup()
@@ -131,7 +157,8 @@ namespace Jeffistance.Common.Models
             CurrentTeamVotes.Clear();
             CurrentMissionVotes.Clear();
             FailedVoteCount = 0;
-            PickLeader();
+            ShufflePlayersForLeader();
+            NextLeaderId();
             PickTeam();
         }
 

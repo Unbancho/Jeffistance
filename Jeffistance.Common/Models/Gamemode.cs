@@ -73,10 +73,13 @@ namespace Jeffistance.Common.Models
 
         public Player PickLeader(IEnumerable<Player> players)
         {
+            //isLeader should be false by default, no need to iterate through the list to set it
+            /* 
             foreach (var p in players)
             {
                 p.IsLeader = false;
             }
+            */
             var leader = players.First((p) => p.ID == nextLeaderID);
             leader.IsLeader = true;
             nextLeaderID = (nextLeaderID < players.Count() - 1) ? nextLeaderID + 1 : 0;

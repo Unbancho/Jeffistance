@@ -83,6 +83,18 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
         {
             Server.Broadcast(message);
         }
+
+        [MessageMethod(JeffistanceFlags.VoteMessage)]
+        private void VoteMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        [MessageMethod(JeffistanceFlags.StartMissionVotingMessage)]
+        private void StartMissionVotingMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
         
     }
 }

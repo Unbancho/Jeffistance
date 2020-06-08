@@ -31,6 +31,9 @@ namespace Jeffistance.Common.Services
         Message MakePickTeamMessageMessage(List<string> playersInTeamIDs);
 
         Message MakeDeclareLeaderMessage(int teamSize, string idUser);
+
+        Message MakeVoteMessage(string userID, bool vote);
+        Message MakeStartMissionVotingMessage(Dictionary<string, bool> voters);
     }
 
     public class ClientMessageFactory : IClientMessageFactory
@@ -124,5 +127,21 @@ namespace Jeffistance.Common.Services
             message["UserID"] = idUser;
             return message;
         }
+
+        public Message MakeVoteMessage(string userID, bool vote)
+        {
+            var message =  new Message(flags: JeffistanceFlags.VoteMessage);
+            message["Vote"] = vote;
+            message["UserID"] = userID;
+            return message;
+        }
+
+        public Message MakeStartMissionVotingMessage(Dictionary<string, bool> voters)
+        {
+            var message =  new Message(flags: JeffistanceFlags.StartMissionVotingMessage);
+            message["Voter"] = voters;
+            return message;
+        }
+        
     }
 }

@@ -32,12 +32,15 @@ namespace Jeffistance.Client.ViewModels
         public string CurrentLeaderID;
         public Phase CurrentPhase;
         List<PlayerAvatarView> AvatarsList;
+        public GameState GameState;
+        public List<string> TeamPickedUsersIDs;
         public GameScreenViewModel()
         {
             PlayerArea = new PlayerAreaViewModel();
             //ScoreDictionary = new Dictionary<int, ScoreNodeView>();
             ChatView = new ChatViewModel();
             ScorePanel = new StackPanel();
+            TeamPickedUsersIDs = new List<string>();
             EnableOKBtn = true;
             EnableVotingBtns = false;
             SelectablePlayers = 0;
@@ -47,6 +50,7 @@ namespace Jeffistance.Client.ViewModels
             SelectedUserIDs = new List<string>();
             AvatarsList = new List<PlayerAvatarView>();
             List<User> Users = ass.UserList;
+            GameState = new GameState(); //TODO actually load stuff in here instead of making a new poperty
 
             //Adding players
             //List<User> userList = AppState.UserList;
@@ -130,7 +134,13 @@ namespace Jeffistance.Client.ViewModels
         {
             get => _scorePanel;
             set => this.RaiseAndSetIfChanged(ref _scorePanel, value);
-        }  
+        }
+
+        internal void ChangeVotingBtnsState(bool v)
+        {
+           EnableVotingBtns = v;
+        }
+
         public Boolean EnableOKBtn
         {
             get => _enableOKBtn;
@@ -152,11 +162,11 @@ namespace Jeffistance.Client.ViewModels
             user.Send(message);
         }
 
-        internal void ShowSelectedPlayers(List<string> pickedUsers)
+        internal void ShowSelectedPlayers()
         {
             foreach(PlayerAvatarView pav in AvatarsList)
             {
-                if(pickedUsers.Contains(pav.UserId))
+                if(TeamPickedUsersIDs.Contains(pav.UserId))
                 {
                     pav.Avatar.Source =  new Bitmap("Jeffistance.Client\\Assets\\Vorebisu.png");
                 }
@@ -232,12 +242,29 @@ namespace Jeffistance.Client.ViewModels
             EnableOKBtn = false;
         }
 
+        internal void StartMissionVoting(Dictionary<string, bool> voters)
+        {
+            AppState gs = AppState.GetAppState();
+            var user = AppState.GetAppState().CurrentUser;
+            var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+            var message = messageFactory.MakeStartMissionVotingMessage(voters);
+            user.Send(message);
+        }
+
         public void OnYesClickedMethod(){
-            Debug.WriteLine("Yes");
+            AppState gs = AppState.GetAppState();
+            var user = AppState.GetAppState().CurrentUser;
+            var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+            var message = messageFactory.MakeVoteMessage(user.ID.ToString(), true);
+            user.Send(message);
         }
 
         public void OnNoClickedMethod(){
-            Debug.WriteLine("No");
+            AppState gs = AppState.GetAppState();
+            var user = AppState.GetAppState().CurrentUser;
+            var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+            var message = messageFactory.MakeVoteMessage(user.ID.ToString(), false);
+            user.Send(message);
         }
     }
 
