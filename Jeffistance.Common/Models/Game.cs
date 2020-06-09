@@ -14,7 +14,9 @@ namespace Jeffistance.Common.Models
         TeamVoting,
         MissionVoting,
         GameEnd,
-        ShowingTeamVoteResult
+        ShowingTeamVoteResult,
+        FailedTeamFormation,
+        AssigningRandomResult
     }
 
     public class Game
@@ -28,16 +30,10 @@ namespace Jeffistance.Common.Models
         public Player CurrentLeader {
             get => CurrentState.CurrentLeader;
             private set => CurrentState.CurrentLeader = value; }
-        public void StartTest()
-        {
-            InProgress = true;
-            Setup();
-            NextRound();
-        }
 
         public Phase CurrentPhase {
             get => CurrentState.CurrentPhase;
-            private set => CurrentState.CurrentPhase = value; }
+            set => CurrentState.CurrentPhase = value; }
         public IEnumerable<Player> CurrentTeam {
             get => CurrentState.CurrentTeam;
             private set => CurrentState.CurrentTeam = value; }
@@ -108,7 +104,7 @@ namespace Jeffistance.Common.Models
             
             InProgress = true;
             Setup();
-            NextRound();
+            NextRound(true);
         }
 
         //Creates a shuffled dictionary of users whos key goes from 0 to the number of players. The list will loop back to 0 to pick leader when everyone was a leader already
@@ -150,18 +146,25 @@ namespace Jeffistance.Common.Models
             ShufflePlayersForLeader();
         }
 
-        public void NextRound()
+        public void NextRound(bool advanceRound)
         {
             if (ResistanceWinCount == 3 || SpiesWinCount == 3)
             {
                 EndGame();
                 return;
             }
-            CurrentRound++;
-            NextTeamSize = TeamSizes[Players.Count()][CurrentRound];
+            if(advanceRound)
+            {
+                CurrentRound++;
+                NextTeamSize = TeamSizes[Players.Count()][CurrentRound];
+                FailedVoteCount = 0;
+            }
+            else
+            {
+                FailedVoteCount++;
+            }
             CurrentTeamVotes.Clear();
             CurrentMissionVotes.Clear();
-            FailedVoteCount = 0;
             NextLeaderId();
             PickTeam();
         }
@@ -243,7 +246,7 @@ namespace Jeffistance.Common.Models
             if (CurrentMissionVotes.Count() == CurrentTeam.Count())
             {
                 ResolveMissionVoting(CurrentMissionVotes.Values);
-                NextRound();
+                NextRound(true);
             }
         }
 

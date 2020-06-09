@@ -129,7 +129,13 @@ namespace Jeffistance.Client.ViewModels
                 }
             }
         }
-        
+
+        internal void RandomRoundResult()
+        {
+            ScoreNodeView scoreNode = ScoreDictionary[GameState.CurrentRound];
+            scoreNode.ChangeState(false);
+        }
+
         public StackPanel ScorePanel
         {
             get => _scorePanel;
@@ -179,6 +185,7 @@ namespace Jeffistance.Client.ViewModels
             {
                 pav.Avatar.Source =  new Bitmap("Jeffistance.Client\\Assets\\Spy.png");
             }
+            SelectedUserIDs = new List<string>();
         }
 
         internal void ChangeOKBtnState(bool v)
@@ -248,12 +255,12 @@ namespace Jeffistance.Client.ViewModels
             EnableOKBtn = false;
         }
 
-        internal void MakeShowVotingResultMessage(Dictionary<string, bool> voters)
+        internal void MakeShowVotingResultMessage(Dictionary<string, bool> voters, bool successfulTeamFormation, int fails)
         {
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            var message = messageFactory.MakeShowTeamVoteResultMessage(voters);
+            var message = messageFactory.MakeShowTeamVoteResultMessage(voters, successfulTeamFormation, fails);
             user.Send(message);
         }
 
@@ -304,14 +311,31 @@ namespace Jeffistance.Client.ViewModels
             EnableVotingBtns = true;
         }
 
-        internal void ShowTeamVoteResult(Dictionary<string, bool> voters)
+        internal void ShowTeamVoteResult(Dictionary<string, bool> voters, bool result, int fails)
         {
             AppState appState = AppState.GetAppState();
             ReadyUserIDs = new List<Guid>();
             EnableVotingBtns = false;
             EnableOKBtn = true;
-            CurrentPhase = Phase.ShowingTeamVoteResult;
             RoundBox = "";
+            if(result)
+            {
+                CurrentPhase = Phase.ShowingTeamVoteResult;
+            }
+            else
+            {
+                RestorePlayersToNormal();
+                if(fails == 0) //if the maximum of fails was reached
+                {
+                    CurrentPhase = Phase.AssigningRandomResult;
+                }
+                else
+                {
+                    CurrentPhase = Phase.FailedTeamFormation;
+                    RoundBox += "Team failed to form. " + fails + "/5 " ;
+                }
+                
+            }
             foreach(string u in voters.Keys)
             {
                 List<User> userList = appState.UserList;
@@ -335,11 +359,11 @@ namespace Jeffistance.Client.ViewModels
             GameState.CurrentRound++;
             if(missionSucceeds)
             {
-                RoundBox = "Resistence victory";
+                RoundBox = "Mission successful";
             }
             else
             {
-                RoundBox = "Spy victory";
+                RoundBox = "Mission failed";
             }
             EnableOKBtn = true;
             EnableVotingBtns = false;
@@ -363,6 +387,7 @@ namespace Jeffistance.Client.ViewModels
             }
             RoundBox = winningFactionName + " victory!";
         }
+
     }
 
 }

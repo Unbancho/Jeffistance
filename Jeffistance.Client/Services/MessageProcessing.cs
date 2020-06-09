@@ -94,21 +94,37 @@ namespace Jeffistance.Client.Services.MessageProcessing
         [MessageMethod(JeffistanceFlags.AdvanceGamePhaseMessage)]
         private void AdvanceGamePhaseMessageFlagMethod(Message message)
         {
-            if(AppState.GetAppState().CurrentUser.IsHost)
+            AppState appState = AppState.GetAppState();
+            if(appState.CurrentUser.IsHost)
             {
+                
                 GameScreenViewModel gameScreen = (AppState.GetAppState().CurrentWindow as GameScreenViewModel);
                 if(gameScreen.CurrentPhase == Phase.Standby)
                 {
-                    Game game = AppState.GetAppState().Server.Game;
+                    Game game = appState.Server.Game;
                     int teamSize = game.NextTeamSize;
                     string leaderID = game.CurrentLeaderID;
+                    gameScreen.DeclareLeader(teamSize, leaderID);
+                }
+                else if(gameScreen.CurrentPhase == Phase.AssigningRandomResult)
+                {
+                    Game game = appState.Server.Game;
+                    int teamSize = game.NextTeamSize;
+                    string leaderID = game.CurrentLeaderID;
+                    Dispatcher.UIThread.Post(()=>  gameScreen.RandomRoundResult());
                     gameScreen.DeclareLeader(teamSize, leaderID);
                 }
                 else if(gameScreen.CurrentPhase == Phase.ShowingTeamVoteResult)
                 {
                     gameScreen.StartMissionVoting();
                 }
-                
+                else if(gameScreen.CurrentPhase == Phase.FailedTeamFormation)
+                {
+                    var user = appState.CurrentUser;
+                    var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+                    var leaderMessage = messageFactory.MakeDeclareLeaderMessage(appState.Server.Game.NextTeamSize, appState.Server.Game.CurrentLeaderID);
+                    user.Send(leaderMessage);
+                }
             }
             
         }
@@ -147,7 +163,6 @@ namespace Jeffistance.Client.Services.MessageProcessing
                 Dispatcher.UIThread.Post(()=> gameScreen.ChangeOKBtnState(true));
                 gameScreen.RoundBox = "Pick a team of " + teamSize + " players for the next mission";
                 gameScreen.CurrentPhase = Phase.TeamPicking;
-                
             }
             else
             {
@@ -195,20 +210,23 @@ namespace Jeffistance.Client.Services.MessageProcessing
                     {
                         Dictionary<string, bool> voters = gameScreen.GameState.TeamVote;
                         gameScreen.GameState.TeamVote = new Dictionary<string, bool>();
-                        Dispatcher.UIThread.Post(()=> gameScreen.MakeShowVotingResultMessage(voters));
+                        Dispatcher.UIThread.Post(()=> gameScreen.MakeShowVotingResultMessage(voters, true, appState.Server.Game.FailedVoteCount));
                     }
                     else
                     {
-                        if(appState.Server.Game.FailedVoteCount == appState.Server.Game.MaxFailedVotes)
+                        if(appState.Server.Game.FailedVoteCount == appState.Server.Game.MaxFailedVotes-1) //TODO Why do you check before going to the next round?
                         {
-                            //random and to next turn
+                            appState.Server.Game.NextRound(true);
+                            Dictionary<string, bool> voters = gameScreen.GameState.TeamVote;
+                            gameScreen.GameState.TeamVote = new Dictionary<string, bool>();
+                            Dispatcher.UIThread.Post(()=> gameScreen.MakeShowVotingResultMessage(voters, false, appState.Server.Game.FailedVoteCount));
                         }
                         else
                         {
-                            appState.Server.Game.FailedVoteCount++;
+                            appState.Server.Game.NextRound(false);
+                            Dictionary<string, bool> voters = gameScreen.GameState.TeamVote;
                             gameScreen.GameState.TeamVote = new Dictionary<string, bool>();
-                            //change leader
-                            //repeat team voting phase
+                            Dispatcher.UIThread.Post(()=> gameScreen.MakeShowVotingResultMessage(voters, false, appState.Server.Game.FailedVoteCount));
                         }
                     }
                 }
@@ -240,9 +258,11 @@ namespace Jeffistance.Client.Services.MessageProcessing
         private void ShowTeamVoteResultMessageFlagMethod(Message message)
         {
             Dictionary<string, bool> voters = (Dictionary<string, bool>) message["Voters"];
+            bool result = (bool) message["SuccessfulTeamFormation"];
+            int fails = (int) message["Fails"];
             AppState appState = AppState.GetAppState();
             GameScreenViewModel gameScreen = (appState.CurrentWindow as GameScreenViewModel);
-            Dispatcher.UIThread.Post(()=> gameScreen.ShowTeamVoteResult(voters));
+            Dispatcher.UIThread.Post(()=> gameScreen.ShowTeamVoteResult(voters, result, fails));
         }
 
         [MessageMethod(JeffistanceFlags.MissionVoteMessage)]
@@ -287,7 +307,7 @@ namespace Jeffistance.Client.Services.MessageProcessing
                     {
                         game.SpiesWinCount++;
                     }
-                    game.NextRound();
+                    game.NextRound(true);
                     var user = apps.CurrentUser;
                     var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
                     var voteMessage = messageFactory.MakeShowMissionResultMessage(missionSucceeds);
@@ -337,6 +357,7 @@ namespace Jeffistance.Client.Services.MessageProcessing
             GameScreenViewModel gameScreen = (appState.CurrentWindow as GameScreenViewModel);
             Dispatcher.UIThread.Post(()=> gameScreen.ShowEndGameResults(winningFactionName, spiesIDs));
         }
+        
         
     }
 }

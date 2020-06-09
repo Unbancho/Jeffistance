@@ -35,7 +35,7 @@ namespace Jeffistance.Common.Services
         Message MakeVoteMessage(string userID, bool vote);
         Message MakeStartMissionVotingMessage(List<string> playersInTeamIDs);
 
-        Message MakeShowTeamVoteResultMessage(Dictionary<string, bool> voters);
+        Message MakeShowTeamVoteResultMessage(Dictionary<string, bool> voters, bool successfulTeamFormation, int fails);
 
         Message MakeMissionVoteMessage(string userID, bool vote);
 
@@ -150,10 +150,12 @@ namespace Jeffistance.Common.Services
             return message;
         }
         
-        public Message MakeShowTeamVoteResultMessage(Dictionary<string, bool> voters)
+        public Message MakeShowTeamVoteResultMessage(Dictionary<string, bool> voters, bool successfulTeamFormation, int fails)
         {
             var message =  new Message(flags: JeffistanceFlags.ShowTeamVoteResultMessage);
             message["Voters"] = voters;
+            message["SuccessfulTeamFormation"] = successfulTeamFormation;
+            message["Fails"] = fails;
             return message;
         }
 
@@ -179,5 +181,6 @@ namespace Jeffistance.Common.Services
             message["SpyPlayersIDs"] = spyPlayersIDs;
             return message;
         }
+
     }
 }
