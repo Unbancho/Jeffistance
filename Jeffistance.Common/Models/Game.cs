@@ -13,7 +13,8 @@ namespace Jeffistance.Common.Models
         TeamPicking,
         TeamVoting,
         MissionVoting,
-        GameEnd
+        GameEnd,
+        ShowingTeamVoteResult
     }
 
     public class Game
@@ -125,12 +126,15 @@ namespace Jeffistance.Common.Models
             }
         }
 
-        public string NextLeaderId()
+        public void NextLeaderId()
         {
-            CurrentLeaderKey++;
             CurrentPhase = Phase.LeaderPicking;
+            if(CurrentLeaderKey == leaderList.Count)
+            {
+                CurrentLeaderKey = 0;
+            }
             CurrentLeaderID = leaderList[CurrentLeaderKey];
-            return leaderList[CurrentLeaderKey];
+            CurrentLeaderKey++;
         }
 
         private void Setup()
@@ -143,9 +147,10 @@ namespace Jeffistance.Common.Models
             CurrentRound = -1;
             ResistanceWinCount = 0;
             SpiesWinCount = 0;
+            ShufflePlayersForLeader();
         }
 
-        private void NextRound()
+        public void NextRound()
         {
             if (ResistanceWinCount == 3 || SpiesWinCount == 3)
             {
@@ -157,7 +162,6 @@ namespace Jeffistance.Common.Models
             CurrentTeamVotes.Clear();
             CurrentMissionVotes.Clear();
             FailedVoteCount = 0;
-            ShufflePlayersForLeader();
             NextLeaderId();
             PickTeam();
         }

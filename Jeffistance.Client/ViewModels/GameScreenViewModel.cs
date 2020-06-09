@@ -13,6 +13,7 @@ using Jeffistance.Common.Services;
 using Jeffistance.Common.Services.IoC;
 using Jeffistance.JeffServer.Models;
 using ReactiveUI;
+using static Jeffistance.Client.Views.ScoreNodeView;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -26,8 +27,8 @@ namespace Jeffistance.Client.ViewModels
         private Server _server;
         public int _selectablePlayers;
         private string _roundBox;
-        //private Dictionary<int, ScoreNodeView> _scoreDictionary;
-        private List<Guid> ReadyUserIDs;
+        private Dictionary<int, ScoreNodeView> _scoreDictionary;
+        public List<Guid> ReadyUserIDs;
         private List<string> SelectedUserIDs;
         public string CurrentLeaderID;
         public Phase CurrentPhase;
@@ -37,7 +38,7 @@ namespace Jeffistance.Client.ViewModels
         public GameScreenViewModel()
         {
             PlayerArea = new PlayerAreaViewModel();
-            //ScoreDictionary = new Dictionary<int, ScoreNodeView>();
+            ScoreDictionary = new Dictionary<int, ScoreNodeView>();
             ChatView = new ChatViewModel();
             ScorePanel = new StackPanel();
             TeamPickedUsersIDs = new List<string>();
@@ -62,11 +63,11 @@ namespace Jeffistance.Client.ViewModels
                 AvatarsList.Add(pav);
             }
             //Adding score nodes
-            for (int index = 1; index <= 5; index++)
+            for (int index = 0; index < 5; index++)
             {               
                 ScoreNodeView snv = new ScoreNodeView();
                 ScorePanel.Children.Add(snv);
-                //ScoreDictionary.Add(index, snv);
+                ScoreDictionary.Add(index, snv);
             }
 
             var okEnabled = this.WhenAnyValue(
@@ -173,18 +174,24 @@ namespace Jeffistance.Client.ViewModels
             }
         }
 
+        public void RestorePlayersToNormal()
+        {
+            foreach(PlayerAvatarView pav in AvatarsList)
+            {
+                pav.Avatar.Source =  new Bitmap("Jeffistance.Client\\Assets\\Spy.png");
+            }
+        }
+
         internal void ChangeOKBtnState(bool v)
         {
             EnableOKBtn = v;
         }
 
-        /*
         public Dictionary<int, ScoreNodeView> ScoreDictionary
         {
             get => _scoreDictionary;
             set => this.RaiseAndSetIfChanged(ref _scoreDictionary, value);
         }   
-        */
         public PlayerAreaViewModel PlayerArea
         {
             get => _playerArea;
@@ -242,12 +249,21 @@ namespace Jeffistance.Client.ViewModels
             EnableOKBtn = false;
         }
 
-        internal void StartMissionVoting(Dictionary<string, bool> voters)
+        internal void MakeShowVotingResultMessage(Dictionary<string, bool> voters)
         {
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            var message = messageFactory.MakeStartMissionVotingMessage(voters);
+            var message = messageFactory.MakeShowTeamVoteResultMessage(voters);
+            user.Send(message);
+        }
+
+        internal void StartMissionVoting()
+        {
+            AppState gs = AppState.GetAppState();
+            var user = AppState.GetAppState().CurrentUser;
+            var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+            var message = messageFactory.MakeStartMissionVotingMessage(TeamPickedUsersIDs);
             user.Send(message);
         }
 
@@ -255,16 +271,80 @@ namespace Jeffistance.Client.ViewModels
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            var message = messageFactory.MakeVoteMessage(user.ID.ToString(), true);
-            user.Send(message);
+            if(CurrentPhase == Phase.TeamVoting)
+            {
+                var message = messageFactory.MakeVoteMessage(user.ID.ToString(), true);
+                user.Send(message);
+            }
+            else if(CurrentPhase == Phase.MissionVoting)
+            {
+                var message = messageFactory.MakeMissionVoteMessage(user.ID.ToString(), true);
+                user.Send(message);
+            }
+            
         }
 
         public void OnNoClickedMethod(){
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            var message = messageFactory.MakeVoteMessage(user.ID.ToString(), false);
-            user.Send(message);
+            if(CurrentPhase == Phase.TeamVoting)
+            {
+                var message = messageFactory.MakeVoteMessage(user.ID.ToString(), false);
+                user.Send(message);
+            }
+            else if(CurrentPhase == Phase.MissionVoting)
+            {
+                var message = messageFactory.MakeMissionVoteMessage(user.ID.ToString(), false);
+                user.Send(message);
+            }
+        }
+
+        internal void ShowMissionVotingInterface()
+        {
+            EnableVotingBtns = true;
+        }
+
+        internal void ShowTeamVoteResult(Dictionary<string, bool> voters)
+        {
+            AppState appState = AppState.GetAppState();
+            ReadyUserIDs = new List<Guid>();
+            EnableVotingBtns = false;
+            EnableOKBtn = true;
+            CurrentPhase = Phase.ShowingTeamVoteResult;
+            RoundBox = "";
+            foreach(string u in voters.Keys)
+            {
+                List<User> userList = appState.UserList;
+                string playerName = userList.Find(user => user.ID.ToString() == u).Name;
+                RoundBox += "[" + playerName + ": "; //TODO Make this prettier with a proper label
+                if(voters[u])
+                {
+                    RoundBox += "Yes] ";
+                }
+                else
+                {
+                    RoundBox += "No] ";
+                }
+            }
+        }
+
+        internal void ResolveMissionResult(bool missionSucceeds)
+        {
+            ScoreNodeView scoreNode = ScoreDictionary[GameState.CurrentRound];
+            scoreNode.ChangeState(missionSucceeds);
+            GameState.CurrentRound++;
+            if(missionSucceeds)
+            {
+                RoundBox = "Resistence victory";
+            }
+            else
+            {
+                RoundBox = "Spy victory";
+            }
+            EnableOKBtn = true;
+            EnableVotingBtns = false;
+            CurrentPhase = Phase.Standby;
         }
     }
 

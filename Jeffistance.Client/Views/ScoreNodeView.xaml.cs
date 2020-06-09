@@ -24,6 +24,20 @@ namespace Jeffistance.Client.Views
             AvaloniaXamlLoader.Load(this);
         }
 
+        public void ChangeState(bool roundResult)
+        {
+            if(roundResult)
+            {
+                State = ScoreState.JeffistanceVictory;
+                nodeImage.Source = new Bitmap("Jeffistance.Client\\Assets\\Sharkbisu.png");
+            }
+            else
+            {
+               State = ScoreState.JeffistanceVictory;
+               nodeImage.Source = new Bitmap("Jeffistance.Client\\Assets\\Vorebisu.png"); 
+            }
+        }
+
         
     public enum ScoreState
     {

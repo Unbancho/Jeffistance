@@ -7,6 +7,8 @@ using Jeffistance.Client.ViewModels;
 using Avalonia.Threading;
 using System.Collections.Generic;
 using Jeffistance.Common.Models;
+using Jeffistance.Common.Services.IoC;
+using Jeffistance.Common.Services;
 
 namespace Jeffistance.Client.Services.MessageProcessing
 {
@@ -94,11 +96,21 @@ namespace Jeffistance.Client.Services.MessageProcessing
         {
             if(AppState.GetAppState().CurrentUser.IsHost)
             {
-                Game game = AppState.GetAppState().Server.Game;
-                int teamSize = game.NextTeamSize;
-                string leaderID = game.CurrentLeaderID;
-                (AppState.GetAppState().CurrentWindow as GameScreenViewModel).DeclareLeader(teamSize, leaderID);
+                GameScreenViewModel gameScreen = (AppState.GetAppState().CurrentWindow as GameScreenViewModel);
+                if(gameScreen.CurrentPhase == Phase.Standby)
+                {
+                    Game game = AppState.GetAppState().Server.Game;
+                    int teamSize = game.NextTeamSize;
+                    string leaderID = game.CurrentLeaderID;
+                    gameScreen.DeclareLeader(teamSize, leaderID);
+                }
+                else if(gameScreen.CurrentPhase == Phase.ShowingTeamVoteResult)
+                {
+                    gameScreen.StartMissionVoting();
+                }
+                
             }
+            
         }
 
         [MessageMethod(JeffistanceFlags.PickTeamMessage)]
@@ -183,7 +195,7 @@ namespace Jeffistance.Client.Services.MessageProcessing
                     {
                         Dictionary<string, bool> voters = gameScreen.GameState.TeamVote;
                         gameScreen.GameState.TeamVote = new Dictionary<string, bool>();
-                        gameScreen.StartMissionVoting(voters);
+                        Dispatcher.UIThread.Post(()=> gameScreen.MakeShowVotingResultMessage(voters));
                     }
                     else
                     {
@@ -206,7 +218,86 @@ namespace Jeffistance.Client.Services.MessageProcessing
         [MessageMethod(JeffistanceFlags.StartMissionVotingMessage)]
         private void StartMissionVotingMessageFlagMethod(Message message)
         {
+            List<string> PlayersInTeamIDs = (List<string>) message["PlayersInTeamIDs"];
+            AppState appState = AppState.GetAppState();
+            string myID = appState.CurrentUser.ID.ToString();
+            GameScreenViewModel gameScreen = (appState.CurrentWindow as GameScreenViewModel);
+            if(PlayersInTeamIDs.Contains(myID))
+            {
+                gameScreen.RoundBox = "Decide on the mission's success";
+                Dispatcher.UIThread.Post(()=> gameScreen.ShowMissionVotingInterface());
+                gameScreen.CurrentPhase = Phase.MissionVoting;
+            }
+            else
+            {
+                gameScreen.RoundBox = "The team is executing the mission";
+                gameScreen.CurrentPhase = Phase.MissionVoting;
+            }
             
         }
+
+        [MessageMethod(JeffistanceFlags.ShowTeamVoteResultMessage)]
+        private void ShowTeamVoteResultMessageFlagMethod(Message message)
+        {
+            Dictionary<string, bool> voters = (Dictionary<string, bool>) message["Voters"];
+            AppState appState = AppState.GetAppState();
+            GameScreenViewModel gameScreen = (appState.CurrentWindow as GameScreenViewModel);
+            Dispatcher.UIThread.Post(()=> gameScreen.ShowTeamVoteResult(voters));
+        }
+
+        [MessageMethod(JeffistanceFlags.MissionVoteMessage)]
+        private void MissionVoteMessageFlagMethod(Message message) //need the list of the mission team
+        {
+            AppState appState = AppState.GetAppState();
+            if(appState.CurrentUser.IsHost)
+            {
+                string userID = (string) message["UserID"];
+                bool vote = (bool) message["Vote"];
+                GameScreenViewModel gameScreen = (appState.CurrentWindow as GameScreenViewModel);
+                if(gameScreen.TeamPickedUsersIDs.Contains(userID)) //You can only vote if you are in the team
+                {
+                    if(!gameScreen.GameState.TeamVote.ContainsKey(userID))
+                    {
+                        gameScreen.GameState.TeamVote.Add(userID, vote);
+                    }
+                    else
+                    {
+                        gameScreen.GameState.TeamVote[userID] = vote;
+                    }
+                }
+                if(gameScreen.GameState.TeamVote.Count == gameScreen.TeamPickedUsersIDs.Count) //If everyone IN TEAM voted
+                {
+                    bool missionSucceeds = true;
+                    foreach(bool b in gameScreen.GameState.TeamVote.Values)
+                    {
+                        if(!b)
+                        {
+                            missionSucceeds = false;
+                        }
+                    }
+                    gameScreen.GameState.TeamVote = new Dictionary<string, bool>();
+                    gameScreen.ReadyUserIDs = new List<Guid>();
+                    AppState apps = AppState.GetAppState();
+                    Game game = apps.Server.Game;
+                    game.NextRound();
+                    var user = apps.CurrentUser;
+                    var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+                    var voteMessage = messageFactory.MakeShowMissionResultMessage(missionSucceeds);
+                    user.Send(voteMessage);
+                }
+            }
+        }
+
+        [MessageMethod(JeffistanceFlags.ShowMissionResultMessage)]
+        private void ShowMissionResultMessageFlagMethod(Message message)
+        {
+            bool result = (bool) message["Result"];
+            AppState appState = AppState.GetAppState();
+            GameScreenViewModel gameScreen = (appState.CurrentWindow as GameScreenViewModel);
+            Dispatcher.UIThread.Post(()=> gameScreen.ResolveMissionResult(result));
+            Dispatcher.UIThread.Post(()=> gameScreen.RestorePlayersToNormal());
+            gameScreen.TeamPickedUsersIDs = new List<string>();
+        }
+        
     }
 }

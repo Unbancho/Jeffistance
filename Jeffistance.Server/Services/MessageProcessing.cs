@@ -95,6 +95,24 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
         {
             Server.Broadcast(message);
         }
+
+        [MessageMethod(JeffistanceFlags.ShowTeamVoteResultMessage)]
+        private void ShowTeamVoteResultMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+        
+        [MessageMethod(JeffistanceFlags.MissionVoteMessage)]
+        private void MissionVoteMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        [MessageMethod(JeffistanceFlags.ShowMissionResultMessage)]
+        private void ShowMissionResultMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
         
     }
 }
