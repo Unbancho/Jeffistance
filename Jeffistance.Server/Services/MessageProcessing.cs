@@ -113,6 +113,13 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
         {
             Server.Broadcast(message);
         }
+
+        [MessageMethod(JeffistanceFlags.EndGameMessage)]
+        private void EndGameMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+        
         
     }
 }

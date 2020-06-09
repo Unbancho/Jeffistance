@@ -279,6 +279,14 @@ namespace Jeffistance.Client.Services.MessageProcessing
                     gameScreen.ReadyUserIDs = new List<Guid>();
                     AppState apps = AppState.GetAppState();
                     Game game = apps.Server.Game;
+                    if(missionSucceeds)
+                    {
+                        game.ResistanceWinCount++;
+                    }
+                    else
+                    {
+                        game.SpiesWinCount++;
+                    }
                     game.NextRound();
                     var user = apps.CurrentUser;
                     var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
@@ -297,6 +305,37 @@ namespace Jeffistance.Client.Services.MessageProcessing
             Dispatcher.UIThread.Post(()=> gameScreen.ResolveMissionResult(result));
             Dispatcher.UIThread.Post(()=> gameScreen.RestorePlayersToNormal());
             gameScreen.TeamPickedUsersIDs = new List<string>();
+            AppState apps = AppState.GetAppState();
+            if(apps.CurrentUser.IsHost)
+            {
+                Game game = apps.Server.Game;
+                if(game.CurrentPhase == Phase.GameEnd) //if game ended
+                {
+                    IFaction winner = game.Winner;
+                    List<string> spyPlayersIDs = new List<string>();
+                    foreach(Player p in game.Players)
+                    {
+                        if(p.Faction is SpiesFaction)
+                        {
+                            spyPlayersIDs.Add(p.UserID);
+                        }
+                    }
+                    var user = apps.CurrentUser;
+                    var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+                    var endGameMessage = messageFactory.MakeEndGameMessage(winner.Name, spyPlayersIDs); 
+                    user.Send(endGameMessage);
+                }
+            }
+        }
+        
+        [MessageMethod(JeffistanceFlags.EndGameMessage)]
+        private void EndGameMessageFlagMethod(Message message)
+        {
+            string winningFactionName = (string) message["Name"];
+            List<string> spiesIDs = (List<string>) message["SpyPlayersIDs"];
+            AppState appState = AppState.GetAppState();
+            GameScreenViewModel gameScreen = (appState.CurrentWindow as GameScreenViewModel);
+            Dispatcher.UIThread.Post(()=> gameScreen.ShowEndGameResults(winningFactionName, spiesIDs));
         }
         
     }

@@ -56,10 +56,10 @@ namespace Jeffistance.Common.Models
         public int MaxFailedVotes { get; private set; } = 5;
         public int ResistanceWinCount {
             get => CurrentState.ResistanceWinCount;
-            private set => CurrentState.ResistanceWinCount = value; }
+            set => CurrentState.ResistanceWinCount = value; }
         public int SpiesWinCount {
             get => CurrentState.SpiesWinCount;
-            private set => CurrentState.SpiesWinCount = value; }
+            set => CurrentState.SpiesWinCount = value; }
         public Dictionary<int, bool> CurrentTeamVotes { get; private set; }
         public Dictionary<int, bool> CurrentMissionVotes { get; private set; }
         public IGamemode Gamemode { get; set; }

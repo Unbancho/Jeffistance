@@ -27,7 +27,8 @@ namespace Jeffistance.Common.Services.MessageProcessing
         StartMissionVotingMessage = 1 << 14,
         ShowTeamVoteResultMessage = 1 << 15,
         MissionVoteMessage = 1 << 16,
-        ShowMissionResultMessage = 1 << 17
+        ShowMissionResultMessage = 1 << 17,
+        EndGameMessage = 1 << 18
     }
 
     public class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>

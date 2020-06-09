@@ -40,6 +40,7 @@ namespace Jeffistance.Common.Services
         Message MakeMissionVoteMessage(string userID, bool vote);
 
         Message MakeShowMissionResultMessage(bool result);
+        Message MakeEndGameMessage(string name, List<string> spyPlayersIDs);
     }
 
     public class ClientMessageFactory : IClientMessageFactory
@@ -168,6 +169,14 @@ namespace Jeffistance.Common.Services
         {
             var message =  new Message(flags: JeffistanceFlags.ShowMissionResultMessage);
             message["Result"] = result;
+            return message;
+        }
+
+        public Message MakeEndGameMessage(string name, List<string> spyPlayersIDs)
+        {
+            var message =  new Message(flags: JeffistanceFlags.EndGameMessage);
+            message["Name"] = name;
+            message["SpyPlayersIDs"] = spyPlayersIDs;
             return message;
         }
     }

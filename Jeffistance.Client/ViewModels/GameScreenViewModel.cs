@@ -13,7 +13,6 @@ using Jeffistance.Common.Services;
 using Jeffistance.Common.Services.IoC;
 using Jeffistance.JeffServer.Models;
 using ReactiveUI;
-using static Jeffistance.Client.Views.ScoreNodeView;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -345,6 +344,24 @@ namespace Jeffistance.Client.ViewModels
             EnableOKBtn = true;
             EnableVotingBtns = false;
             CurrentPhase = Phase.Standby;
+        }
+
+        internal void ShowEndGameResults(string winningFactionName, List<string> spiesIDs)
+        {
+            EnableOKBtn = false;
+            EnableVotingBtns = false;
+            foreach(PlayerAvatarView avatar in AvatarsList)
+            {
+                if(spiesIDs.Contains(avatar.UserId))
+                {
+                    avatar.Avatar.Source =  new Bitmap("Jeffistance.Client\\Assets\\Jew.png");
+                }
+                else
+                {
+                    avatar.Avatar.Source =  new Bitmap("Jeffistance.Client\\Assets\\Spy.png"); //changes them back in case they were selected
+                }
+            }
+            RoundBox = winningFactionName + " victory!";
         }
     }
 
