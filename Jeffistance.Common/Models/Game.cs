@@ -98,6 +98,7 @@ namespace Jeffistance.Common.Models
                 Player player = new Player();
                 player.ID = i;
                 player.UserID = u.ID.ToString();
+                player.Name = u.Name;
                 i++;
                 Players.Add(player);
             }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reactive;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -11,7 +10,6 @@ using Jeffistance.Client.Views;
 using Jeffistance.Common.Models;
 using Jeffistance.Common.Services;
 using Jeffistance.Common.Services.IoC;
-using Jeffistance.JeffServer.Models;
 using ReactiveUI;
 
 namespace Jeffistance.Client.ViewModels
@@ -23,7 +21,6 @@ namespace Jeffistance.Client.ViewModels
         private StackPanel _scorePanel;
         public Boolean _enableOKBtn;
         public Boolean _enableVotingBtns;
-        private Server _server;
         public int _selectablePlayers;
         private string _roundBox;
         private Dictionary<int, ScoreNodeView> _scoreDictionary;
@@ -40,30 +37,21 @@ namespace Jeffistance.Client.ViewModels
             ScoreDictionary = new Dictionary<int, ScoreNodeView>();
             ChatView = new ChatViewModel();
             ScorePanel = new StackPanel();
-            TeamPickedUsersIDs = new List<string>();
+            AvatarsList = new List<PlayerAvatarView>();
+
             EnableOKBtn = true;
             EnableVotingBtns = false;
-            SelectablePlayers = 0;
-            AppState ass = AppState.GetAppState();
-            Server = ass.Server;
-            ReadyUserIDs = new List<Guid>();
-            SelectedUserIDs = new List<string>();
-            AvatarsList = new List<PlayerAvatarView>();
-            List<User> Users = ass.UserList;
-            GameState = new GameState(); //TODO actually load stuff in here instead of making a new poperty
 
-            //Adding players
-            //List<User> userList = AppState.UserList;
-            foreach(User u in Users)
-            {
-                PlayerAvatarView pav = new PlayerAvatarView(u.Name, u.ID.ToString());
-                pav.PointerPressed += onAvatarClicked;
-                PlayerArea.CircularPanel.Children.Add(pav);
-                AvatarsList.Add(pav);
-            }
+            ///Things that maybe should be moved
+            TeamPickedUsersIDs = new List<string>();
+            SelectablePlayers = 0;
+            SelectedUserIDs = new List<string>();
+            ReadyUserIDs = new List<Guid>();
+            GameState = new GameState(); //TODO actually load stuff in here instead of making a new poperty
+            
             //Adding score nodes
             for (int index = 0; index < 5; index++)
-            {               
+            {
                 ScoreNodeView snv = new ScoreNodeView();
                 ScorePanel.Children.Add(snv);
                 ScoreDictionary.Add(index, snv);
@@ -80,6 +68,17 @@ namespace Jeffistance.Client.ViewModels
             OnOkClicked = ReactiveCommand.Create(OnOkClickedMethod, okEnabled);
             OnYesClicked = ReactiveCommand.Create(OnYesClickedMethod, votingEnabled);
             OnNoClicked = ReactiveCommand.Create(OnNoClickedMethod, votingEnabled);
+        }
+
+        public void PrepareAvatars(List<Player> Players)
+        {
+            foreach (Player p in Players)
+            {
+                PlayerAvatarView pav = new PlayerAvatarView(p.Name, p.UserID.ToString());
+                pav.PointerPressed += onAvatarClicked;
+                PlayerArea.CircularPanel.Children.Add(pav);
+                AvatarsList.Add(pav);
+            }
         }
 
         public void AddReadyUser(Guid userID)
@@ -110,22 +109,22 @@ namespace Jeffistance.Client.ViewModels
 
         private void onAvatarClicked(object sender, PointerPressedEventArgs args)
         {
-            if(SelectablePlayers != 0)
+            if (SelectablePlayers != 0)
             {
-                PlayerAvatarView playerAvatar = (PlayerAvatarView) sender;
-                if(!SelectedUserIDs.Contains(playerAvatar.UserId))
+                PlayerAvatarView playerAvatar = (PlayerAvatarView)sender;
+                if (!SelectedUserIDs.Contains(playerAvatar.UserId))
                 {
-                    if(SelectedUserIDs.Count < SelectablePlayers)
+                    if (SelectedUserIDs.Count < SelectablePlayers)
                     {
-                        playerAvatar.Avatar.Source =  new Bitmap("Jeffistance.Client\\Assets\\Vorebisu.png");
-                        SelectedUserIDs.Add(playerAvatar.UserId);   
+                        playerAvatar.Avatar.Source = new Bitmap("Jeffistance.Client\\Assets\\Vorebisu.png");
+                        SelectedUserIDs.Add(playerAvatar.UserId);
                     }
                 }
                 else
                 {
-                    SelectedUserIDs.Remove(playerAvatar.UserId); 
-                    playerAvatar.Avatar.Source =  new Bitmap("Jeffistance.Client\\Assets\\Spy.png");
-                    
+                    SelectedUserIDs.Remove(playerAvatar.UserId);
+                    playerAvatar.Avatar.Source = new Bitmap("Jeffistance.Client\\Assets\\Spy.png");
+
                 }
             }
         }
@@ -144,7 +143,7 @@ namespace Jeffistance.Client.ViewModels
 
         internal void ChangeVotingBtnsState(bool v)
         {
-           EnableVotingBtns = v;
+            EnableVotingBtns = v;
         }
 
         public Boolean EnableOKBtn
@@ -170,20 +169,20 @@ namespace Jeffistance.Client.ViewModels
 
         internal void ShowSelectedPlayers()
         {
-            foreach(PlayerAvatarView pav in AvatarsList)
+            foreach (PlayerAvatarView pav in AvatarsList)
             {
-                if(TeamPickedUsersIDs.Contains(pav.UserId))
+                if (TeamPickedUsersIDs.Contains(pav.UserId))
                 {
-                    pav.Avatar.Source =  new Bitmap("Jeffistance.Client\\Assets\\Vorebisu.png");
+                    pav.Avatar.Source = new Bitmap("Jeffistance.Client\\Assets\\Vorebisu.png");
                 }
             }
         }
 
         public void RestorePlayersToNormal()
         {
-            foreach(PlayerAvatarView pav in AvatarsList)
+            foreach (PlayerAvatarView pav in AvatarsList)
             {
-                pav.Avatar.Source =  new Bitmap("Jeffistance.Client\\Assets\\Spy.png");
+                pav.Avatar.Source = new Bitmap("Jeffistance.Client\\Assets\\Spy.png");
             }
             SelectedUserIDs = new List<string>();
         }
@@ -197,7 +196,7 @@ namespace Jeffistance.Client.ViewModels
         {
             get => _scoreDictionary;
             set => this.RaiseAndSetIfChanged(ref _scoreDictionary, value);
-        }   
+        }
         public PlayerAreaViewModel PlayerArea
         {
             get => _playerArea;
@@ -221,23 +220,19 @@ namespace Jeffistance.Client.ViewModels
             set => this.RaiseAndSetIfChanged(ref _roundBox, value);
         }
 
-        public Server Server
-        {
-            get => _server;
-            set => this.RaiseAndSetIfChanged(ref _server, value);
-        }
-        
+
         public ReactiveCommand<Unit, Unit> OnOkClicked { get; }
         public ReactiveCommand<Unit, Unit> OnYesClicked { get; }
         public ReactiveCommand<Unit, Unit> OnNoClicked { get; }
 
-        public void OnOkClickedMethod(){
+        public void OnOkClickedMethod()
+        {
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            if(CurrentPhase == Phase.TeamPicking) //Leader picking team 
+            if (CurrentPhase == Phase.TeamPicking) //Leader picking team 
             {
-                if(SelectedUserIDs.Count == SelectablePlayers)
+                if (SelectedUserIDs.Count == SelectablePlayers)
                 {
                     var message = messageFactory.MakePickTeamMessageMessage(SelectedUserIDs);
                     user.Send(message);
@@ -273,33 +268,35 @@ namespace Jeffistance.Client.ViewModels
             user.Send(message);
         }
 
-        public void OnYesClickedMethod(){
+        public void OnYesClickedMethod()
+        {
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            if(CurrentPhase == Phase.TeamVoting)
+            if (CurrentPhase == Phase.TeamVoting)
             {
                 var message = messageFactory.MakeVoteMessage(user.ID.ToString(), true);
                 user.Send(message);
             }
-            else if(CurrentPhase == Phase.MissionVoting)
+            else if (CurrentPhase == Phase.MissionVoting)
             {
                 var message = messageFactory.MakeMissionVoteMessage(user.ID.ToString(), true);
                 user.Send(message);
             }
-            
+
         }
 
-        public void OnNoClickedMethod(){
+        public void OnNoClickedMethod()
+        {
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            if(CurrentPhase == Phase.TeamVoting)
+            if (CurrentPhase == Phase.TeamVoting)
             {
                 var message = messageFactory.MakeVoteMessage(user.ID.ToString(), false);
                 user.Send(message);
             }
-            else if(CurrentPhase == Phase.MissionVoting)
+            else if (CurrentPhase == Phase.MissionVoting)
             {
                 var message = messageFactory.MakeMissionVoteMessage(user.ID.ToString(), false);
                 user.Send(message);
@@ -318,30 +315,30 @@ namespace Jeffistance.Client.ViewModels
             EnableVotingBtns = false;
             EnableOKBtn = true;
             RoundBox = "";
-            if(result)
+            if (result)
             {
                 CurrentPhase = Phase.ShowingTeamVoteResult;
             }
             else
             {
                 RestorePlayersToNormal();
-                if(fails == 0) //if the maximum of fails was reached
+                if (fails == 0) //if the maximum of fails was reached
                 {
                     CurrentPhase = Phase.AssigningRandomResult;
                 }
                 else
                 {
                     CurrentPhase = Phase.FailedTeamFormation;
-                    RoundBox += "Team failed to form. " + fails + "/5 " ;
+                    RoundBox += "Team failed to form. " + fails + "/5 ";
                 }
-                
+
             }
-            foreach(string u in voters.Keys)
+            foreach (string u in voters.Keys)
             {
                 List<User> userList = appState.UserList;
                 string playerName = userList.Find(user => user.ID.ToString() == u).Name;
                 RoundBox += "[" + playerName + ": "; //TODO Make this prettier with a proper label
-                if(voters[u])
+                if (voters[u])
                 {
                     RoundBox += "Yes] ";
                 }
@@ -357,7 +354,7 @@ namespace Jeffistance.Client.ViewModels
             ScoreNodeView scoreNode = ScoreDictionary[GameState.CurrentRound];
             scoreNode.ChangeState(missionSucceeds);
             GameState.CurrentRound++;
-            if(missionSucceeds)
+            if (missionSucceeds)
             {
                 RoundBox = "Mission successful";
             }
@@ -374,15 +371,15 @@ namespace Jeffistance.Client.ViewModels
         {
             EnableOKBtn = false;
             EnableVotingBtns = false;
-            foreach(PlayerAvatarView avatar in AvatarsList)
+            foreach (PlayerAvatarView avatar in AvatarsList)
             {
-                if(spiesIDs.Contains(avatar.UserId))
+                if (spiesIDs.Contains(avatar.UserId))
                 {
-                    avatar.Avatar.Source =  new Bitmap("Jeffistance.Client\\Assets\\Jew.png");
+                    avatar.Avatar.Source = new Bitmap("Jeffistance.Client\\Assets\\Jew.png");
                 }
                 else
                 {
-                    avatar.Avatar.Source =  new Bitmap("Jeffistance.Client\\Assets\\Spy.png"); //changes them back in case they were selected
+                    avatar.Avatar.Source = new Bitmap("Jeffistance.Client\\Assets\\Spy.png"); //changes them back in case they were selected
                 }
             }
             RoundBox = winningFactionName + " victory!";

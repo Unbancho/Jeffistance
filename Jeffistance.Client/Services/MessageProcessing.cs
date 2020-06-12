@@ -79,9 +79,11 @@ namespace Jeffistance.Client.Services.MessageProcessing
         private void GetPlayerInfoMessageFlagMethod(Message message)
         {
             AppState appState = AppState.GetAppState();
-            List<Player> players = (List<Player>) message["Players"];
-            Player me = players.Find(x => x.UserID == appState.CurrentUser.ID.ToString());
-            (appState.CurrentWindow as GameScreenViewModel).RoundBox = "You are in the " + me.Faction.Name + " team";
+            GameScreenViewModel game = (appState.CurrentWindow as GameScreenViewModel);
+            game.GameState.Players = (List<Player>) message["Players"];
+            Dispatcher.UIThread.Post(()=> game.PrepareAvatars(game.GameState.Players));
+            Player me = game.GameState.Players.Find(x => x.UserID == appState.CurrentUser.ID.ToString());
+            game.RoundBox = "You are in the " + me.Faction.Name + " team";
         }
 
         [MessageMethod(JeffistanceFlags.GamePhaseReadyMessage)]
