@@ -30,7 +30,7 @@ namespace Jeffistance.Common.Services
 
         Message MakePickTeamMessageMessage(List<string> playersInTeamIDs);
 
-        Message MakeDeclareLeaderMessage(int teamSize, string idUser);
+        Message MakeDeclareLeaderMessage(int teamSize, Player leader);
 
         Message MakeVoteMessage(string userID, bool vote);
         Message MakeStartMissionVotingMessage(List<string> playersInTeamIDs);
@@ -127,11 +127,11 @@ namespace Jeffistance.Common.Services
             return message;
         }
 
-        public Message MakeDeclareLeaderMessage(int teamSize, string idUser)
+        public Message MakeDeclareLeaderMessage(int teamSize, Player leader)
         {
             var message =  new Message(flags: JeffistanceFlags.DeclareLeaderMessage);
             message["TeamSize"] = teamSize;
-            message["UserID"] = idUser;
+            message["Leader"] = leader;
             return message;
         }
 

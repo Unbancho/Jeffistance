@@ -26,13 +26,12 @@ namespace Jeffistance.Client.ViewModels
         private Dictionary<int, ScoreNodeView> _scoreDictionary;
         public List<Guid> ReadyUserIDs;
         private List<string> SelectedUserIDs;
-        public string CurrentLeaderID;
-        public Phase CurrentPhase;
         List<PlayerAvatarView> AvatarsList;
         public GameState GameState;
         public List<string> TeamPickedUsersIDs;
         public GameScreenViewModel()
         {
+            GameState = new GameState();
             PlayerArea = new PlayerAreaViewModel();
             ScoreDictionary = new Dictionary<int, ScoreNodeView>();
             ChatView = new ChatViewModel();
@@ -42,12 +41,12 @@ namespace Jeffistance.Client.ViewModels
             EnableOKBtn = true;
             EnableVotingBtns = false;
 
-            ///Things that maybe should be moved
-            TeamPickedUsersIDs = new List<string>();
             SelectablePlayers = 0;
             SelectedUserIDs = new List<string>();
+
+            ///Things that maybe should be moved
+            TeamPickedUsersIDs = new List<string>();
             ReadyUserIDs = new List<Guid>();
-            GameState = new GameState(); //TODO actually load stuff in here instead of making a new poperty
             
             //Adding score nodes
             for (int index = 0; index < 5; index++)
@@ -158,12 +157,12 @@ namespace Jeffistance.Client.ViewModels
             set => this.RaiseAndSetIfChanged(ref _enableVotingBtns, value);
         }
 
-        internal void DeclareLeader(int teamSize, string leaderID)
+        internal void DeclareLeader(int teamSize, Player leader)
         {
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            var message = messageFactory.MakeDeclareLeaderMessage(teamSize, leaderID);
+            var message = messageFactory.MakeDeclareLeaderMessage(teamSize, leader);
             user.Send(message);
         }
 
@@ -230,7 +229,7 @@ namespace Jeffistance.Client.ViewModels
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            if (CurrentPhase == Phase.TeamPicking) //Leader picking team 
+            if (GameState.CurrentPhase == Phase.TeamPicking) //Leader picking team 
             {
                 if (SelectedUserIDs.Count == SelectablePlayers)
                 {
@@ -273,12 +272,12 @@ namespace Jeffistance.Client.ViewModels
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            if (CurrentPhase == Phase.TeamVoting)
+            if (GameState.CurrentPhase == Phase.TeamVoting)
             {
                 var message = messageFactory.MakeVoteMessage(user.ID.ToString(), true);
                 user.Send(message);
             }
-            else if (CurrentPhase == Phase.MissionVoting)
+            else if (GameState.CurrentPhase == Phase.MissionVoting)
             {
                 var message = messageFactory.MakeMissionVoteMessage(user.ID.ToString(), true);
                 user.Send(message);
@@ -291,12 +290,12 @@ namespace Jeffistance.Client.ViewModels
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            if (CurrentPhase == Phase.TeamVoting)
+            if (GameState.CurrentPhase == Phase.TeamVoting)
             {
                 var message = messageFactory.MakeVoteMessage(user.ID.ToString(), false);
                 user.Send(message);
             }
-            else if (CurrentPhase == Phase.MissionVoting)
+            else if (GameState.CurrentPhase == Phase.MissionVoting)
             {
                 var message = messageFactory.MakeMissionVoteMessage(user.ID.ToString(), false);
                 user.Send(message);
@@ -317,18 +316,18 @@ namespace Jeffistance.Client.ViewModels
             RoundBox = "";
             if (result)
             {
-                CurrentPhase = Phase.ShowingTeamVoteResult;
+                GameState.CurrentPhase = Phase.ShowingTeamVoteResult;
             }
             else
             {
                 RestorePlayersToNormal();
                 if (fails == 0) //if the maximum of fails was reached
                 {
-                    CurrentPhase = Phase.AssigningRandomResult;
+                    GameState.CurrentPhase = Phase.AssigningRandomResult;
                 }
                 else
                 {
-                    CurrentPhase = Phase.FailedTeamFormation;
+                    GameState.CurrentPhase = Phase.FailedTeamFormation;
                     RoundBox += "Team failed to form. " + fails + "/5 ";
                 }
 
@@ -364,7 +363,7 @@ namespace Jeffistance.Client.ViewModels
             }
             EnableOKBtn = true;
             EnableVotingBtns = false;
-            CurrentPhase = Phase.Standby;
+            GameState.CurrentPhase = Phase.Standby;
         }
 
         internal void ShowEndGameResults(string winningFactionName, List<string> spiesIDs)

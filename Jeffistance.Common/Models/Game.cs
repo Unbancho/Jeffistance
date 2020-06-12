@@ -60,9 +60,8 @@ namespace Jeffistance.Common.Models
         public Dictionary<int, bool> CurrentMissionVotes { get; private set; }
         public IGamemode Gamemode { get; set; }
         public GameState CurrentState { get; private set; }
-        public Dictionary<int, string> leaderList { get; private set; }
+        public Dictionary<int, Player> leaderList { get; private set; }
         public int CurrentLeaderKey { get; private set; }
-        public string CurrentLeaderID { get; private set; }
         public IFaction Winner {
             get => CurrentState.Winner;
             private set => CurrentState.Winner = value; }
@@ -113,24 +112,24 @@ namespace Jeffistance.Common.Models
         {
             Random rng = new Random();
             var ll = Players.OrderBy(a => rng.Next());
-            leaderList = new Dictionary<int, string>();
+            leaderList = new Dictionary<int, Player>();
             CurrentLeaderKey = 0;
             int j = 0;
             foreach(Player p in ll)
             {
-                leaderList.Add(j, p.UserID);
+                leaderList.Add(j, p);
                 j++;
             }
         }
-
-        public void NextLeaderId()
+        ///<summary>Rotates to the next leader updating the Game's CurrentLeader</summary>
+        public void NextLeader()
         {
             CurrentPhase = Phase.LeaderPicking;
             if(CurrentLeaderKey == leaderList.Count)
             {
                 CurrentLeaderKey = 0;
             }
-            CurrentLeaderID = leaderList[CurrentLeaderKey];
+            CurrentLeader = leaderList[CurrentLeaderKey];
             CurrentLeaderKey++;
         }
 
@@ -166,7 +165,7 @@ namespace Jeffistance.Common.Models
             }
             CurrentTeamVotes.Clear();
             CurrentMissionVotes.Clear();
-            NextLeaderId();
+            NextLeader();
             PickTeam();
         }
 

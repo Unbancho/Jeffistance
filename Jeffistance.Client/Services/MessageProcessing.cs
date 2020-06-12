@@ -101,30 +101,30 @@ namespace Jeffistance.Client.Services.MessageProcessing
             {
                 
                 GameScreenViewModel gameScreen = (AppState.GetAppState().CurrentWindow as GameScreenViewModel);
-                if(gameScreen.CurrentPhase == Phase.Standby)
+                if(gameScreen.GameState.CurrentPhase == Phase.Standby)
                 {
                     Game game = appState.Server.Game;
                     int teamSize = game.NextTeamSize;
-                    string leaderID = game.CurrentLeaderID;
-                    gameScreen.DeclareLeader(teamSize, leaderID);
+                    Player leader = game.CurrentLeader;
+                    gameScreen.DeclareLeader(teamSize, leader);
                 }
-                else if(gameScreen.CurrentPhase == Phase.AssigningRandomResult)
+                else if(gameScreen.GameState.CurrentPhase == Phase.AssigningRandomResult)
                 {
                     Game game = appState.Server.Game;
                     int teamSize = game.NextTeamSize;
-                    string leaderID = game.CurrentLeaderID;
+                    Player leader = game.CurrentLeader;
                     Dispatcher.UIThread.Post(()=>  gameScreen.RandomRoundResult());
-                    gameScreen.DeclareLeader(teamSize, leaderID);
+                    gameScreen.DeclareLeader(teamSize, leader);
                 }
-                else if(gameScreen.CurrentPhase == Phase.ShowingTeamVoteResult)
+                else if(gameScreen.GameState.CurrentPhase == Phase.ShowingTeamVoteResult)
                 {
                     gameScreen.StartMissionVoting();
                 }
-                else if(gameScreen.CurrentPhase == Phase.FailedTeamFormation)
+                else if(gameScreen.GameState.CurrentPhase == Phase.FailedTeamFormation)
                 {
                     var user = appState.CurrentUser;
                     var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-                    var leaderMessage = messageFactory.MakeDeclareLeaderMessage(appState.Server.Game.NextTeamSize, appState.Server.Game.CurrentLeaderID);
+                    var leaderMessage = messageFactory.MakeDeclareLeaderMessage(appState.Server.Game.NextTeamSize, appState.Server.Game.CurrentLeader);
                     user.Send(leaderMessage);
                 }
             }
@@ -137,14 +137,14 @@ namespace Jeffistance.Client.Services.MessageProcessing
             AppState appState = AppState.GetAppState();
             GameScreenViewModel gameScreen = (appState.CurrentWindow as GameScreenViewModel);
             gameScreen.TeamPickedUsersIDs = (List<string>) message["PlayersInTeamIDs"];
-            string leaderName = appState.UserList.Find(u => u.ID.ToString() == gameScreen.CurrentLeaderID).Name;
+            string leaderName = appState.UserList.Find(u => u.ID.ToString() == gameScreen.GameState.CurrentLeader.UserID).Name;
             Dispatcher.UIThread.Post(()=>gameScreen.ShowSelectedPlayers());
             gameScreen.RoundBox = leaderName + " picked the following team. It's voting time";
-            gameScreen.CurrentPhase = Phase.TeamVoting;
+            gameScreen.GameState.CurrentPhase = Phase.TeamVoting;
             Dispatcher.UIThread.Post(()=> gameScreen.ChangeOKBtnState(false));
             Dispatcher.UIThread.Post(()=> gameScreen.ChangeVotingBtnsState(true));
             User me = appState.CurrentUser;
-            if(me.ID.ToString().Equals(gameScreen.CurrentLeaderID))
+            if(me.ID.ToString().Equals(gameScreen.GameState.CurrentLeader.UserID))
             {
                 gameScreen.SelectablePlayers = 0;
             }
@@ -153,22 +153,22 @@ namespace Jeffistance.Client.Services.MessageProcessing
         [MessageMethod(JeffistanceFlags.DeclareLeaderMessage)]
         private void DeclareLeaderMessageFlagMethod(Message message)
         {
-            string leaderID =  (string) message["UserID"];
+            Player leader =  (Player) message["Leader"];
             int teamSize =  (int) message["TeamSize"];
             AppState appState = AppState.GetAppState();
             GameScreenViewModel gameScreen = (appState.CurrentWindow as GameScreenViewModel);
-            gameScreen.CurrentLeaderID = leaderID;
+            gameScreen.GameState.CurrentLeader = leader;
             User me = appState.CurrentUser;
-            if(me.ID.ToString().Equals(leaderID))
+            if(me.ID.ToString().Equals(gameScreen.GameState.CurrentLeader.UserID))
             {
                 gameScreen.SelectablePlayers = teamSize;
                 Dispatcher.UIThread.Post(()=> gameScreen.ChangeOKBtnState(true));
                 gameScreen.RoundBox = "Pick a team of " + teamSize + " players for the next mission";
-                gameScreen.CurrentPhase = Phase.TeamPicking;
+                gameScreen.GameState.CurrentPhase = Phase.TeamPicking;
             }
             else
             {
-                string leaderName = appState.UserList.Find(u => u.ID.ToString()==leaderID).Name;
+                string leaderName = appState.UserList.Find(u => u.ID.ToString()==gameScreen.GameState.CurrentLeader.UserID).Name;
                 Dispatcher.UIThread.Post(()=> gameScreen.ChangeOKBtnState(false));
                 gameScreen.RoundBox = 
                 leaderName + " is picking a team of " + teamSize + " for the next mission";
@@ -246,12 +246,12 @@ namespace Jeffistance.Client.Services.MessageProcessing
             {
                 gameScreen.RoundBox = "Decide on the mission's success";
                 Dispatcher.UIThread.Post(()=> gameScreen.ShowMissionVotingInterface());
-                gameScreen.CurrentPhase = Phase.MissionVoting;
+                gameScreen.GameState.CurrentPhase = Phase.MissionVoting;
             }
             else
             {
                 gameScreen.RoundBox = "The team is executing the mission";
-                gameScreen.CurrentPhase = Phase.MissionVoting;
+                gameScreen.GameState.CurrentPhase = Phase.MissionVoting;
             }
             
         }
