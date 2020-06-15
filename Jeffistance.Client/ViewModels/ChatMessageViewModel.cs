@@ -18,13 +18,14 @@ namespace Jeffistance.Client.ViewModels
         public ChatMessageViewModel(string id, string content, ChatViewModel parent, string username)
         {
             this.id = id;
-            this.Content = content;
-            this.Parent = parent;
-            this.Username = username;
+            Content = content;
+            Parent = parent;
+            Username = username;
+            IsAuthor = AppState.GetAppState().CurrentUser.Name.Equals(Username);
 
             var isAuthor = this.WhenAnyValue(
-                x => x.Username,
-                x => x == AppState.GetAppState().CurrentUser.Name);
+                x => x.IsAuthor,
+                x => x == true);
 
             OnEditClicked = ReactiveCommand.Create<Control>(OnEditClickedMethod, isAuthor);
             OnDeleteClicked = ReactiveCommand.Create(OnDeleteClickedMethod, isAuthor);
@@ -36,10 +37,17 @@ namespace Jeffistance.Client.ViewModels
 
         string username;
 
+        bool _isAuthor;
+
         ChatViewModel parent;
 
         public bool edited {get; set;}
 
+        public bool IsAuthor
+        {
+            get => _isAuthor;
+            set => this.RaiseAndSetIfChanged(ref _isAuthor, value);
+        }
         public string Username
         {
             get => username;

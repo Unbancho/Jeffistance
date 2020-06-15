@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Reactive;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using Jeffistance.Client.Models;
 using Jeffistance.Client.Views;
@@ -115,14 +117,18 @@ namespace Jeffistance.Client.ViewModels
                 {
                     if (SelectedUserIDs.Count < SelectablePlayers)
                     {
-                        playerAvatar.Avatar.Source = new Bitmap("Jeffistance.Client\\Assets\\Vorebisu.png");
+                        var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                        Uri uri = new Uri("avares://Jeffistance.Client/Assets/Vorebisu.png");
+                        playerAvatar.Avatar.Source = new Bitmap(assets.Open(uri));
                         SelectedUserIDs.Add(playerAvatar.UserId);
                     }
                 }
                 else
                 {
                     SelectedUserIDs.Remove(playerAvatar.UserId);
-                    playerAvatar.Avatar.Source = new Bitmap("Jeffistance.Client\\Assets\\Spy.png");
+                    var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                    Uri uri = new Uri("avares://Jeffistance.Client/Assets/Spy.png");
+                    playerAvatar.Avatar.Source = new Bitmap(assets.Open(uri));
 
                 }
             }
@@ -171,8 +177,9 @@ namespace Jeffistance.Client.ViewModels
             foreach (PlayerAvatarView pav in AvatarsList)
             {
                 if (TeamPickedUsersIDs.Contains(pav.UserId))
-                {
-                    pav.Avatar.Source = new Bitmap("Jeffistance.Client\\Assets\\Vorebisu.png");
+            {       var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                    Uri uri = new Uri("avares://Jeffistance.Client/Assets/Vorebisu.png");
+                    pav.Avatar.Source  = new Bitmap(assets.Open(uri));
                 }
             }
         }
@@ -181,7 +188,9 @@ namespace Jeffistance.Client.ViewModels
         {
             foreach (PlayerAvatarView pav in AvatarsList)
             {
-                pav.Avatar.Source = new Bitmap("Jeffistance.Client\\Assets\\Spy.png");
+                var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                Uri uri = new Uri("avares://Jeffistance.Client/Assets/Spy.png");
+                pav.Avatar.Source  = new Bitmap(assets.Open(uri));
             }
             SelectedUserIDs = new List<string>();
         }
@@ -370,15 +379,18 @@ namespace Jeffistance.Client.ViewModels
         {
             EnableOKBtn = false;
             EnableVotingBtns = false;
+            var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
             foreach (PlayerAvatarView avatar in AvatarsList)
             {
                 if (spiesIDs.Contains(avatar.UserId))
                 {
-                    avatar.Avatar.Source = new Bitmap("Jeffistance.Client\\Assets\\Jew.png");
+                    Uri uri = new Uri("avares://Jeffistance.Client/Assets/Jew.png");
+                    avatar.Avatar.Source = new Bitmap(assets.Open(uri));
                 }
                 else
                 {
-                    avatar.Avatar.Source = new Bitmap("Jeffistance.Client\\Assets\\Spy.png"); //changes them back in case they were selected
+                    Uri uri = new Uri("avares://Jeffistance.Client/Assets/Spy.png");//changes them back in case they were selected
+                    avatar.Avatar.Source = new Bitmap(assets.Open(uri));
                 }
             }
             RoundBox = winningFactionName + " victory!";
