@@ -5,8 +5,6 @@ using Avalonia.Controls;
 using Avalonia.VisualTree;
 using System.Reactive;
 using Jeffistance.Client.Models;
-using ModusOperandi.Messaging;
-using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
 using Jeffistance.Common.Services.IoC;
 using Jeffistance.Common.Services;
@@ -91,7 +89,6 @@ namespace Jeffistance.Client.ViewModels
                     if (model != null)
                     {
                         ChatMessageViewModel message = (ChatMessageViewModel) model;
-                        //edited = true;
                         Content = message.content;
 
                         LocalUser user = AppState.GetAppState().CurrentUser;
