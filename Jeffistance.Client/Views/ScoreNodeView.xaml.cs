@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Jeffistance.Common.AvaloniaTools;
 
 namespace Jeffistance.Client.Views
 {
@@ -25,20 +26,18 @@ namespace Jeffistance.Client.Views
             AvaloniaXamlLoader.Load(this);
         }
 
-        public void ChangeState(bool roundResult)
+        public void ChangeState(bool isJeffistanceVictory)
         {
             var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-            if(roundResult)
+            if(isJeffistanceVictory)
             {
                 State = ScoreState.JeffistanceVictory;
-                Uri uri = new Uri("avares://Jeffistance.Client/Assets/Sharkbisu.png");
-                nodeImage.Source = new Bitmap(assets.Open(uri));
+                nodeImage.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Sharkbisu.png");
             }
             else
             {
-                State = ScoreState.JeffistanceVictory;
-                Uri uri = new Uri("avares://Jeffistance.Client/Assets/Vorebisu.png");
-                nodeImage.Source = new Bitmap(assets.Open(uri));
+                State = ScoreState.SpyVictory;
+                nodeImage.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Vorebisu.png");
             }
         }
 
