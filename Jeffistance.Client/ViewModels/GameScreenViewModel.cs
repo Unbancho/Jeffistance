@@ -274,15 +274,16 @@ namespace Jeffistance.Client.ViewModels
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            if (GameState.CurrentPhase == Phase.TeamVoting)
+            switch(GameState.CurrentPhase)
             {
-                var message = messageFactory.MakeVoteMessage(user.ID.ToString(), true);
-                user.Send(message);
-            }
-            else if (GameState.CurrentPhase == Phase.MissionVoting)
-            {
-                var message = messageFactory.MakeMissionVoteMessage(user.ID.ToString(), true);
-                user.Send(message);
+                case Phase.TeamVoting:
+                    var message = messageFactory.MakeVoteMessage(user.ID.ToString(), true);
+                    user.Send(message);
+                    break;
+                case Phase.MissionVoting:
+                    var missionMessage = messageFactory.MakeMissionVoteMessage(user.ID.ToString(), true);
+                    user.Send(missionMessage);
+                    break;
             }
 
         }
@@ -292,15 +293,16 @@ namespace Jeffistance.Client.ViewModels
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            if (GameState.CurrentPhase == Phase.TeamVoting)
+            switch(GameState.CurrentPhase)
             {
-                var message = messageFactory.MakeVoteMessage(user.ID.ToString(), false);
-                user.Send(message);
-            }
-            else if (GameState.CurrentPhase == Phase.MissionVoting)
-            {
-                var message = messageFactory.MakeMissionVoteMessage(user.ID.ToString(), false);
-                user.Send(message);
+                case Phase.TeamVoting:
+                    var message = messageFactory.MakeVoteMessage(user.ID.ToString(), false);
+                    user.Send(message);
+                    break;
+                case Phase.MissionVoting:
+                    var missionMessage = messageFactory.MakeMissionVoteMessage(user.ID.ToString(), false);
+                user.Send(missionMessage);
+                    break;
             }
         }
 
