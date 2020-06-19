@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using Jeffistance.Client.Models;
-using System;
 using Avalonia.Threading;
 using ReactiveUI;
 using Jeffistance.Common.Models;

@@ -1,9 +1,3 @@
-using System.Reactive;
-using Avalonia.Controls;
-using Avalonia.Media;
-using Avalonia.VisualTree;
-using ReactiveUI;
-
 
 namespace Jeffistance.Client.ViewModels
 {

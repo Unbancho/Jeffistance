@@ -17,9 +17,11 @@ namespace Jeffistance.Common.Models
         public IFaction Winner { get; set; }
         public Dictionary<int, bool> RevealedTeamVotes { get; set; }
 
+        public Dictionary<string,bool> TeamVote {get; set; }
         public GameState()
         {
             RevealedTeamVotes = new Dictionary<int, bool>();
+            TeamVote = new Dictionary<string, bool>();
         }
     }
 }
