@@ -12,12 +12,14 @@ namespace Jeffistance.Common.Models
         void AssignFactions(IEnumerable<Player> players);
         void AssignRoles(IEnumerable<Player> players);
         Player PickLeader(IEnumerable<Player> players);
+        void ShufflePlayersForFactions(List<Player> players);
+        void ShufflePlayersForLeader(List<Player> players);
     }
 
     public class BasicGamemode : IGamemode
     {
-        private int nextLeaderID = 0;
-
+        private int CurrentLeaderKey = 0;
+        public Dictionary<int, Player> leaderList;
         public FactionFactory FactionFactory { get; set; } = new FactionFactory();
         public RoleFactory RoleFactory { get; set; } = new RoleFactory();
         public Dictionary<int, int[]> Factions { get; set; }
@@ -40,7 +42,7 @@ namespace Jeffistance.Common.Models
             int resistanceCount = Factions[players.Count()][0];
             int spiesCount = Factions[players.Count()][1];
             List<Player> playerList = new List<Player>(players);
-            ShufflePlayers(playerList);
+            ShufflePlayersForFactions(playerList);
 
             foreach (var player in playerList.Select((p, idx) => (p, idx)))
             {
@@ -49,7 +51,31 @@ namespace Jeffistance.Common.Models
             }
         }
 
-        private void ShufflePlayers(List<Player> list)
+       
+
+        public void AssignRoles(IEnumerable<Player> players)
+        {
+            foreach (var player in players)
+            {
+                player.Role = RoleFactory.MakeDefault();
+            }
+        }
+
+        //Creates a shuffled dictionary of users whos key goes from 0 to the number of players. The list will loop back to 0 to pick leader when everyone was a leader already
+        public void ShufflePlayersForLeader(List<Player> Players)
+        {
+            Random rng = new Random();
+            var ll = Players.OrderBy(a => rng.Next());
+            leaderList = new Dictionary<int, Player>();
+            int j = 0;
+            foreach(Player p in ll)
+            {
+                leaderList.Add(j, p);
+                j++;
+            }
+        }
+
+        public void ShufflePlayersForFactions(List<Player> list)
         {
             Random rng = new Random();
             int n = list.Count;
@@ -63,27 +89,17 @@ namespace Jeffistance.Common.Models
             }  
         }
 
-        public void AssignRoles(IEnumerable<Player> players)
-        {
-            foreach (var player in players)
-            {
-                player.Role = RoleFactory.MakeDefault();
-            }
-        }
-
         public Player PickLeader(IEnumerable<Player> players)
         {
-            //isLeader should be false by default, no need to iterate through the list to set it
-            /* 
-            foreach (var p in players)
+            if(CurrentLeaderKey == leaderList.Count)
             {
-                p.IsLeader = false;
+                CurrentLeaderKey = 0;
             }
-            */
-            var leader = players.First((p) => p.ID == nextLeaderID);
-            leader.IsLeader = true;
-            nextLeaderID = (nextLeaderID < players.Count() - 1) ? nextLeaderID + 1 : 0;
+            Player leader = leaderList[CurrentLeaderKey];
+            CurrentLeaderKey++;
             return leader;
         }
+
+      
     }
 }

@@ -60,7 +60,6 @@ namespace Jeffistance.Common.Models
         public Dictionary<int, bool> CurrentMissionVotes { get; private set; }
         public IGamemode Gamemode { get; set; }
         public GameState CurrentState { get; private set; }
-        public Dictionary<int, Player> leaderList { get; private set; }
         public int CurrentLeaderKey { get; private set; }
         public IFaction Winner {
             get => CurrentState.Winner;
@@ -107,31 +106,6 @@ namespace Jeffistance.Common.Models
             NextRound(true);
         }
 
-        //Creates a shuffled dictionary of users whos key goes from 0 to the number of players. The list will loop back to 0 to pick leader when everyone was a leader already
-        public void ShufflePlayersForLeader()
-        {
-            Random rng = new Random();
-            var ll = Players.OrderBy(a => rng.Next());
-            leaderList = new Dictionary<int, Player>();
-            CurrentLeaderKey = 0;
-            int j = 0;
-            foreach(Player p in ll)
-            {
-                leaderList.Add(j, p);
-                j++;
-            }
-        }
-        ///<summary>Rotates to the next leader updating the Game's CurrentLeader</summary>
-        public void NextLeader()
-        {
-            CurrentPhase = Phase.LeaderPicking;
-            if(CurrentLeaderKey == leaderList.Count)
-            {
-                CurrentLeaderKey = 0;
-            }
-            CurrentLeader = leaderList[CurrentLeaderKey];
-            CurrentLeaderKey++;
-        }
 
         private void Setup()
         {
@@ -143,7 +117,7 @@ namespace Jeffistance.Common.Models
             CurrentRound = -1;
             ResistanceWinCount = 0;
             SpiesWinCount = 0;
-            ShufflePlayersForLeader();
+            Gamemode.ShufflePlayersForLeader(Players);
         }
 
         public void NextRound(bool advanceRound)
@@ -165,7 +139,7 @@ namespace Jeffistance.Common.Models
             }
             CurrentTeamVotes.Clear();
             CurrentMissionVotes.Clear();
-            NextLeader();
+            PickLeader();
             PickTeam();
         }
 
@@ -191,7 +165,8 @@ namespace Jeffistance.Common.Models
             Winner = (SpiesWinCount == 3 || FailedVoteCount == MaxFailedVotes) ?
             ff.GetSpies() : ff.GetResistance();
         }
-
+        
+        ///<summary>Rotates to the next leader updating the Game's CurrentLeader</summary>
         private void PickLeader()
         {
             CurrentPhase = Phase.LeaderPicking;
