@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System;
+using Jeffistance.Common.Services.PlayerEventManager;
 
 namespace Jeffistance.JeffServer.Models
 {
@@ -24,7 +25,7 @@ namespace Jeffistance.JeffServer.Models
         private Dictionary<string, User> UserNameDictionary = new Dictionary<string, User>();
         private Dictionary<Guid, User> UserGuidDictionary = new Dictionary<Guid, User>();
         private MessageHandler MessageHandler {get; set;}
-
+        public Game Game {get; set;}
 
         public Server()
         {
@@ -53,6 +54,13 @@ namespace Jeffistance.JeffServer.Models
             Host.Connect(NetworkUtilities.GetLocalIPAddress(), Connection.PORT_NO);
             Host.AttachMessageHandler(new MessageHandler(messageProcessor, Host.Connection));
             Host.GreetServer();
+        }
+
+        public void StartGame(List<User> Users)
+        {
+            PlayerEventManager playerEventManager = new PlayerEventManager();
+            Game = new Game(new BasicGamemode(), playerEventManager);
+            Game.Start(Users);
         }
 
         public void Run(int port)

@@ -53,7 +53,73 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
         {
             Server.Broadcast(message);
         }
-        
 
+        [MessageMethod(JeffistanceFlags.GetPlayerInfoMessage)]
+        private void GetPlayerInfoMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        [MessageMethod(JeffistanceFlags.GamePhaseReadyMessage)]
+        private void GamePhaseReadyMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        [MessageMethod(JeffistanceFlags.AdvanceGamePhaseMessage)]
+        private void AdvanceGamePhaseMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        [MessageMethod(JeffistanceFlags.PickTeamMessage)]
+        private void PickTeamMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+        
+        [MessageMethod(JeffistanceFlags.DeclareLeaderMessage)]
+        private void DeclareLeaderMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        [MessageMethod(JeffistanceFlags.VoteMessage)]
+        private void VoteMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        [MessageMethod(JeffistanceFlags.StartMissionVotingMessage)]
+        private void StartMissionVotingMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        [MessageMethod(JeffistanceFlags.ShowTeamVoteResultMessage)]
+        private void ShowTeamVoteResultMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+        
+        [MessageMethod(JeffistanceFlags.MissionVoteMessage)]
+        private void MissionVoteMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        [MessageMethod(JeffistanceFlags.ShowMissionResultMessage)]
+        private void ShowMissionResultMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+
+        [MessageMethod(JeffistanceFlags.EndGameMessage)]
+        private void EndGameMessageFlagMethod(Message message)
+        {
+            Server.Broadcast(message);
+        }
+        
+        
     }
 }

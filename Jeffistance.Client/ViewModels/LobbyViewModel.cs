@@ -11,6 +11,7 @@ using Jeffistance.Common.Models;
 using Jeffistance.Common.Services.IoC;
 using Jeffistance.Common.Services;
 using ReactiveUI;
+using Jeffistance.JeffServer.Models;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -174,6 +175,22 @@ namespace Jeffistance.Client.ViewModels
             GameScreenViewModel gameScreen = new GameScreenViewModel();
             parent.Content = gameScreen;
             gs.CurrentWindow = gameScreen;
+        }
+
+        public void SetupGame()
+        {
+            AppState gs = AppState.GetAppState();
+            if(gs.CurrentUser.IsHost)
+            {
+                List<User> Users = gs.UserList;
+                AppState apps = AppState.GetAppState();
+                Server server = apps.Server;
+                LocalUser me = apps.CurrentUser;
+                server.StartGame(Users);
+                var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+                var message = messageFactory.MakeGetPlayerInfoMessage(server.Game.Players);
+                me.Send(message);
+            }
         }
 
         private void UsersUpdated(object obj, NotifyCollectionChangedEventArgs args)

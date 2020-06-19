@@ -1,8 +1,5 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia.Interactivity;
-using System.ComponentModel;
 
 namespace Jeffistance.Client.Views
 {
