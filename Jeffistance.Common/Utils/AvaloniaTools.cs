@@ -7,10 +7,10 @@ namespace Jeffistance.Common.AvaloniaTools
 {
     public static class AvaloniaTools
     {
-        public static Bitmap GetImageFromResources(string assamble, string imageName)
+        public static Bitmap GetImageFromResources(string assemblyName, string imageName)
         {
             var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-            Uri uri = new Uri("avares://" + assamble + "/Assets/" + imageName);
+            Uri uri = new Uri("avares://" + assemblyName + "/Assets/" + imageName);
             return new Bitmap(assets.Open(uri));
         }
     }
