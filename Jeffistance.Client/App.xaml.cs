@@ -5,6 +5,7 @@ using Jeffistance.Client.ViewModels;
 using Jeffistance.Client.Views;
 using Jeffistance.Common.Services.IoC;
 using Jeffistance.Common.Services;
+using Microsoft.Extensions.Logging;
 
 using System;
 
@@ -35,8 +36,14 @@ namespace Jeffistance.Client
         public void RegisterClientDependencies()
         {
             IoCManager.Register<IClientMessageFactory, ClientMessageFactory>();
+            IoCManager.AddLogging(builder => builder
+                .AddFile("Logs/Jeffistance-{Date}.txt")
+                .AddConsole());
 
             IoCManager.BuildGraph();
+
+            var logger = IoCManager.Resolve<ILogger>();
+            logger.LogInformation("Registered client dependencies.");
         }
     }
 }

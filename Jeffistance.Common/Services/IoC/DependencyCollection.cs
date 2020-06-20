@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 
 namespace Jeffistance.Common.Services.IoC
 {
@@ -71,6 +72,14 @@ namespace Jeffistance.Common.Services.IoC
             }
 
             throw new UnregisteredTypeException(type);
+        }
+
+        public void AddLogging(Action<ILoggingBuilder> configure)
+        {
+            var loggerFactory = LoggerFactory.Create(configure);
+            var logger = loggerFactory.CreateLogger("General");
+            _resolveTypes[typeof(ILogger)] = typeof(ILogger);
+            _services[typeof(ILogger)] = logger;
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 using System;
+using Microsoft.Extensions.Logging;
 
 namespace Jeffistance.Common.Services.IoC
 {
@@ -29,6 +30,11 @@ namespace Jeffistance.Common.Services.IoC
         public static T Resolve<T>()
         {
             return _dependencyCollection.Resolve<T>();
+        }
+
+        public static void AddLogging(Action<ILoggingBuilder> configure)
+        {
+            _dependencyCollection.AddLogging(configure);
         }
 
         /// <summary>
