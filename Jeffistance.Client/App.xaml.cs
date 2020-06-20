@@ -36,13 +36,13 @@ namespace Jeffistance.Client
         public void RegisterClientDependencies()
         {
             IoCManager.Register<IClientMessageFactory, ClientMessageFactory>();
-            IoCManager.AddLogging(builder => builder
+            IoCManager.AddClientLogging(builder => builder
                 .AddFile("Logs/Jeffistance-{Date}.txt")
                 .AddConsole());
 
             IoCManager.BuildGraph();
 
-            var logger = IoCManager.Resolve<ILogger>();
+            var logger = IoCManager.GetClientLogger();
             logger.LogInformation("Registered client dependencies.");
         }
     }

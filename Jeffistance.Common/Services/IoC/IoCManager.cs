@@ -32,9 +32,24 @@ namespace Jeffistance.Common.Services.IoC
             return _dependencyCollection.Resolve<T>();
         }
 
-        public static void AddLogging(Action<ILoggingBuilder> configure)
+        public static void AddClientLogging(Action<ILoggingBuilder> configure)
         {
-            _dependencyCollection.AddLogging(configure);
+            _dependencyCollection.AddClientLogging(configure);
+        }
+
+        public static void AddServerLogging(Action<ILoggingBuilder> configure)
+        {
+            _dependencyCollection.AddServerLogging(configure);
+        }
+
+        public static ILogger GetClientLogger()
+        {
+            return _dependencyCollection.GetClientLogger();
+        }
+
+        public static ILogger GetServerLogger()
+        {
+            return _dependencyCollection.GetServerLogger();
         }
 
         /// <summary>

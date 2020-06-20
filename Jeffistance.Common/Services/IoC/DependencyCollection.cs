@@ -19,6 +19,9 @@ namespace Jeffistance.Common.Services.IoC
         /// </summary>
         private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
 
+        private ILogger _clientLogger;
+        private ILogger _serverLogger;
+
         /// <summary>
         /// Register a type to its implementation.
         /// </summary>
@@ -74,12 +77,32 @@ namespace Jeffistance.Common.Services.IoC
             throw new UnregisteredTypeException(type);
         }
 
-        public void AddLogging(Action<ILoggingBuilder> configure)
+        public void AddClientLogging(Action<ILoggingBuilder> configure)
         {
             var loggerFactory = LoggerFactory.Create(configure);
-            var logger = loggerFactory.CreateLogger("General");
-            _resolveTypes[typeof(ILogger)] = typeof(ILogger);
-            _services[typeof(ILogger)] = logger;
+            var logger = loggerFactory.CreateLogger("Client");
+            _clientLogger = logger;
+        }
+
+        public void AddServerLogging(Action<ILoggingBuilder> configure)
+        {
+            var loggerFactory = LoggerFactory.Create(configure);
+            var logger = loggerFactory.CreateLogger("Server");
+            _serverLogger = logger;
+        }
+
+        public ILogger GetClientLogger()
+        {
+            return _clientLogger ?? throw new InvalidOperationException(
+                $"Attempted to get uninitialized client logger."
+            );
+        }
+
+        public ILogger GetServerLogger()
+        {
+            return _serverLogger ?? throw new InvalidOperationException(
+                $"Attempted to get uninitialized server logger."
+            );
         }
 
         /// <summary>
