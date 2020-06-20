@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 
 namespace Jeffistance.Common.Services.IoC
 {
@@ -17,6 +18,9 @@ namespace Jeffistance.Common.Services.IoC
         /// Dictionary that maps types passed to <see cref="Resolve{T}"/> to their implementation.
         /// </summary>
         private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
+
+        private ILogger _clientLogger;
+        private ILogger _serverLogger;
 
         /// <summary>
         /// Register a type to its implementation.
@@ -71,6 +75,34 @@ namespace Jeffistance.Common.Services.IoC
             }
 
             throw new UnregisteredTypeException(type);
+        }
+
+        public void AddClientLogging(Action<ILoggingBuilder> configure)
+        {
+            var loggerFactory = LoggerFactory.Create(configure);
+            var logger = loggerFactory.CreateLogger("Client");
+            _clientLogger = logger;
+        }
+
+        public void AddServerLogging(Action<ILoggingBuilder> configure)
+        {
+            var loggerFactory = LoggerFactory.Create(configure);
+            var logger = loggerFactory.CreateLogger("Server");
+            _serverLogger = logger;
+        }
+
+        public ILogger GetClientLogger()
+        {
+            return _clientLogger ?? throw new InvalidOperationException(
+                $"Attempted to get uninitialized client logger."
+            );
+        }
+
+        public ILogger GetServerLogger()
+        {
+            return _serverLogger ?? throw new InvalidOperationException(
+                $"Attempted to get uninitialized server logger."
+            );
         }
 
         /// <summary>
