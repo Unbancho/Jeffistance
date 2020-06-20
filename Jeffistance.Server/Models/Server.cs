@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System;
 using Jeffistance.Common.Services.PlayerEventManager;
+using Microsoft.Extensions.Logging;
 
 namespace Jeffistance.JeffServer.Models
 {
@@ -43,8 +44,14 @@ namespace Jeffistance.JeffServer.Models
         private void RegisterServerDependencies()
         {
             IoCManager.Register<IServerMessageFactory, ServerMessageFactory>();
+            IoCManager.AddServerLogging(builder => builder
+                .AddFile("Logs/Jeffistance-Server-{Date}.txt")
+                .AddConsole());
 
             IoCManager.BuildGraph();
+
+            var logger = IoCManager.GetServerLogger();
+            logger.LogInformation("Registered server dependencies.");
         }
 
         public void ConnectHost(string username, JeffistanceMessageProcessor messageProcessor)
