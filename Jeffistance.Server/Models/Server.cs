@@ -10,12 +10,16 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System;
 using Jeffistance.Common.Services.PlayerEventManager;
+using Jeffistance.Common.ExtensionMethods;
 using Microsoft.Extensions.Logging;
+using System.Configuration;
 
 namespace Jeffistance.JeffServer.Models
 {
     public class Server
     {
+        private ILogger _logger;
+
         const string DEFAULT_HOST_NAME = "Admin";
 
         public LocalUser Host {get; set;}
@@ -44,14 +48,16 @@ namespace Jeffistance.JeffServer.Models
         private void RegisterServerDependencies()
         {
             IoCManager.Register<IServerMessageFactory, ServerMessageFactory>();
+            var logLevel = ConfigurationManager.AppSettings["LogLevel"].ToLogLevel();
             IoCManager.AddServerLogging(builder => builder
-                .AddFile("Logs/Jeffistance-Server-{Date}.txt")
-                .AddConsole());
+                .AddFile("Logs/Jeffistance-Server-{Date}.txt", logLevel)
+                .AddConsole()
+                .SetMinimumLevel(logLevel));
 
             IoCManager.BuildGraph();
 
-            var logger = IoCManager.GetServerLogger();
-            logger.LogInformation("Registered server dependencies.");
+            _logger = IoCManager.GetServerLogger();
+            _logger.LogInformation("Registered server dependencies.");
         }
 
         public void ConnectHost(string username, JeffistanceMessageProcessor messageProcessor)
@@ -78,6 +84,8 @@ namespace Jeffistance.JeffServer.Models
             Connection.OnDisconnection += OnUserDisconnect;
             Connection.OnMessageReceived += MessageHandler.OnMessageReceived;
             Connection.Run();
+            var ip = NetworkUtilities.GetLocalIPAddress();
+            _logger.LogInformation($"Started server on {ip}:{port}");
         }
 
         public void Stop()

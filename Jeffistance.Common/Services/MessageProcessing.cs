@@ -4,6 +4,7 @@ using ModusOperandi.Messaging;
 using ModusOperandi.Networking;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace Jeffistance.Common.Services.MessageProcessing
 {
@@ -46,9 +47,27 @@ namespace Jeffistance.Common.Services.MessageProcessing
             }
         }
 
-        public virtual void LogMessage(Message message)
+        public void LogMessage(ILogger logger, Message message)
         {
-            Console.WriteLine(message.Text);
+            string messageToLog = "Received network message:\n";
+            if (message.Sender != null)
+            {
+                messageToLog += $"Sender: {((ConnectionTcp) message.Sender).SERVER_IP}\n";
+            }
+            else
+            {
+                messageToLog += "Sender: UNKNOWN\n";
+            }
+            messageToLog += $"Text: {message.Text}\nContents:";
+
+            foreach (KeyValuePair<string, object> entry in message.PackedObjects)
+            {
+                var result = (obj: message.UnpackObject(entry.Key), name: entry.Key);
+                (object obj, string name) = (ValueTuple<object, string>) result;
+                messageToLog += $" {name}";
+            }
+
+            logger.LogDebug(messageToLog);
         }
 
     }
