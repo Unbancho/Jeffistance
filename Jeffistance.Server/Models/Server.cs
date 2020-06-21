@@ -10,7 +10,9 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System;
 using Jeffistance.Common.Services.PlayerEventManager;
+using Jeffistance.Common.ExtensionMethods;
 using Microsoft.Extensions.Logging;
+using System.Configuration;
 
 namespace Jeffistance.JeffServer.Models
 {
@@ -44,9 +46,11 @@ namespace Jeffistance.JeffServer.Models
         private void RegisterServerDependencies()
         {
             IoCManager.Register<IServerMessageFactory, ServerMessageFactory>();
+            var logLevel = ConfigurationManager.AppSettings["LogLevel"].ToLogLevel();
             IoCManager.AddServerLogging(builder => builder
-                .AddFile("Logs/Jeffistance-Server-{Date}.txt")
-                .AddConsole());
+                .AddFile("Logs/Jeffistance-Server-{Date}.txt", logLevel)
+                .AddConsole()
+                .SetMinimumLevel(logLevel));
 
             IoCManager.BuildGraph();
 

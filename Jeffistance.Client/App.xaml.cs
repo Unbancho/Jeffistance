@@ -5,7 +5,9 @@ using Jeffistance.Client.ViewModels;
 using Jeffistance.Client.Views;
 using Jeffistance.Common.Services.IoC;
 using Jeffistance.Common.Services;
+using Jeffistance.Common.ExtensionMethods;
 using Microsoft.Extensions.Logging;
+using System.Configuration;
 
 using System;
 
@@ -33,12 +35,14 @@ namespace Jeffistance.Client
             base.OnFrameworkInitializationCompleted();
         }
 
-        public void RegisterClientDependencies()
+        private void RegisterClientDependencies()
         {
             IoCManager.Register<IClientMessageFactory, ClientMessageFactory>();
+            var logLevel = ConfigurationManager.AppSettings["LogLevel"].ToLogLevel();
             IoCManager.AddClientLogging(builder => builder
-                .AddFile("Logs/Jeffistance-{Date}.txt")
-                .AddConsole());
+                .AddFile("Logs/Jeffistance-{Date}.txt", logLevel)
+                .AddConsole()
+                .SetMinimumLevel(logLevel));
 
             IoCManager.BuildGraph();
 
