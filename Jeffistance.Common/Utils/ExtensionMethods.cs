@@ -1,6 +1,5 @@
 using System;
 using Microsoft.Extensions.Logging;
-
 namespace Jeffistance.Common.ExtensionMethods
 {
     public static class IntegerExtensions
@@ -63,5 +62,5 @@ namespace Jeffistance.Common.ExtensionMethods
         {
             return (Math.PI / 180) * angle;
         }
-    }   
+    }
 }

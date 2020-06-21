@@ -18,6 +18,8 @@ namespace Jeffistance.JeffServer.Models
 {
     public class Server
     {
+        private ILogger _logger;
+
         const string DEFAULT_HOST_NAME = "Admin";
 
         public LocalUser Host {get; set;}
@@ -54,8 +56,8 @@ namespace Jeffistance.JeffServer.Models
 
             IoCManager.BuildGraph();
 
-            var logger = IoCManager.GetServerLogger();
-            logger.LogInformation("Registered server dependencies.");
+            _logger = IoCManager.GetServerLogger();
+            _logger.LogInformation("Registered server dependencies.");
         }
 
         public void ConnectHost(string username, JeffistanceMessageProcessor messageProcessor)
@@ -82,6 +84,8 @@ namespace Jeffistance.JeffServer.Models
             Connection.OnDisconnection += OnUserDisconnect;
             Connection.OnMessageReceived += MessageHandler.OnMessageReceived;
             Connection.Run();
+            var ip = NetworkUtilities.GetLocalIPAddress();
+            _logger.LogInformation($"Started server on {ip}:{port}");
         }
 
         public void Stop()

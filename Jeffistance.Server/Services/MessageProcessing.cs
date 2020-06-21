@@ -3,6 +3,7 @@ using Jeffistance.Common.Models;
 using Jeffistance.JeffServer.Models;
 using ModusOperandi.Networking;
 using ModusOperandi.Messaging;
+using Jeffistance.Common.Services.IoC;
 
 namespace Jeffistance.JeffServer.Services.MessageProcessing
 {
@@ -13,6 +14,14 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
         public ServerMessageProcessor(Server server):base()
         {
             Server = server;
+        }
+
+        public override void ProcessMessage(Message message)
+        {
+            var logger = IoCManager.GetServerLogger();
+            LogMessage(logger, message);
+
+            base.ProcessMessage(message);
         }
 
         [MessageMethod(JeffistanceFlags.Greeting)]

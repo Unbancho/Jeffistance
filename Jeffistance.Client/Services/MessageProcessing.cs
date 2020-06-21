@@ -16,6 +16,9 @@ namespace Jeffistance.Client.Services.MessageProcessing
     {
         public override void ProcessMessage(Message message)
         {
+            var logger = IoCManager.GetClientLogger();
+            LogMessage(logger, message);
+
             base.ProcessMessage(message);
         }
         

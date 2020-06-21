@@ -33,6 +33,9 @@ namespace Jeffistance.Client
             }
 
             base.OnFrameworkInitializationCompleted();
+
+            var logger = IoCManager.GetClientLogger();
+            logger.LogInformation("Completed Avalonia initialization.");
         }
 
         private void RegisterClientDependencies()
