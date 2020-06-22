@@ -5,6 +5,8 @@ using Jeffistance.Client.Models;
 using Jeffistance.JeffServer.Models;
 using Jeffistance.Client.Services.MessageProcessing;
 using Jeffistance.Common.ExtensionMethods;
+using Jeffistance.Common.Services.IoC;
+using Microsoft.Extensions.Logging;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -12,6 +14,7 @@ namespace Jeffistance.Client.ViewModels
     {
         MainWindowViewModel parent;
         int port = 7700;
+        private ILogger _logger;
         
         //TODO Actual port validation
         public string Port
@@ -37,6 +40,8 @@ namespace Jeffistance.Client.ViewModels
         public HostMenuViewModel(MainWindowViewModel parent)
         {
             this.parent = parent;
+            this._logger = IoCManager.GetClientLogger();
+
             var okEnabled = this.WhenAnyValue(
                 x => x.Port,
                 x => x != "-1"
@@ -44,7 +49,7 @@ namespace Jeffistance.Client.ViewModels
 
             Ok = ReactiveCommand.Create(
                 () => {
-                    Console.WriteLine($"Hosting on {port}");
+                    _logger.LogInformation($"Hosting on {port}");
                     Host();},
                 okEnabled
             );
@@ -65,6 +70,7 @@ namespace Jeffistance.Client.ViewModels
             parent.Content = lobby;
             gs.CurrentLobby = lobby;
             gs.CurrentWindow = parent.Content;
+            _logger.LogInformation("Successfully hosted server.");
         }
     }
 }
