@@ -31,6 +31,8 @@ namespace Jeffistance.Client.ViewModels
         List<PlayerAvatarView> AvatarsList;
         public GameState GameState;
         public List<string> TeamPickedUsersIDs;
+        public string _noChoice;
+        public string _yesChoice;
         public GameScreenViewModel()
         {
             GameState = new GameState();
@@ -39,6 +41,8 @@ namespace Jeffistance.Client.ViewModels
             ChatView = new ChatViewModel();
             ScorePanel = new StackPanel();
             AvatarsList = new List<PlayerAvatarView>();
+            NoChoice = "Gray";
+            YesChoice = "Orange";
 
             EnableOKBtn = true;
             EnableVotingBtns = false;
@@ -117,7 +121,7 @@ namespace Jeffistance.Client.ViewModels
                 {
                     if (SelectedUserIDs.Count < SelectablePlayers)
                     {
-                        playerAvatar.Avatar.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Vorebisu.png");
+                        playerAvatar.Avatar.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Selected Spy.png");
                         SelectedUserIDs.Add(playerAvatar.UserId);
                     }
                 }
@@ -152,6 +156,17 @@ namespace Jeffistance.Client.ViewModels
             set => this.RaiseAndSetIfChanged(ref _enableOKBtn, value);
         }
 
+        public string NoChoice
+        {
+            get => _noChoice;
+            set => this.RaiseAndSetIfChanged(ref _noChoice, value);
+        }
+        public string YesChoice
+        {
+            get => _yesChoice;
+            set => this.RaiseAndSetIfChanged(ref _yesChoice, value);
+        }
+
         public Boolean EnableVotingBtns
         {
             get => _enableVotingBtns;
@@ -173,7 +188,7 @@ namespace Jeffistance.Client.ViewModels
             {
                 if (TeamPickedUsersIDs.Contains(pav.UserId))
                 {       
-                    pav.Avatar.Source  = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Vorebisu.png");
+                    pav.Avatar.Source  = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Selected Spy.png");
                 }
             }
         }
@@ -273,6 +288,8 @@ namespace Jeffistance.Client.ViewModels
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+            NoChoice = "Gray";
+            YesChoice = "Orange";
             switch(GameState.CurrentPhase)
             {
                 case Phase.TeamVoting:
@@ -292,6 +309,8 @@ namespace Jeffistance.Client.ViewModels
             AppState gs = AppState.GetAppState();
             var user = AppState.GetAppState().CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
+            NoChoice = "Orange";
+            YesChoice = "Gray";
             switch(GameState.CurrentPhase)
             {
                 case Phase.TeamVoting:
