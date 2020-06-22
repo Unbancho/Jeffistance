@@ -8,6 +8,8 @@ using ModusOperandi.Networking;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Client.Services.MessageProcessing;
 using Jeffistance.Common.ExtensionMethods;
+using Jeffistance.Common.Services.IoC;
+using Microsoft.Extensions.Logging;
 
 namespace Jeffistance.Client.ViewModels
 {
@@ -17,6 +19,7 @@ namespace Jeffistance.Client.ViewModels
         int port = 7700;
         string ipAddress = NetworkUtilities.GetLocalIPAddress();
         private string username;
+        private ILogger _logger;
 
         public string Username
         {
@@ -52,6 +55,7 @@ namespace Jeffistance.Client.ViewModels
         public JoinMenuViewModel(MainWindowViewModel parent)
         {
             this.parent = parent;
+            this._logger = IoCManager.GetClientLogger();
 
             var okEnabled = this.WhenAnyValue(
                 x => x.Port,
@@ -64,7 +68,7 @@ namespace Jeffistance.Client.ViewModels
             Ok = ReactiveCommand.Create(
                 () =>
                 {
-                    Console.WriteLine($"Joining {IpAddress}:{port}");
+                    _logger.LogInformation($"Joining {IpAddress}:{port}");
                     Join();
                 },
                 okEnabled
@@ -85,6 +89,7 @@ namespace Jeffistance.Client.ViewModels
             parent.Content = lobby;
             appState.CurrentLobby = lobby;
             appState.CurrentWindow = parent.Content;
+            _logger.LogInformation("Successfully joined server.");
         }
     }
 }
