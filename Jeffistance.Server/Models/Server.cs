@@ -67,6 +67,7 @@ namespace Jeffistance.JeffServer.Models
             Host.Connect(NetworkUtilities.GetLocalIPAddress(), Connection.PORT_NO);
             Host.AttachMessageHandler(new MessageHandler(messageProcessor, Host.Connection));
             Host.GreetServer();
+            _logger.LogInformation($"Connected host: {username}");
         }
 
         public void StartGame(List<User> Users)
@@ -98,6 +99,7 @@ namespace Jeffistance.JeffServer.Models
         {
             ObservableUserList.Remove(user);
             Connection.Kick(user.Connection);
+            _logger.LogInformation($"Kicked {user.Name}");
         }
 
         public void AddUser(User user)
@@ -106,6 +108,8 @@ namespace Jeffistance.JeffServer.Models
             UserNameDictionary[user.Name.ToLower()] = user;
             UserGuidDictionary[user.ID] = user;
             ObservableUserList.Add(user);
+            _logger.LogInformation($"Added new user: {user.Name}");
+            _logger.LogDebug($"ID: {user.ID}");
         }
 
         public User GetUser(string username)
@@ -128,12 +132,14 @@ namespace Jeffistance.JeffServer.Models
 
         public void OnUserDisconnect(object obj, DisconnectionArgs args)
         {
-            ObservableUserList.Remove(GetUser(args.Client));
+            var user = GetUser(args.Client);
+            ObservableUserList.Remove(user);
+            _logger.LogInformation($"{user.Name} has disconnected.");
         }
 
         public void Broadcast(Message message)
         {
-            Connection.Broadcast(message);
+            MessageHandler.Broadcast(message);
         }
 
         private void OnUserListChanged(object obj, NotifyCollectionChangedEventArgs args)

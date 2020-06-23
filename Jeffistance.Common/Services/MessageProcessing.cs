@@ -66,6 +66,12 @@ namespace Jeffistance.Common.Services.MessageProcessing
                 (object obj, string name) = (ValueTuple<object, string>) result;
                 messageToLog += $" {name}";
             }
+            messageToLog += "\nFlags:";
+
+            foreach (var flag in message.GetFlags())
+            {
+                messageToLog += $" {Enum.GetName(typeof(JeffistanceFlags), flag)}";
+            }
 
             logger.LogDebug(messageToLog);
         }
