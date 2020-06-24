@@ -17,9 +17,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Assets\background_1.png" />
+    <None Remove="Assets\background_2.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Assets\background_1.png" />
+    <EmbeddedResource Include="Assets\background_2.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.9.0" />
