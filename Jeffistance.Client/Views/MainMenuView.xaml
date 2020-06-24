@@ -8,7 +8,11 @@
   <DockPanel
     Background="DarkSlateGray"
     VerticalAlignment="Stretch">
-    
+
+    <DockPanel.Background>
+      <ImageBrush Source="/Assets/background_1.png" Stretch="Fill"/>
+    </DockPanel.Background>
+
     <StackPanel
       VerticalAlignment="Center">
 
@@ -16,8 +20,8 @@
         <Style Selector="Button.RoundedButton">
           <Setter Property="Template">
             <ControlTemplate>
-              <Border CornerRadius="5" Background="Crimson" >
-                <ContentPresenter Padding="24" Content="{TemplateBinding Content}"/>
+              <Border CornerRadius="5" Background="#487E91" >
+                <ContentPresenter Padding="56, 24" Content="{TemplateBinding Content}"/>
               </Border>
             </ControlTemplate>
           </Setter>
@@ -26,42 +30,49 @@
         <Style Selector="Button.RoundedButton:pointerover">
           <Setter Property="Template">
             <ControlTemplate>
-              <Border CornerRadius="5" Background="Purple" >
-                <ContentPresenter Padding="24" Content="{TemplateBinding Content}"/>
+              <Border CornerRadius="5" Background="#850505" >
+                <ContentPresenter Padding="56, 24" Content="{TemplateBinding Content}"/>
               </Border>
             </ControlTemplate>
           </Setter>
         </Style>
       </StackPanel.Styles>
 
-      <TextBlock Text="{Binding Path=Greeting, StringFormat='Jeffistance version {0}' }"
+      <TextBlock Text="Jeffistance"
                       HorizontalAlignment="Center"
-                      VerticalAlignment="Center"
-                      FontFamily="Impact"
-                      FontSize="49"
-                      Margin="0,56"/>
+                      VerticalAlignment="Top"
+                      FontFamily="DorBlue"
+                      FontSize="72"
+                      Margin="0, 48, 0, 8"/>
+      
+      <TextBlock Text="{Binding Path=Greeting, StringFormat='Version {0}' }"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Top"
+                      FontFamily="Inter UI"
+                      FontSize="18"
+                      Margin="0, 8, 0, 72"/>
 
       <Button     Command="{Binding OnHostButtonClick}"
                   Content="Host Game"
-                  FontSize="24"
+                  FontSize="36"
                   Padding="24"
                   Margin="0, 0, 0, 24"
                   Cursor="Hand"
                   HorizontalAlignment="Center"
                   VerticalAlignment="Center"
-                  FontFamily="Inter UI"
+                  FontFamily="DorBlue"
                   Classes="RoundedButton"/>
 
 
       <Button     Command="{Binding OnJoinButtonClick}"
                   Content="Join Game"
-                  FontSize="24"
+                  FontSize="36"
                   Padding="24"
                   Margin="0, 24, 0, 0"
                   Cursor="Hand"
                   HorizontalAlignment="Center"
                   VerticalAlignment="Center"
-                  FontFamily="Inter UI"
+                  FontFamily="DorBlue"
                   Classes="RoundedButton"/>
 
     </StackPanel>

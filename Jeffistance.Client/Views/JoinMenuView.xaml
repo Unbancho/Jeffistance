@@ -5,28 +5,164 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Jeffistance.Client.Views.JoinMenuView">
   <DockPanel>
-    <Button DockPanel.Dock="Bottom" Command="{Binding Cancel}">Cancel</Button>
-    <Button DockPanel.Dock="Bottom" Command="{Binding Ok}">Join</Button>
-    <StackPanel Orientation = "Vertical" VerticalAlignment="Center" Height="100">
+    
+    <DockPanel.Background>
+      <ImageBrush Source="/Assets/background_1.png" Stretch="Fill"/>
+    </DockPanel.Background>
+
+    <TextBlock  Text="join game"
+                DockPanel.Dock="Top"
+                HorizontalAlignment="Center"
+                FontFamily="DorBlue"
+                FontSize="48"
+                Margin="0, 48, 0, 8"/>
+    
+    <StackPanel 
+      Orientation="Vertical" 
+      VerticalAlignment="Center" 
+      Background="DarkGray"
+      Height="600"
+      Margin="72">
+
+      <StackPanel.Background>
+        <ImageBrush Source="/Assets/background_2.png" Stretch="Fill"/>
+      </StackPanel.Background>
+
+      <StackPanel.Styles>
+        <Style Selector="Button.RoundedButton">
+          <Setter Property="Template">
+            <ControlTemplate>
+              <Border CornerRadius="5" Background="#487E91" >
+                <ContentPresenter Padding="24, 8" Content="{TemplateBinding Content}"/>
+              </Border>
+            </ControlTemplate>
+          </Setter>
+        </Style>
+
+        <Style Selector="Button.RoundedButton:pointerover">
+          <Setter Property="Template">
+            <ControlTemplate>
+              <Border CornerRadius="5" Background="#850505" >
+                <ContentPresenter Padding="24, 8" Content="{TemplateBinding Content}"/>
+              </Border>
+            </ControlTemplate>
+          </Setter>
+        </Style>
+      </StackPanel.Styles>
+      
       <StackPanel.KeyBindings>
         <KeyBinding Command="{Binding Ok}" Gesture="Enter"/>
       </StackPanel.KeyBindings>
-      <TextBox AcceptsReturn="False"
+
+      <Grid 
+        ColumnDefinitions="40*, 30*, 30*" 
+        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto"  
+        Margin="24">
+
+        <Button   Command="{Binding Cancel}"
+                  Content="back"
+                  FontSize="16"
+                  Padding="24"
+                  Margin="0, 0, 0, 32"
+                  Cursor="Hand"
+                  HorizontalAlignment="Left"
+                  FontFamily="DorBlue"
+                  Classes="RoundedButton"
+                  Grid.Row="0"
+                  Grid.Column="0"/>
+
+        <TextBlock  Text="Username"
+                DockPanel.Dock="Top"
+                HorizontalAlignment="Left"
+                FontFamily="Inter UI"
+                FontSize="16"
+                Margin="0, 0, 16, 0"
+                Grid.Row="1"
+                Grid.Column="0"/>
+        
+        <TextBox AcceptsReturn="False"
             Text="{Binding Username}"
             Watermark="Username"
             Height="30"
             Width="300"
-            Name="UsernameTextBox"/>
-      <TextBox AcceptsReturn="False"
-              Text="{Binding IpAddress}"
-              Watermark="Enter ip"
-              Height="30"
-              Width="300"/>
-      <TextBox AcceptsReturn="False"
-              Text="{Binding Port}"
-              Watermark="Enter port"
-              Height="30"
-              Width="300"/>
+            HorizontalAlignment="Left"
+            Margin="0, 0, 16, 16"
+            Name="UsernameTextBox"
+            Grid.Row="2" 
+            Grid.Column="0"/>
+
+        <TextBlock  Text="Server IP"
+                DockPanel.Dock="Top"
+                HorizontalAlignment="Left"
+                FontFamily="Inter UI"
+                FontSize="16"
+                Margin="0, 0, 16, 0"
+                Grid.Row="3"
+                Grid.Column="0"/>
+        
+        <TextBox AcceptsReturn="False"
+                Text="{Binding IpAddress}"
+                Watermark="Enter ip"
+                Height="30"
+                Width="300"
+                HorizontalAlignment="Left"
+                Margin="0, 0, 16, 0"
+                Grid.Row="4"
+                Grid.Column="0"/>
+
+        <TextBlock  Text="Server Port"
+                DockPanel.Dock="Top"
+                HorizontalAlignment="Left"
+                FontFamily="Inter UI"
+                FontSize="16"
+                Margin="0, 0, 16, 0"
+                Grid.Row="5"
+                Grid.Column="0"/>
+        
+        <TextBox AcceptsReturn="False"
+                Text="{Binding Port}"
+                Watermark="Enter port"
+                HorizontalAlignment="Left"
+                Margin="0, 0, 16, 16"
+                Height="30"
+                Width="300"
+                Grid.Row="6"
+                Grid.Column="0"/>
+        
+        <Button 
+          Content="Casca gae and blocking girls" 
+          Grid.Row="0" 
+          Grid.Column="1" 
+          Grid.RowSpan="5"
+          Grid.ColumnSpan="2"/>
+
+        <Button   Command="{Binding Cancel}"
+                  Content="refresh"
+                  FontSize="16"
+                  Padding="24"
+                  Margin="0, 32, 0, 0"
+                  Cursor="Hand"
+                  HorizontalAlignment="Right"
+                  FontFamily="DorBlue"
+                  Classes="RoundedButton"
+                  Grid.Row="6"
+                  Grid.Column="1"/>
+
+        <Button   Command="{Binding Ok}"
+                  Content="join"
+                  FontSize="16"
+                  Padding="24"
+                  Margin="0, 32, 0, 0"
+                  Cursor="Hand"
+                  HorizontalAlignment="Right"
+                  FontFamily="DorBlue"
+                  Classes="RoundedButton"
+                  Grid.Row="6"
+                  Grid.Column="2"/>
+        
+      </Grid>
+      
+      
     </StackPanel>
   </DockPanel>
 </UserControl>
