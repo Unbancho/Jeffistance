@@ -4,5 +4,5 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Jeffistance.Client.Views.ScoreNodeView">
-   <Image Name="nodeImage" Width="75" Height="75" Source="/Assets/Skullbisu.png"/>
+   <Image Name="nodeImage" Width="75" Height="75" Source="/Assets/RoundStateNormal.png"/>
 </UserControl>

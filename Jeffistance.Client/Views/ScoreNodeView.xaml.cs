@@ -30,12 +30,12 @@ namespace Jeffistance.Client.Views
             if(isJeffistanceVictory)
             {
                 State = ScoreState.JeffistanceVictory;
-                nodeImage.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Sharkbisu.png");
+                nodeImage.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "RoundStateResistenceVictory.png");
             }
             else
             {
                 State = ScoreState.SpyVictory;
-                nodeImage.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Vorebisu.png");
+                nodeImage.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "RoundStateSpyVictory.png");
             }
         }
 
