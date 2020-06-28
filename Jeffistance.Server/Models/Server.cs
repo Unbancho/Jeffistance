@@ -18,6 +18,8 @@ namespace Jeffistance.JeffServer.Models
 {
     public class Server
     {
+        public IServerChatManager ChatManager { get; private set; }
+
         private ILogger _logger;
 
         const string DEFAULT_HOST_NAME = "Admin";
@@ -43,11 +45,15 @@ namespace Jeffistance.JeffServer.Models
                     CanKick = true
                 }
             };
+            ChatManager = IoCManager.Resolve<IServerChatManager>();
+            ChatManager.Server = this;
         }
 
         private void RegisterServerDependencies()
         {
             IoCManager.Register<IServerMessageFactory, ServerMessageFactory>();
+            IoCManager.Register<IServerChatManager, ServerChatManager>();
+
             var logLevel = ConfigurationManager.AppSettings["LogLevel"].ToLogLevel();
             IoCManager.AddServerLogging(builder => builder
                 .AddFile("Logs/Jeffistance-Server-{Date}.txt", logLevel)

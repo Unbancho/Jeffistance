@@ -31,6 +31,7 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
             ClientConnection connection = (ClientConnection) message.Sender;
             user.Connection = connection;
             Server.AddUser(user);
+            Server.ChatManager.Notify($"{user.Name} has joined.");
         }
 
         [MessageMethod(JeffistanceFlags.Chat)]

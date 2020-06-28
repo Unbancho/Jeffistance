@@ -124,7 +124,7 @@ namespace Jeffistance.Client.ViewModels
             var message = messageFactory.MakeLobbyReadyMessage(user.ID);
             user.Send(message);
 
-            // Send user ready state to chat
+            // TODO MOVE TO SERVER
             message = messageFactory.MakeChatMessage(messageText);
             user.Send(message);
         }

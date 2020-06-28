@@ -124,10 +124,10 @@ namespace Jeffistance.Common.Services.MessageProcessing
             {
                 ClientConnection?.Send(message);
             }
-            catch (ObjectDisposedException ex)
+            catch (ObjectDisposedException e)
             {
                 var logger = IoCManager.GetClientLogger();
-                logger.LogError("Message failed to send.", ex);
+                logger.LogError(message: "Message failed to send.", exception: e);
             }
         }
 
