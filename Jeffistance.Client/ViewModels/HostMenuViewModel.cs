@@ -16,7 +16,6 @@ namespace Jeffistance.Client.ViewModels
         int port = 7700;
         private ILogger _logger;
         
-        //TODO Actual port validation
         public string Port
         {
             get => port.ToString();

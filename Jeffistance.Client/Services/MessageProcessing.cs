@@ -363,6 +363,14 @@ namespace Jeffistance.Client.Services.MessageProcessing
             Dispatcher.UIThread.Post(()=> gameScreen.ShowEndGameResults(winningFactionName, spiesIDs));
         }
         
-        
+        [MessageMethod(JeffistanceFlags.EveryoneReadyStateMessage)]
+        private void EveryoneReadyStateMessage(Message message)
+        {
+            var appState = AppState.GetAppState();
+            if (appState.CurrentUser.IsHost)
+            {
+                appState.CurrentLobby.OnEveryoneReadyStateChange((bool) message["readyState"]);
+            }
+        }
     }
 }

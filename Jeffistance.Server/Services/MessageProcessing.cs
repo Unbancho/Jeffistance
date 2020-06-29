@@ -1,3 +1,4 @@
+using System;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
 using Jeffistance.JeffServer.Models;
@@ -43,6 +44,7 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
         [MessageMethod(JeffistanceFlags.LobbyReady)]
         private void LobbyReadyFlagMethod(Message message)
         {
+            Server.Lobby.AddReadyUser(Guid.Parse((string) message["UserID"]));
             Server.Broadcast(message);
         }
 

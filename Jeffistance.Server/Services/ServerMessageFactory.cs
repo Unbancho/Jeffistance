@@ -9,6 +9,8 @@ namespace Jeffistance.JeffServer.Services
         Message MakeUpdateMessage();
 
         Message MakeChatMessage(string text);
+
+        Message MakeEveryoneReadyStateMessage(bool ready);
     }
 
     public class ServerMessageFactory : IServerMessageFactory
@@ -22,6 +24,13 @@ namespace Jeffistance.JeffServer.Services
         {
             var message = new Message(text, JeffistanceFlags.Chat);
             message["MessageID"] = Guid.NewGuid().ToString();
+            return message;
+        }
+
+        public Message MakeEveryoneReadyStateMessage(bool ready)
+        {
+            var message = new Message(flags: JeffistanceFlags.EveryoneReadyStateMessage);
+            message["readyState"] = ready;
             return message;
         }
     }
