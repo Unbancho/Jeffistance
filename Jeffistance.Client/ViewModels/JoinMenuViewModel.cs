@@ -84,11 +84,11 @@ namespace Jeffistance.Client.ViewModels
             appState.CurrentUser = new LocalUser(Username);
             appState.CurrentUser.Connect(IpAddress, port);
             appState.CurrentUser.AttachMessageHandler(new MessageHandler(new ClientMessageProcessor(), appState.CurrentUser.Connection));
-            appState.CurrentUser.GreetServer();
             LobbyViewModel lobby = new LobbyViewModel(parent);
             parent.Content = lobby;
             appState.CurrentLobby = lobby;
             appState.CurrentWindow = parent.Content;
+            appState.CurrentUser.GreetServer();
             _logger.LogInformation("Successfully joined server.");
         }
     }

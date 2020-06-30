@@ -1,10 +1,8 @@
 using System.Collections.ObjectModel;
-using Jeffistance.Client.Models;
 using Avalonia.Threading;
 using ReactiveUI;
-using Jeffistance.Common.Models;
+using Jeffistance.Client.Services;
 using Jeffistance.Common.Services.IoC;
-using Jeffistance.Common.Services;
 using System.Reactive;
 using System.Collections.Generic;
 
@@ -14,6 +12,7 @@ namespace Jeffistance.Client.ViewModels
     {
         public ChatViewModel()
         {
+            _chatManager = IoCManager.Resolve<IClientChatManager>();
             ChatMessageLog = new ObservableCollection <ChatMessageViewModel>();
             chatMessageDictionary = new Dictionary<string, ChatMessageViewModel>();
             AutoScrollToggled = true;
@@ -21,6 +20,8 @@ namespace Jeffistance.Client.ViewModels
                 () => { AutoScrollToggled = !AutoScrollToggled; }
             );
         }
+
+        private IClientChatManager _chatManager;
 
         private string _messageContent;
 
@@ -56,10 +57,7 @@ namespace Jeffistance.Client.ViewModels
         {
             if (!string.IsNullOrWhiteSpace(MessageContent))
             {
-                LocalUser user = AppState.GetAppState().CurrentUser;
-                var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-                var message = messageFactory.MakeChatMessage(MessageContent, user.ID);
-                user.Send(message);
+                _chatManager.Send(MessageContent);
                 MessageContent = "";
             }
         }

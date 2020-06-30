@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Jeffistance.Client.Services;
 using Jeffistance.Client.ViewModels;
 using Jeffistance.Client.Views;
 using Jeffistance.Common.Services.IoC;
@@ -41,6 +42,8 @@ namespace Jeffistance.Client
         private void RegisterClientDependencies()
         {
             IoCManager.Register<IClientMessageFactory, ClientMessageFactory>();
+            IoCManager.Register<IClientChatManager, ClientChatManager>();
+
             var logLevel = ConfigurationManager.AppSettings["LogLevel"].ToLogLevel();
             IoCManager.AddClientLogging(builder => builder
                 .AddFile("Logs/Jeffistance-{Date}.txt", logLevel)
