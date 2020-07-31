@@ -188,7 +188,7 @@ namespace Jeffistance.JeffServer.Models
         {
             var updateList = _messageFactory.MakeUpdateMessage();
             updateList["UserList"] = UserList;
-            MessageHandler.Broadcast(updateList);
+            Broadcast(updateList);
 
             if (!_inGame) Lobby.CheckIfAllReady();
         }
