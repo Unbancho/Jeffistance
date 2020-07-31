@@ -26,7 +26,6 @@ namespace Jeffistance.Client.ViewModels
         public int _selectablePlayers;
         private string _roundBox;
         private Dictionary<int, ScoreNodeView> _scoreDictionary;
-        public List<Guid> ReadyUserIDs;
         private List<string> SelectedUserIDs;
         List<PlayerAvatarView> AvatarsList;
         public GameState GameState;
@@ -52,7 +51,6 @@ namespace Jeffistance.Client.ViewModels
 
             ///Things that maybe should be moved
             TeamPickedUsersIDs = new List<string>();
-            ReadyUserIDs = new List<Guid>();
             
             //Adding score nodes
             for (int index = 0; index < 5; index++)
@@ -83,32 +81,6 @@ namespace Jeffistance.Client.ViewModels
                 pav.PointerPressed += onAvatarClicked;
                 PlayerArea.CircularPanel.Children.Add(pav);
                 AvatarsList.Add(pav);
-            }
-        }
-
-        public void AddReadyUser(Guid userID)
-        {
-            if (!ReadyUserIDs.Contains(userID))
-            {
-                ReadyUserIDs.Add(userID);
-            }
-            if (AppState.GetAppState().CurrentUser.IsHost)
-            {
-                Dispatcher.UIThread.Post(CheckIfAllReady);
-            }
-        }
-
-        private void CheckIfAllReady()
-        {
-            AppState ass = AppState.GetAppState();
-            List<User> Users = ass.UserList;
-            if (ass.CurrentUser.IsHost && Users.Count == ReadyUserIDs.Count) //Works as long as theres no expectators, which there arent
-            {
-                AppState gs = AppState.GetAppState();
-                var user = AppState.GetAppState().CurrentUser;
-                var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-                var message = messageFactory.MakeAdvanceGamePhaseMessage();
-                user.Send(message);
             }
         }
 
@@ -197,7 +169,7 @@ namespace Jeffistance.Client.ViewModels
         {
             foreach (PlayerAvatarView pav in AvatarsList)
             {
-                pav.Avatar.Source  = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Spy.png");
+                pav.Avatar.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Spy.png");
             }
             SelectedUserIDs = new List<string>();
         }
@@ -332,7 +304,6 @@ namespace Jeffistance.Client.ViewModels
         internal void ShowTeamVoteResult(Dictionary<string, bool> voters, bool result, int fails)
         {
             AppState appState = AppState.GetAppState();
-            ReadyUserIDs = new List<Guid>();
             EnableVotingBtns = false;
             EnableOKBtn = true;
             RoundBox = "";

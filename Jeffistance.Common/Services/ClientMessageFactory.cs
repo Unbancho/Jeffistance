@@ -22,8 +22,6 @@ namespace Jeffistance.Common.Services
 
         Message MakeJoinGameMessage();
 
-        Message MakeGetPlayerInfoMessage(List<Player> players);
-
         Message MakeGamePhaseReadyMessage(string UserID);
 
         Message MakeAdvanceGamePhaseMessage();
@@ -99,13 +97,6 @@ namespace Jeffistance.Common.Services
         public Message MakeJoinGameMessage()
         {
             return new Message(flags: JeffistanceFlags.JoinGameMessage);
-        }
-
-        public Message MakeGetPlayerInfoMessage(List<Player> players)
-        {
-            var message = new Message(flags: JeffistanceFlags.GetPlayerInfoMessage);
-            message["Players"] = players;
-            return message;
         }
 
         public Message MakeGamePhaseReadyMessage(string userID)

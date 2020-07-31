@@ -74,48 +74,37 @@ namespace Jeffistance.Client.Services.MessageProcessing
         private void JoinGameMessageFlagMethod(Message message)
         {
             LobbyViewModel lobby = AppState.GetAppState().CurrentLobby;
-            Dispatcher.UIThread.Post(()=> lobby.MoveToGameScreen());
-            Dispatcher.UIThread.Post(()=> lobby.SetupGame());
+            Dispatcher.UIThread.Post(() => lobby.MoveToGameScreen());
         }
 
         [MessageMethod(JeffistanceFlags.GetPlayerInfoMessage)]
         private void GetPlayerInfoMessageFlagMethod(Message message)
         {
-            AppState appState = AppState.GetAppState();
-            GameScreenViewModel game = (appState.CurrentWindow as GameScreenViewModel);
-            game.GameState.Players = (List<Player>) message["Players"];
-            Dispatcher.UIThread.Post(()=> game.PrepareAvatars(game.GameState.Players));
-            Player me = game.GameState.Players.Find(x => x.UserID == appState.CurrentUser.ID.ToString());
-            game.RoundBox = "You are in the " + me.Faction.Name + " team";
-        }
-
-        [MessageMethod(JeffistanceFlags.GamePhaseReadyMessage)]
-        private void GamePhaseReadyMessageFlagMethod(Message message)
-        {
-            (AppState.GetAppState().CurrentWindow as GameScreenViewModel)
-            .AddReadyUser(Guid.Parse((string) message["UserID"]));
+            Dispatcher.UIThread.Post(() =>
+            {
+                AppState appState = AppState.GetAppState();
+                GameScreenViewModel game = (appState.CurrentWindow as GameScreenViewModel);
+                game.GameState.Players = (List<Player>) message["Players"];
+                game.PrepareAvatars(game.GameState.Players);
+                Player me = game.GameState.Players.Find(x => x.UserID == appState.CurrentUser.ID.ToString());
+                game.RoundBox = "You are in the " + me.Faction.Name + " team";
+            });
         }
         
         [MessageMethod(JeffistanceFlags.AdvanceGamePhaseMessage)]
         private void AdvanceGamePhaseMessageFlagMethod(Message message)
         {
             AppState appState = AppState.GetAppState();
-            if(appState.CurrentUser.IsHost)
+            if(appState.CurrentUser.IsHost) // TODO MOVE TO SERVER
             {
                 
                 GameScreenViewModel gameScreen = (AppState.GetAppState().CurrentWindow as GameScreenViewModel);
-                if(gameScreen.GameState.CurrentPhase == Phase.Standby)
+                if(gameScreen.GameState.CurrentPhase == Phase.AssigningRandomResult)
                 {
                     Game game = appState.Server.Game;
                     int teamSize = game.NextTeamSize;
                     Player leader = game.CurrentLeader;
-                    gameScreen.DeclareLeader(teamSize, leader);
-                }
-                else if(gameScreen.GameState.CurrentPhase == Phase.AssigningRandomResult)
-                {
-                    Game game = appState.Server.Game;
-                    int teamSize = game.NextTeamSize;
-                    Player leader = game.CurrentLeader;
+                    // This sets the spy victory for host only TODO FIX
                     Dispatcher.UIThread.Post(()=>  gameScreen.RandomRoundResult());
                     gameScreen.DeclareLeader(teamSize, leader);
                 }
@@ -301,7 +290,6 @@ namespace Jeffistance.Client.Services.MessageProcessing
                         }
                     }
                     gameScreen.GameState.TeamVote = new Dictionary<string, bool>();
-                    gameScreen.ReadyUserIDs = new List<Guid>();
                     AppState apps = AppState.GetAppState();
                     Game game = apps.Server.Game;
                     if(missionSucceeds)
@@ -312,6 +300,7 @@ namespace Jeffistance.Client.Services.MessageProcessing
                     {
                         game.SpiesWinCount++;
                     }
+                    // TODO Start here, make the whole assign random phase method just a normal SHOWMISSIONRESULT message and move it all to server
                     game.NextRound(true);
                     var user = apps.CurrentUser;
                     var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
@@ -327,6 +316,7 @@ namespace Jeffistance.Client.Services.MessageProcessing
             bool result = (bool) message["Result"];
             AppState appState = AppState.GetAppState();
             GameScreenViewModel gameScreen = (appState.CurrentWindow as GameScreenViewModel);
+            // TODO Fix inconsistent game state
             Dispatcher.UIThread.Post(()=> gameScreen.ResolveMissionResult(result));
             Dispatcher.UIThread.Post(()=> gameScreen.RestorePlayersToNormal());
             gameScreen.TeamPickedUsersIDs = new List<string>();

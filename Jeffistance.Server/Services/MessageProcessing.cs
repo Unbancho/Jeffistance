@@ -64,18 +64,13 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
         private void JoinGameMessageFlagMethod(Message message)
         {
             Server.Broadcast(message);
-        }
-
-        [MessageMethod(JeffistanceFlags.GetPlayerInfoMessage)]
-        private void GetPlayerInfoMessageFlagMethod(Message message)
-        {
-            Server.Broadcast(message);
+            Server.StartGame();
         }
 
         [MessageMethod(JeffistanceFlags.GamePhaseReadyMessage)]
         private void GamePhaseReadyMessageFlagMethod(Message message)
         {
-            Server.Broadcast(message);
+            Server.GameManager.AddReadyUser(Guid.Parse((string) message["UserID"]));
         }
 
         [MessageMethod(JeffistanceFlags.AdvanceGamePhaseMessage)]

@@ -15,7 +15,7 @@ namespace Jeffistance.JeffServer
 
         static void Main(string[] args)
         {
-            Server = new Server();
+            Server = new Server(dedicated: true);
             Server.Run(7700);
             string input;
             while((input = Console.ReadLine().ToLower()) != "stop")

@@ -12,7 +12,8 @@
         </Style>
     </Grid.Styles>
     <TextBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1"
-     IsEnabled="False" Text="{Binding Username}" Classes="h1" TextWrapping="Wrap"/>
+     IsEnabled="False" Text="{Binding Username}" Classes="h1" TextWrapping="Wrap"
+     Name="UsernameBox"/>
     <TextBox AcceptsReturn="True"  Grid.Row="1" Grid.Column="0" Grid.RowSpan="2"
      IsEnabled="False" Text="{Binding Content}" Name="MessageContentBox" Classes="h1" TextWrapping="Wrap"/>
     <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
