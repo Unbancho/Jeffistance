@@ -15,11 +15,24 @@ namespace Jeffistance.JeffServer
 
         static void Main(string[] args)
         {
+            int port = GetPort();
             Server = new Server(dedicated: true);
-            Server.Run(7700);
+            Server.Run(port);
             string input;
             while((input = Console.ReadLine().ToLower()) != "stop")
                 HandleInput(input);
+        }
+
+        private static int GetPort()
+        {
+            Console.Write("Input port: ");
+            var input = Console.ReadLine();
+            if (int.TryParse(input, out int port))
+            {
+                return port;
+            }
+            Console.WriteLine("Invalid port, defaulting to 7700");
+            return 7700;
         }
 
         static void HandleInput(string input)
