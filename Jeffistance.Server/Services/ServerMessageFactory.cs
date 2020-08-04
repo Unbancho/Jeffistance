@@ -14,11 +14,11 @@ namespace Jeffistance.JeffServer.Services
 
         Message MakeEveryoneReadyStateMessage(bool ready);
 
-        Message MakeGetPlayerInfoMessage(List<Player> players);
 
         Message MakeJoinGameMessage();
 
-        Message MakeDeclareLeaderMessage(int teamSize, Player leader);
+
+        Message MakeGameStateUpdateMessage(GameState state);
     }
 
     public class ServerMessageFactory : IServerMessageFactory
@@ -42,23 +42,15 @@ namespace Jeffistance.JeffServer.Services
             return message;
         }
 
-        public Message MakeGetPlayerInfoMessage(List<Player> players)
-        {
-            var message = new Message(flags: JeffistanceFlags.GetPlayerInfoMessage);
-            message["Players"] = players;
-            return message;
-        }
-
         public Message MakeJoinGameMessage()
         {
             return new Message(flags: JeffistanceFlags.JoinGameMessage);
         }
 
-        public Message MakeDeclareLeaderMessage(int teamSize, Player leader)
+        public Message MakeGameStateUpdateMessage(GameState state)
         {
-            var message =  new Message(flags: JeffistanceFlags.DeclareLeaderMessage);
-            message["TeamSize"] = teamSize;
-            message["Leader"] = leader;
+            var message = new Message(flags: JeffistanceFlags.GameStateUpdateMessage);
+            message["GameState"] = state;
             return message;
         }
     }

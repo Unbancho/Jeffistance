@@ -20,18 +20,12 @@ namespace Jeffistance.Common.Services.MessageProcessing
         EditChatMessage = 1 << 5,
         DeleteChatMessage = 1 << 6,
         JoinGameMessage = 1 << 7,
-        GetPlayerInfoMessage = 1 << 8,
-        GamePhaseReadyMessage = 1 << 9,
-        AdvanceGamePhaseMessage = 1 << 10,
-        PickTeamMessage = 1 << 11,
-        DeclareLeaderMessage = 1 << 12,
-        VoteMessage = 1 << 13,
-        StartMissionVotingMessage = 1 << 14,
-        ShowTeamVoteResultMessage = 1 << 15,
-        MissionVoteMessage = 1 << 16,
-        ShowMissionResultMessage = 1 << 17,
-        EndGameMessage = 1 << 18,
-        EveryoneReadyStateMessage = 1 << 19
+        GamePhaseReadyMessage = 1 << 8,
+        PickTeamMessage = 1 << 9,
+        VoteMessage = 1 << 10,
+        MissionVoteMessage = 1 << 11,
+        EveryoneReadyStateMessage = 1 << 12,
+        GameStateUpdateMessage = 1 << 13
     }
 
     public class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>

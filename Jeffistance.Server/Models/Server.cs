@@ -101,12 +101,9 @@ namespace Jeffistance.JeffServer.Models
 
             PlayerEventManager playerEventManager = new PlayerEventManager();
             Game = new Game(new BasicGamemode(), playerEventManager);
-            GameManager = new GameManager(this, Game, _messageFactory);
+            GameManager = new GameManager(this, Game, _messageFactory, playerEventManager);
             GameManager.Start(UserList);
             _inGame = true;
-
-            var message = _messageFactory.MakeGetPlayerInfoMessage(Game.Players);
-            Broadcast(message);
         }
 
         public void StartCountdown()

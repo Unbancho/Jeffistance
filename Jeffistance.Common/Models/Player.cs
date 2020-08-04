@@ -13,6 +13,40 @@ namespace Jeffistance.Common.Models
         public bool IsLeader { get; set; } = false;
         public string UserID { get; set; }
 
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as Player);
+        }
+
+        public bool Equals(Player p)
+        {
+            if (Object.ReferenceEquals(p, null)) return false;
+            return ID == p.ID;
+        }
+
+        public override int GetHashCode()
+        {
+            return ID.GetHashCode();
+        }
+
+        public static bool operator ==(Player lp, Player rp)
+        {
+            if (Object.ReferenceEquals(lp, null))
+            {
+                if (Object.ReferenceEquals(rp, null))
+                {
+                    return true;
+                }
+                return false;
+            }
+            return lp.Equals(rp);
+        }
+
+        public static bool operator !=(Player lp, Player rp)
+        {
+            return !(lp == rp);
+        }
+
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("Faction", Faction, typeof(IFaction)); 

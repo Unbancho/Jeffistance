@@ -24,21 +24,13 @@ namespace Jeffistance.Common.Services
 
         Message MakeGamePhaseReadyMessage(string UserID);
 
-        Message MakeAdvanceGamePhaseMessage();
+        Message MakePickTeamMessage(List<string> playersInTeamIDs);
 
-        Message MakePickTeamMessageMessage(List<string> playersInTeamIDs);
 
-        Message MakeDeclareLeaderMessage(int teamSize, Player leader);
+        Message MakeVoteMessage(int playerID, bool vote);
 
-        Message MakeVoteMessage(string userID, bool vote);
-        Message MakeStartMissionVotingMessage(List<string> playersInTeamIDs);
+        Message MakeMissionVoteMessage(int playerID, bool vote);
 
-        Message MakeShowTeamVoteResultMessage(Dictionary<string, bool> voters, bool successfulTeamFormation, int fails);
-
-        Message MakeMissionVoteMessage(string userID, bool vote);
-
-        Message MakeShowMissionResultMessage(bool result);
-        Message MakeEndGameMessage(string name, List<string> spyPlayersIDs);
     }
 
     public class ClientMessageFactory : IClientMessageFactory
@@ -106,72 +98,27 @@ namespace Jeffistance.Common.Services
             return message;
         }
 
-        public Message MakeAdvanceGamePhaseMessage()
-        {
-            return new Message(flags: JeffistanceFlags.AdvanceGamePhaseMessage);
-        }
-
-        public Message MakePickTeamMessageMessage(List<string> playersInTeamIDs)
+        public Message MakePickTeamMessage(List<string> playersInTeamIDs)
         {
             var message =  new Message(flags: JeffistanceFlags.PickTeamMessage);
             message["PlayersInTeamIDs"] = playersInTeamIDs;
             return message;
         }
 
-        public Message MakeDeclareLeaderMessage(int teamSize, Player leader)
-        {
-            var message =  new Message(flags: JeffistanceFlags.DeclareLeaderMessage);
-            message["TeamSize"] = teamSize;
-            message["Leader"] = leader;
-            return message;
-        }
-
-        public Message MakeVoteMessage(string userID, bool vote)
+        public Message MakeVoteMessage(int playerID, bool vote)
         {
             var message =  new Message(flags: JeffistanceFlags.VoteMessage);
             message["Vote"] = vote;
-            message["UserID"] = userID;
+            message["PlayerID"] = playerID;
             return message;
         }
 
-        public Message MakeStartMissionVotingMessage(List<string> playersInTeamIDs)
-        {
-            var message =  new Message(flags: JeffistanceFlags.StartMissionVotingMessage);
-            message["PlayersInTeamIDs"] = playersInTeamIDs;
-            return message;
-        }
-        
-        public Message MakeShowTeamVoteResultMessage(Dictionary<string, bool> voters, bool successfulTeamFormation, int fails)
-        {
-            var message =  new Message(flags: JeffistanceFlags.ShowTeamVoteResultMessage);
-            message["Voters"] = voters;
-            message["SuccessfulTeamFormation"] = successfulTeamFormation;
-            message["Fails"] = fails;
-            return message;
-        }
-
-        public Message MakeMissionVoteMessage(string userID, bool vote)
+        public Message MakeMissionVoteMessage(int playerID, bool vote)
         {
             var message =  new Message(flags: JeffistanceFlags.MissionVoteMessage);
             message["Vote"] = vote;
-            message["UserID"] = userID;
+            message["PlayerID"] = playerID;
             return message;
         }
-
-        public Message MakeShowMissionResultMessage(bool result)
-        {
-            var message =  new Message(flags: JeffistanceFlags.ShowMissionResultMessage);
-            message["Result"] = result;
-            return message;
-        }
-
-        public Message MakeEndGameMessage(string name, List<string> spyPlayersIDs)
-        {
-            var message =  new Message(flags: JeffistanceFlags.EndGameMessage);
-            message["Name"] = name;
-            message["SpyPlayersIDs"] = spyPlayersIDs;
-            return message;
-        }
-
     }
 }
