@@ -6,6 +6,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Platform;
+using Avalonia.Media;
 using Jeffistance.Client.Models;
 using Jeffistance.Client.Views;
 using Jeffistance.Common.AvaloniaTools;
@@ -93,6 +94,10 @@ namespace Jeffistance.Client.ViewModels
                 pav.PointerPressed += onAvatarClicked;
                 PlayerArea.CircularPanel.Children.Add(pav);
                 AvatarsList.Add(pav);
+                if (CurrentPlayer.Faction is SpiesFaction && p.Faction is SpiesFaction)
+                {
+                    pav.Username.Foreground = Brushes.Red;
+                }
             }
         }
 
@@ -354,7 +359,7 @@ namespace Jeffistance.Client.ViewModels
             {
                 if (spiesIDs.Contains(avatar.UserId))
                 {
-                    avatar.Avatar.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Jew.png");
+                    avatar.Avatar.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Traitor.png");
                 }
                 else
                 {
