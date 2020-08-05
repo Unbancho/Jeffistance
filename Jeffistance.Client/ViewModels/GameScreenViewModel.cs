@@ -406,7 +406,7 @@ namespace Jeffistance.Client.ViewModels
                     }
                     break;
                 
-                case Phase.FailedTeamFormation:  // TODO Add max failures handling
+                case Phase.FailedTeamFormation:
                     ShowTeamVoteResult(GameState.RevealedTeamVotes, false);
                     break;
 
