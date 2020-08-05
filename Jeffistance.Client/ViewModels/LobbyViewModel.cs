@@ -18,10 +18,10 @@ namespace Jeffistance.Client.ViewModels
     {
         public ObservableCollection<User> Users { get; }
         public List<Guid> ReadyUserIDs { get; }
-        bool showKickButton;
-        bool showReadyButton;
-        bool showStartButton;
-        bool canStart;
+        private bool showKickButton;
+        private bool showReadyButton;
+        private bool showStartButton;
+        private bool canStart;
 
         public bool ShowKickButton
         {
@@ -145,24 +145,8 @@ namespace Jeffistance.Client.ViewModels
         {
             AppState gs = AppState.GetAppState();
             GameScreenViewModel gameScreen = new GameScreenViewModel();
-            parent.Content = gameScreen;
             gs.CurrentWindow = gameScreen;
-        }
-
-        public void SetupGame()
-        {
-            AppState gs = AppState.GetAppState();
-            if(gs.CurrentUser.IsHost)
-            {
-                List<User> Users = gs.UserList;
-                AppState apps = AppState.GetAppState();
-                Server server = apps.Server;
-                LocalUser me = apps.CurrentUser;
-                server.StartGame(Users);
-                var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-                var message = messageFactory.MakeGetPlayerInfoMessage(server.Game.Players);
-                me.Send(message);
-            }
+            parent.Content = gameScreen;
         }
     }
 }

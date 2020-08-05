@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using Jeffistance.Common.Services.MessageProcessing;
 using ModusOperandi.Messaging;
+using Jeffistance.Common.Models;
 
 namespace Jeffistance.JeffServer.Services
 {
@@ -11,6 +13,12 @@ namespace Jeffistance.JeffServer.Services
         Message MakeChatMessage(string text);
 
         Message MakeEveryoneReadyStateMessage(bool ready);
+
+
+        Message MakeJoinGameMessage();
+
+
+        Message MakeGameStateUpdateMessage(GameState state);
     }
 
     public class ServerMessageFactory : IServerMessageFactory
@@ -31,6 +39,18 @@ namespace Jeffistance.JeffServer.Services
         {
             var message = new Message(flags: JeffistanceFlags.EveryoneReadyStateMessage);
             message["readyState"] = ready;
+            return message;
+        }
+
+        public Message MakeJoinGameMessage()
+        {
+            return new Message(flags: JeffistanceFlags.JoinGameMessage);
+        }
+
+        public Message MakeGameStateUpdateMessage(GameState state)
+        {
+            var message = new Message(flags: JeffistanceFlags.GameStateUpdateMessage);
+            message["GameState"] = state;
             return message;
         }
     }

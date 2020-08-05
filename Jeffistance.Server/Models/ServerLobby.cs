@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Jeffistance.Common.Services.IoC;
 using Jeffistance.JeffServer.Services;
+using Jeffistance.Common.ExtensionMethods;
 
 namespace Jeffistance.JeffServer.Models
 {
@@ -43,8 +44,12 @@ namespace Jeffistance.JeffServer.Models
         public void CheckIfAllReady()
         {
             bool ready = false;
+            int lowerBound = _server.IsDedicated ? 2 : 1;
+            int upperBound = _server.IsDedicated ? 7 : 6;
+
             if (_server.UserList.Where((u, i) => u.ID != _server.Host.ID)
-                .All(user => _readyUserIDs.Contains(user.ID)))
+                .All(user => _readyUserIDs.Contains(user.ID)) &&
+                _readyUserIDs.Count.IsInRange(lowerBound, upperBound))
             {
                 ready = true;
             }
@@ -52,6 +57,13 @@ namespace Jeffistance.JeffServer.Models
             var messageFactory = IoCManager.Resolve<IServerMessageFactory>();
             var message = messageFactory.MakeEveryoneReadyStateMessage(ready);
             _server.Broadcast(message);
+
+            if (ready)
+            {
+                var chatManager = IoCManager.Resolve<IServerChatManager>();
+                chatManager.Notify("All players are now ready.");
+                if (_server.IsDedicated) _server.StartCountdown();
+            }
         }
     }
 }

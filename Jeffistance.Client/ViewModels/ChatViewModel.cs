@@ -61,7 +61,8 @@ namespace Jeffistance.Client.ViewModels
                 MessageContent = "";
             }
         }
-         public void WriteLineInLog(string msg, string username, string msgId)
+        
+        public void WriteLineInLog(string msg, string username, string msgId)
         {
             var chatMessage = new ChatMessageViewModel(msgId, msg, this, username);
             Dispatcher.UIThread.Post(()=> ChatMessageLog.Add(chatMessage));
@@ -76,7 +77,6 @@ namespace Jeffistance.Client.ViewModels
             if(!selectMessage)
                 SelectedMessage = null;
         }
-
 
         public void DeleteMessage(string msgId)
         {

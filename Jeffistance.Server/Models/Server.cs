@@ -13,6 +13,8 @@ using Jeffistance.Common.Services.PlayerEventManager;
 using Jeffistance.Common.ExtensionMethods;
 using Microsoft.Extensions.Logging;
 using System.Configuration;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Jeffistance.JeffServer.Models
 {
@@ -22,9 +24,15 @@ namespace Jeffistance.JeffServer.Models
 
         public IServerChatManager ChatManager { get; private set; }
 
+        private IServerMessageFactory _messageFactory;
+        
+        public GameManager GameManager { get; private set; }
+
         private ILogger _logger;
 
         const string DEFAULT_HOST_NAME = "Admin";
+
+        public bool IsDedicated { get; private set; }
 
         public LocalUser Host {get; set;}
         private ServerConnection Connection {get; set;}
@@ -38,8 +46,9 @@ namespace Jeffistance.JeffServer.Models
 
         private bool _inGame = false;
 
-        public Server()
+        public Server(bool dedicated=false)
         {
+            IsDedicated = dedicated;
             RegisterServerDependencies();
             Host = new LocalUser("Server")
             {
@@ -52,6 +61,7 @@ namespace Jeffistance.JeffServer.Models
             ChatManager = IoCManager.Resolve<IServerChatManager>();
             ChatManager.Server = this;
             Lobby = new ServerLobby(this);
+            _messageFactory = IoCManager.Resolve<IServerMessageFactory>();
         }
 
         private void RegisterServerDependencies()
@@ -81,12 +91,29 @@ namespace Jeffistance.JeffServer.Models
             _logger.LogInformation($"Connected host: {username}");
         }
 
-        public void StartGame(List<User> Users)
+        public void StartGame()
         {
+            if (IsDedicated)
+            {
+                var joinMessage = _messageFactory.MakeJoinGameMessage();
+                Broadcast(joinMessage);
+            }
+
             PlayerEventManager playerEventManager = new PlayerEventManager();
             Game = new Game(new BasicGamemode(), playerEventManager);
-            Game.Start(Users);
+            GameManager = new GameManager(this, Game, _messageFactory, playerEventManager);
+            GameManager.Start(UserList);
             _inGame = true;
+        }
+
+        public void StartCountdown()
+        {
+            var source = new CancellationTokenSource();
+            var t = Task.Run(async delegate
+            {
+                await Task.Delay(TimeSpan.FromSeconds(5), source.Token);
+                StartGame();
+            });
         }
 
         public void Run(int port)
@@ -156,11 +183,9 @@ namespace Jeffistance.JeffServer.Models
 
         private void OnUserListChanged(object obj, NotifyCollectionChangedEventArgs args)
         {
-            var messageFactory = IoCManager.Resolve<IServerMessageFactory>();
-
-            var updateList = messageFactory.MakeUpdateMessage();
+            var updateList = _messageFactory.MakeUpdateMessage();
             updateList["UserList"] = UserList;
-            MessageHandler.Broadcast(updateList);
+            Broadcast(updateList);
 
             if (!_inGame) Lobby.CheckIfAllReady();
         }

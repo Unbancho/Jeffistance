@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Reactive;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Platform;
-using Avalonia.Threading;
+using Avalonia.Media;
 using Jeffistance.Client.Models;
 using Jeffistance.Client.Views;
 using Jeffistance.Common.AvaloniaTools;
@@ -13,11 +14,13 @@ using Jeffistance.Common.Models;
 using Jeffistance.Common.Services;
 using Jeffistance.Common.Services.IoC;
 using ReactiveUI;
+using ModusOperandi.Messaging;
 
 namespace Jeffistance.Client.ViewModels
 {
     public class GameScreenViewModel : ViewModelBase, IChatView
     {
+        private AppState _as;
         private PlayerAreaViewModel _playerArea;
         private ChatViewModel _chatView;
         private StackPanel _scorePanel;
@@ -26,15 +29,24 @@ namespace Jeffistance.Client.ViewModels
         public int _selectablePlayers;
         private string _roundBox;
         private Dictionary<int, ScoreNodeView> _scoreDictionary;
-        public List<Guid> ReadyUserIDs;
         private List<string> SelectedUserIDs;
         List<PlayerAvatarView> AvatarsList;
-        public GameState GameState;
+        public GameState GameState { get; set; }
         public List<string> TeamPickedUsersIDs;
         public string _noChoice;
         public string _yesChoice;
+        private Player _currentPlayer;
+        public Player CurrentPlayer
+        {
+            get
+            {
+                return _currentPlayer ??= FindCurrentPlayer();
+            }
+        }
+
         public GameScreenViewModel()
         {
+            _as = AppState.GetAppState();
             GameState = new GameState();
             PlayerArea = new PlayerAreaViewModel();
             ScoreDictionary = new Dictionary<int, ScoreNodeView>();
@@ -52,7 +64,6 @@ namespace Jeffistance.Client.ViewModels
 
             ///Things that maybe should be moved
             TeamPickedUsersIDs = new List<string>();
-            ReadyUserIDs = new List<Guid>();
             
             //Adding score nodes
             for (int index = 0; index < 5; index++)
@@ -75,40 +86,18 @@ namespace Jeffistance.Client.ViewModels
             OnNoClicked = ReactiveCommand.Create(OnNoClickedMethod, votingEnabled);
         }
 
-        public void PrepareAvatars(List<Player> Players)
+        public void PrepareAvatars()
         {
-            foreach (Player p in Players)
+            foreach (Player p in GameState.Players)
             {
                 PlayerAvatarView pav = new PlayerAvatarView(p.Name, p.UserID.ToString());
                 pav.PointerPressed += onAvatarClicked;
                 PlayerArea.CircularPanel.Children.Add(pav);
                 AvatarsList.Add(pav);
-            }
-        }
-
-        public void AddReadyUser(Guid userID)
-        {
-            if (!ReadyUserIDs.Contains(userID))
-            {
-                ReadyUserIDs.Add(userID);
-            }
-            if (AppState.GetAppState().CurrentUser.IsHost)
-            {
-                Dispatcher.UIThread.Post(CheckIfAllReady);
-            }
-        }
-
-        private void CheckIfAllReady()
-        {
-            AppState ass = AppState.GetAppState();
-            List<User> Users = ass.UserList;
-            if (ass.CurrentUser.IsHost && Users.Count == ReadyUserIDs.Count) //Works as long as theres no expectators, which there arent
-            {
-                AppState gs = AppState.GetAppState();
-                var user = AppState.GetAppState().CurrentUser;
-                var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-                var message = messageFactory.MakeAdvanceGamePhaseMessage();
-                user.Send(message);
+                if (CurrentPlayer.Faction is SpiesFaction && p.Faction is SpiesFaction)
+                {
+                    pav.Username.Foreground = Brushes.Red;
+                }
             }
         }
 
@@ -173,15 +162,6 @@ namespace Jeffistance.Client.ViewModels
             set => this.RaiseAndSetIfChanged(ref _enableVotingBtns, value);
         }
 
-        internal void DeclareLeader(int teamSize, Player leader)
-        {
-            AppState gs = AppState.GetAppState();
-            var user = AppState.GetAppState().CurrentUser;
-            var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            var message = messageFactory.MakeDeclareLeaderMessage(teamSize, leader);
-            user.Send(message);
-        }
-
         internal void ShowSelectedPlayers()
         {
             foreach (PlayerAvatarView pav in AvatarsList)
@@ -197,7 +177,7 @@ namespace Jeffistance.Client.ViewModels
         {
             foreach (PlayerAvatarView pav in AvatarsList)
             {
-                pav.Avatar.Source  = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Spy.png");
+                pav.Avatar.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Spy.png");
             }
             SelectedUserIDs = new List<string>();
         }
@@ -242,86 +222,81 @@ namespace Jeffistance.Client.ViewModels
 
         public void OnOkClickedMethod()
         {
-            AppState gs = AppState.GetAppState();
-            var user = AppState.GetAppState().CurrentUser;
+            var user = _as.CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            if (GameState.CurrentPhase == Phase.TeamPicking) //Leader picking team 
+            Message message;
+            switch (GameState.CurrentPhase)
             {
-                if (SelectedUserIDs.Count == SelectablePlayers)
-                {
-                    var message = messageFactory.MakePickTeamMessageMessage(SelectedUserIDs);
+                case Phase.TeamPicking: //Leader picking team 
+                    if (SelectedUserIDs.Count == SelectablePlayers)
+                    {
+                        message = messageFactory.MakePickTeamMessage(SelectedUserIDs);
+                        user.Send(message);
+                    }
+                    else
+                    {
+                        return; //Not enough players selected to form the team
+                    }
+                    break;
+                
+                case Phase.MissionVoting:
+                    if (GameState.CurrentTeam.Contains(CurrentPlayer))
+                    {
+                        RoundBox = "Vote on the missions's success!";
+                        ShowMissionVotingInterface();
+                    }
+                    else
+                    {
+                        RoundBox = "The current team is voting on the mission's success.";
+                    }
+                    break;
+
+                default: //OK information
+                    message = messageFactory.MakeGamePhaseReadyMessage(user.ID.ToString());
                     user.Send(message);
-                }
-                else
-                {
-                    return; //Not enough players selected to form the team
-                }
-            }
-            else //OK information
-            {
-                var message = messageFactory.MakeGamePhaseReadyMessage(user.ID.ToString());
-                user.Send(message);
+                    break;
             }
             EnableOKBtn = false;
         }
 
-        internal void MakeShowVotingResultMessage(Dictionary<string, bool> voters, bool successfulTeamFormation, int fails)
-        {
-            AppState gs = AppState.GetAppState();
-            var user = AppState.GetAppState().CurrentUser;
-            var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            var message = messageFactory.MakeShowTeamVoteResultMessage(voters, successfulTeamFormation, fails);
-            user.Send(message);
-        }
-
-        internal void StartMissionVoting()
-        {
-            AppState gs = AppState.GetAppState();
-            var user = AppState.GetAppState().CurrentUser;
-            var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
-            var message = messageFactory.MakeStartMissionVotingMessage(TeamPickedUsersIDs);
-            user.Send(message);
-        }
-
         public void OnYesClickedMethod()
         {
-            AppState gs = AppState.GetAppState();
-            var user = AppState.GetAppState().CurrentUser;
+            var user = _as.CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
             NoChoice = "Gray";
             YesChoice = "Orange";
             switch(GameState.CurrentPhase)
             {
                 case Phase.TeamVoting:
-                    var message = messageFactory.MakeVoteMessage(user.ID.ToString(), true);
+                    var message = messageFactory.MakeVoteMessage(CurrentPlayer.ID, true);
                     user.Send(message);
                     break;
                 case Phase.MissionVoting:
-                    var missionMessage = messageFactory.MakeMissionVoteMessage(user.ID.ToString(), true);
+                    var missionMessage = messageFactory.MakeMissionVoteMessage(CurrentPlayer.ID, true);
                     user.Send(missionMessage);
                     break;
             }
-
+            EnableVotingBtns = false;
         }
 
         public void OnNoClickedMethod()
         {
-            AppState gs = AppState.GetAppState();
-            var user = AppState.GetAppState().CurrentUser;
+            var user = _as.CurrentUser;
             var messageFactory = IoCManager.Resolve<IClientMessageFactory>();
             NoChoice = "Orange";
             YesChoice = "Gray";
             switch(GameState.CurrentPhase)
             {
                 case Phase.TeamVoting:
-                    var message = messageFactory.MakeVoteMessage(user.ID.ToString(), false);
+                    var message = messageFactory.MakeVoteMessage(CurrentPlayer.ID, false);
                     user.Send(message);
                     break;
                 case Phase.MissionVoting:
-                    var missionMessage = messageFactory.MakeMissionVoteMessage(user.ID.ToString(), false);
-                user.Send(missionMessage);
+                    var missionMessage = messageFactory.MakeMissionVoteMessage(CurrentPlayer.ID, false);
+                    user.Send(missionMessage);
                     break;
             }
+            EnableVotingBtns = false;
         }
 
         internal void ShowMissionVotingInterface()
@@ -329,37 +304,23 @@ namespace Jeffistance.Client.ViewModels
             EnableVotingBtns = true;
         }
 
-        internal void ShowTeamVoteResult(Dictionary<string, bool> voters, bool result, int fails)
+        internal void ShowTeamVoteResult(Dictionary<Player, bool> voters, bool result)
         {
-            AppState appState = AppState.GetAppState();
-            ReadyUserIDs = new List<Guid>();
             EnableVotingBtns = false;
             EnableOKBtn = true;
             RoundBox = "";
-            if (result)
-            {
-                GameState.CurrentPhase = Phase.ShowingTeamVoteResult;
-            }
-            else
+
+            if (!result)
             {
                 RestorePlayersToNormal();
-                if (fails == 0) //if the maximum of fails was reached
-                {
-                    GameState.CurrentPhase = Phase.AssigningRandomResult;
-                }
-                else
-                {
-                    GameState.CurrentPhase = Phase.FailedTeamFormation;
-                    RoundBox += "Team failed to form. " + fails + "/5 ";
-                }
-
+                RoundBox += $"Team formation failed. {GameState.FailedVoteCount}/5 ";
             }
-            foreach (string u in voters.Keys)
+
+            foreach (Player p in voters.Keys)
             {
-                List<User> userList = appState.UserList;
-                string playerName = userList.Find(user => user.ID.ToString() == u).Name;
-                RoundBox += "[" + playerName + ": "; //TODO Make this prettier with a proper label
-                if (voters[u])
+                List<User> userList = _as.UserList;
+                RoundBox += "[" + p.Name + ": "; //TODO Make this prettier with a proper label
+                if (voters[p])
                 {
                     RoundBox += "Yes] ";
                 }
@@ -370,12 +331,12 @@ namespace Jeffistance.Client.ViewModels
             }
         }
 
-        internal void ResolveMissionResult(bool missionSucceeds)
+        internal void ResolveMissionResult()
         {
             ScoreNodeView scoreNode = ScoreDictionary[GameState.CurrentRound];
-            scoreNode.ChangeState(missionSucceeds);
+            scoreNode.ChangeState(GameState.MissionVictory);
             GameState.CurrentRound++;
-            if (missionSucceeds)
+            if (GameState.MissionVictory)
             {
                 RoundBox = "Mission successful";
             }
@@ -385,28 +346,89 @@ namespace Jeffistance.Client.ViewModels
             }
             EnableOKBtn = true;
             EnableVotingBtns = false;
-            GameState.CurrentPhase = Phase.Standby;
         }
 
-        internal void ShowEndGameResults(string winningFactionName, List<string> spiesIDs)
+        internal void ShowEndGameResults()
         {
             EnableOKBtn = false;
             EnableVotingBtns = false;
             var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+            var spiesIDs = GameState.Players.FindAll((p) => p.Faction is SpiesFaction)
+                           .Select((p, i) => p.UserID);
             foreach (PlayerAvatarView avatar in AvatarsList)
             {
                 if (spiesIDs.Contains(avatar.UserId))
                 {
-                    avatar.Avatar.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Jew.png");
+                    avatar.Avatar.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Traitor.png");
                 }
                 else
                 {
                     avatar.Avatar.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "Spy.png"); //changes them back in case they were selected
                 }
             }
-            RoundBox = winningFactionName + " victory!";
+            RoundBox = GameState.Winner.Name + " victory!";
         }
 
-    }
+        public void OnGameStateUpdate(GameState state)
+        {
+            GameState = state;
+            switch (GameState.CurrentPhase)
+            {
+                case Phase.Setup:
+                    PrepareAvatars();
+                    RoundBox = $"You are a member of the {CurrentPlayer.Faction.Name} faction";
+                    break;
+                
+                case Phase.TeamPicking:
+                    if (CurrentPlayer == GameState.CurrentLeader)
+                    {
+                        SelectablePlayers = GameState.NextTeamSize;
+                        ChangeOKBtnState(true);
+                        RoundBox = $"Pick {GameState.NextTeamSize} players for the next mission";
+                    }
+                    else
+                    {
+                        ChangeOKBtnState(false);
+                        RoundBox = $"{GameState.CurrentLeader.Name} is picking " +
+                        $"{GameState.NextTeamSize} players for the next mission";
+                    }
+                    break;
+                
+                case Phase.TeamVoting:
+                    TeamPickedUsersIDs = GameState.CurrentTeam.Select((p, i) => p.UserID).ToList();
+                    ShowSelectedPlayers();
+                    RoundBox = $"{GameState.CurrentLeader.Name} picked the following team.";
+                    ChangeOKBtnState(false);
+                    ChangeVotingBtnsState(true);
+                    if (CurrentPlayer.UserID == GameState.CurrentLeader.UserID)
+                    {
+                        SelectablePlayers = 0;
+                    }
+                    break;
+                
+                case Phase.FailedTeamFormation:
+                    ShowTeamVoteResult(GameState.RevealedTeamVotes, false);
+                    break;
 
+                case Phase.MissionVoting:
+                    ShowTeamVoteResult(GameState.RevealedTeamVotes, true);
+                    break;
+                
+                case Phase.MissionVoteResult:
+                    ResolveMissionResult();
+                    RestorePlayersToNormal();
+                    TeamPickedUsersIDs.Clear();
+                    break;
+                
+                case Phase.GameEnd:
+                    ShowEndGameResults();
+                    break;
+            }
+        }
+
+        private Player FindCurrentPlayer()
+        {
+            return GameState.Players.Find(x => x.UserID == _as.CurrentUser.ID.ToString());
+        }
+    }
 }
