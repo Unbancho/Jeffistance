@@ -20,13 +20,15 @@
     <StackPanel 
       Orientation="Vertical" 
       VerticalAlignment="Center" 
-      Background="DarkGray"
+      Background="#36393E"
       Height="600"
       Margin="72">
 
+      <!--
       <StackPanel.Background>
         <ImageBrush Source="/Assets/background_2.png" Stretch="Fill"/>
       </StackPanel.Background>
+      -->
 
       <StackPanel.Styles>
         <Style Selector="Button.RoundedButton">
