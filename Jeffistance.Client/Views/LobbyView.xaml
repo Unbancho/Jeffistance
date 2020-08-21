@@ -5,23 +5,33 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:views="clr-namespace:Jeffistance.Client.Views"
              x:Class="Jeffistance.Client.Views.LobbyView">
-  <Grid ColumnDefinitions="9*,1*" RowDefinitions="9*,0.5*" Margin="4">
-    <views:ChatView Grid.Row="0" Grid.Column="0" Content="{Binding ChatView}"/>
-    <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Orientation="Horizontal"
-                Grid.Row="1" Grid.Column="0" Margin="4" Spacing="10">
-      <Button Content="Ready" MinWidth="200" Command="{Binding ReadyUser}"
-              IsVisible="{Binding ShowReadyButton}"/>
-      <Button Content="Start Game" MinWidth="200" Command="{Binding StartGame}"
-              IsVisible="{Binding ShowStartButton}"/>
-      <Button Content="Kick Everyone" Command="{Binding OnKickEveryoneClicked}"
-                IsVisible="{Binding ShowKickButton}" MinWidth="200"/>
-    </StackPanel>
-    <ListBox Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Items="{Binding Users}">
-      <ListBox.ItemTemplate>
-        <DataTemplate>
-          <TextBlock Text="{Binding Name}"/>
-        </DataTemplate>
-      </ListBox.ItemTemplate>
-    </ListBox>
-  </Grid>
+  <DockPanel>
+
+    <DockPanel.Background>
+      <ImageBrush Source="/Assets/background_1.png" Stretch="Fill"/>
+    </DockPanel.Background>
+
+    <Grid ColumnDefinitions="9*,1*" RowDefinitions="9*,0.5*" Margin="4">
+      <views:ChatView Grid.Row="0" Grid.Column="0" Content="{Binding ChatView}"/>
+      <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Orientation="Horizontal"
+                  Grid.Row="1" Grid.Column="0" Margin="4" Spacing="10">
+        <Button Content="Ready" MinWidth="200" Command="{Binding ReadyUser}"
+                IsVisible="{Binding ShowReadyButton}"/>
+        <Button Content="Start Game" MinWidth="200" Command="{Binding StartGame}"
+                IsVisible="{Binding ShowStartButton}"/>
+        <Button Content="Kick Everyone" Command="{Binding OnKickEveryoneClicked}"
+                  IsVisible="{Binding ShowKickButton}" MinWidth="200"/>
+      </StackPanel>
+      <ListBox Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Items="{Binding Users}">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Name}"/>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </Grid>
+    
+  </DockPanel>
+  
+  
 </UserControl>
