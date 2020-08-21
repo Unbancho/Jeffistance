@@ -1,3 +1,6 @@
+using System;
+using System.Runtime.Serialization;
+
 namespace Jeffistance.Common.Models
 {
     public interface IFaction
@@ -5,14 +8,40 @@ namespace Jeffistance.Common.Models
         string Name { get; }
     }
 
-    public class ResistanceFaction : IFaction
+    [Serializable]
+    public class ResistanceFaction : IFaction, ISerializable
     {
         public string Name { get; } = "Resistance";
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("Name", Name);
+        }
+
+        public ResistanceFaction(){}
+
+        protected ResistanceFaction(SerializationInfo info, StreamingContext context)
+        {
+            Name = info.GetString("Name");
+        }
     }
 
-    public class SpiesFaction : IFaction
+    [Serializable]
+    public class SpiesFaction : IFaction, ISerializable
     {
         public string Name { get;} = "Spies";
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("Name", Name);
+        }
+
+        public SpiesFaction(){}
+
+        protected SpiesFaction(SerializationInfo info, StreamingContext context)
+        {
+            Name = info.GetString("Name");
+        }
     }
 
     public class FactionFactory

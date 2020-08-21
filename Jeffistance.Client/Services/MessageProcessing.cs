@@ -5,6 +5,10 @@ using Jeffistance.Client.Models;
 using ModusOperandi.Messaging;
 using Jeffistance.Client.ViewModels;
 using Avalonia.Threading;
+using System.Collections.Generic;
+using Jeffistance.Common.Models;
+using Jeffistance.Common.Services.IoC;
+using Jeffistance.Common.Services;
 
 namespace Jeffistance.Client.Services.MessageProcessing
 {
@@ -12,6 +16,9 @@ namespace Jeffistance.Client.Services.MessageProcessing
     {
         public override void ProcessMessage(Message message)
         {
+            var logger = IoCManager.GetClientLogger();
+            LogMessage(logger, message);
+
             base.ProcessMessage(message);
         }
         
@@ -67,7 +74,29 @@ namespace Jeffistance.Client.Services.MessageProcessing
         private void JoinGameMessageFlagMethod(Message message)
         {
             LobbyViewModel lobby = AppState.GetAppState().CurrentLobby;
-            Dispatcher.UIThread.Post(()=> lobby.MoveToGameScreen());
+            Dispatcher.UIThread.Post(() => lobby.MoveToGameScreen());
+        }
+
+        [MessageMethod(JeffistanceFlags.EveryoneReadyStateMessage)]
+        private void EveryoneReadyStateMessage(Message message)
+        {
+            var appState = AppState.GetAppState();
+            if (appState.CurrentUser.IsHost)
+            {
+                appState.CurrentLobby.OnEveryoneReadyStateChange((bool) message["readyState"]);
+            }
+        }
+
+        [MessageMethod(JeffistanceFlags.GameStateUpdateMessage)]
+        private void GameStateUpdateMessage(Message message)
+        {
+            var gameState = (GameState) message["GameState"];
+            Dispatcher.UIThread.Post(() =>
+            {
+                AppState appState = AppState.GetAppState();
+                GameScreenViewModel gameScreen = appState.CurrentWindow as GameScreenViewModel;
+                gameScreen.OnGameStateUpdate(gameState);
+            });
         }
     }
 }

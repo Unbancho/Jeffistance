@@ -85,10 +85,6 @@ namespace Jeffistance.Common.Models
 
             var greetingMessage = messageFactory.MakeGreetingMessage(new User(this));
             Send(greetingMessage);
-
-            var greetingChatMessage = messageFactory.MakeChatMessage(
-                $"{Name} has joined from {Connection.IPAddress}.");
-            Send(greetingChatMessage);
         }
 
         public void Disconnect()

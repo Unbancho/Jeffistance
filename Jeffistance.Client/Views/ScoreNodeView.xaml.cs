@@ -1,7 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using Jeffistance.Common.AvaloniaTools;
 
 namespace Jeffistance.Client.Views
 {
@@ -15,13 +16,27 @@ namespace Jeffistance.Client.Views
         {
             InitializeComponent();
             nodeImage = this.FindControl<Image>("nodeImage");
-            nodeImage.Source = new Bitmap("Jeffistance.Client\\Assets\\Skullbisu.png");
             State = ScoreState.NoResult;
         }
 
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+        }
+
+        public void ChangeState(bool isJeffistanceVictory)
+        {
+            var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+            if(isJeffistanceVictory)
+            {
+                State = ScoreState.JeffistanceVictory;
+                nodeImage.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "RoundStateResistenceVictory.png");
+            }
+            else
+            {
+                State = ScoreState.SpyVictory;
+                nodeImage.Source = AvaloniaTools.GetImageFromResources("Jeffistance.Client", "RoundStateSpyVictory.png");
+            }
         }
 
         

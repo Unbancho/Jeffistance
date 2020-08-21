@@ -4,6 +4,8 @@ using ModusOperandi.Messaging;
 using ModusOperandi.Networking;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using Jeffistance.Common.Services.IoC;
 
 namespace Jeffistance.Common.Services.MessageProcessing
 {
@@ -14,10 +16,16 @@ namespace Jeffistance.Common.Services.MessageProcessing
         Greeting = 1 << 0,
         Update = 1 << 2,
         Chat = 1 << 3,
-        LobbyReady = 1 << 4,    
+        LobbyReady = 1 << 4,
         EditChatMessage = 1 << 5,
         DeleteChatMessage = 1 << 6,
-        JoinGameMessage = 1 << 7
+        JoinGameMessage = 1 << 7,
+        GamePhaseReadyMessage = 1 << 8,
+        PickTeamMessage = 1 << 9,
+        VoteMessage = 1 << 10,
+        MissionVoteMessage = 1 << 11,
+        EveryoneReadyStateMessage = 1 << 12,
+        GameStateUpdateMessage = 1 << 13
     }
 
     public class JeffistanceMessageProcessor : MessageProcessor<JeffistanceFlags>
@@ -35,9 +43,33 @@ namespace Jeffistance.Common.Services.MessageProcessing
             }
         }
 
-        public virtual void LogMessage(Message message)
+        public void LogMessage(ILogger logger, Message message)
         {
-            Console.WriteLine(message.Text);
+            string messageToLog = "Received network message:\n";
+            if (message.Sender != null)
+            {
+                messageToLog += $"Sender: {((ConnectionTcp) message.Sender).SERVER_IP}\n";
+            }
+            else
+            {
+                messageToLog += "Sender: UNKNOWN\n";
+            }
+            messageToLog += $"Text: {message.Text}\nContents:";
+
+            foreach (KeyValuePair<string, object> entry in message.PackedObjects)
+            {
+                var result = (obj: message.UnpackObject(entry.Key), name: entry.Key);
+                (object obj, string name) = (ValueTuple<object, string>) result;
+                messageToLog += $" {name}";
+            }
+            messageToLog += "\nFlags:";
+
+            foreach (var flag in message.GetFlags())
+            {
+                messageToLog += $" {Enum.GetName(typeof(JeffistanceFlags), flag)}";
+            }
+
+            logger.LogDebug(messageToLog);
         }
 
     }
@@ -83,7 +115,15 @@ namespace Jeffistance.Common.Services.MessageProcessing
 
         public void Send(Message message)
         {
-            ClientConnection?.Send(message);
+            try
+            {
+                ClientConnection?.Send(message);
+            }
+            catch (ObjectDisposedException e)
+            {
+                var logger = IoCManager.GetClientLogger();
+                logger.LogError(message: "Message failed to send.", exception: e);
+            }
         }
 
         public void Send(string message)

@@ -8,7 +8,25 @@
             "args": [
                 "build",
                 "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "/consoleloggerparameters:Summary",
+                "/nologo"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build tests",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Jeffistance.Test/Jeffistance.Test.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary",
+                "/nologo"
             ],
             "problemMatcher": "$msCompile",
             "group": "build"
@@ -27,19 +45,64 @@
             },
             "problemMatcher": "$msCompile",
             "dependsOrder": "sequence",
-            "dependsOn": ["build tests"]
+            "dependsOn": [
+                "build tests"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": false
+            }
         },
         {
             "label": "Delay",
             "type": "shell",
             "windows": {
-            "command": "ping 127.0.0.1 -n 1"
+                "command": "ping 127.0.0.1 -n 1"
             },
             "group": "none",
             "presentation": {
                 "reveal": "silent",
                 "panel": "new"
             }
+        },
+        {
+            "label": "Make Avalonia control",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+                "new",
+                "avalonia.usercontrol",
+                "-o",
+                "${workspaceFolder}/Jeffistance.Client/Views",
+                "-n",
+                "${input:controlName}",
+                "--namespace",
+                "Jeffistance.Client.Views",
+                "&&",
+                "code",
+                "-r",
+                "${workspaceFolder}/Jeffistance.Client/Views/${input:controlName}.xaml"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "echo": false,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "type": "promptString",
+            "id": "controlName",
+            "description": "Name your control. Example: TodoListView"
         }
     ]
 }

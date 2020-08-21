@@ -9,12 +9,30 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System;
+using Jeffistance.Common.Services.PlayerEventManager;
+using Jeffistance.Common.ExtensionMethods;
+using Microsoft.Extensions.Logging;
+using System.Configuration;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Jeffistance.JeffServer.Models
 {
     public class Server
     {
+        public ServerLobby Lobby { get; private set; }
+
+        public IServerChatManager ChatManager { get; private set; }
+
+        private IServerMessageFactory _messageFactory;
+        
+        public GameManager GameManager { get; private set; }
+
+        private ILogger _logger;
+
         const string DEFAULT_HOST_NAME = "Admin";
+
+        public bool IsDedicated { get; private set; }
 
         public LocalUser Host {get; set;}
         private ServerConnection Connection {get; set;}
@@ -24,10 +42,13 @@ namespace Jeffistance.JeffServer.Models
         private Dictionary<string, User> UserNameDictionary = new Dictionary<string, User>();
         private Dictionary<Guid, User> UserGuidDictionary = new Dictionary<Guid, User>();
         private MessageHandler MessageHandler {get; set;}
+        public Game Game {get; set;}
 
+        private bool _inGame = false;
 
-        public Server()
+        public Server(bool dedicated=false)
         {
+            IsDedicated = dedicated;
             RegisterServerDependencies();
             Host = new LocalUser("Server")
             {
@@ -37,13 +58,27 @@ namespace Jeffistance.JeffServer.Models
                     CanKick = true
                 }
             };
+            ChatManager = IoCManager.Resolve<IServerChatManager>();
+            ChatManager.Server = this;
+            Lobby = new ServerLobby(this);
+            _messageFactory = IoCManager.Resolve<IServerMessageFactory>();
         }
 
         private void RegisterServerDependencies()
         {
             IoCManager.Register<IServerMessageFactory, ServerMessageFactory>();
+            IoCManager.Register<IServerChatManager, ServerChatManager>();
+
+            var logLevel = ConfigurationManager.AppSettings["LogLevel"].ToLogLevel();
+            IoCManager.AddServerLogging(builder => builder
+                .AddFile("Logs/Jeffistance-Server-{Date}.txt", logLevel)
+                .AddConsole()
+                .SetMinimumLevel(logLevel));
 
             IoCManager.BuildGraph();
+
+            _logger = IoCManager.GetServerLogger();
+            _logger.LogInformation("Registered server dependencies.");
         }
 
         public void ConnectHost(string username, JeffistanceMessageProcessor messageProcessor)
@@ -53,6 +88,32 @@ namespace Jeffistance.JeffServer.Models
             Host.Connect(NetworkUtilities.GetLocalIPAddress(), Connection.PORT_NO);
             Host.AttachMessageHandler(new MessageHandler(messageProcessor, Host.Connection));
             Host.GreetServer();
+            _logger.LogInformation($"Connected host: {username}");
+        }
+
+        public void StartGame()
+        {
+            if (IsDedicated)
+            {
+                var joinMessage = _messageFactory.MakeJoinGameMessage();
+                Broadcast(joinMessage);
+            }
+
+            PlayerEventManager playerEventManager = new PlayerEventManager();
+            Game = new Game(new BasicGamemode(), playerEventManager);
+            GameManager = new GameManager(this, Game, _messageFactory, playerEventManager);
+            GameManager.Start(UserList);
+            _inGame = true;
+        }
+
+        public void StartCountdown()
+        {
+            var source = new CancellationTokenSource();
+            var t = Task.Run(async delegate
+            {
+                await Task.Delay(TimeSpan.FromSeconds(5), source.Token);
+                StartGame();
+            });
         }
 
         public void Run(int port)
@@ -63,6 +124,8 @@ namespace Jeffistance.JeffServer.Models
             Connection.OnDisconnection += OnUserDisconnect;
             Connection.OnMessageReceived += MessageHandler.OnMessageReceived;
             Connection.Run();
+            var ip = NetworkUtilities.GetLocalIPAddress();
+            _logger.LogInformation($"Started server on {ip}:{port}");
         }
 
         public void Stop()
@@ -75,6 +138,7 @@ namespace Jeffistance.JeffServer.Models
         {
             ObservableUserList.Remove(user);
             Connection.Kick(user.Connection);
+            _logger.LogInformation($"Kicked {user.Name}");
         }
 
         public void AddUser(User user)
@@ -83,6 +147,8 @@ namespace Jeffistance.JeffServer.Models
             UserNameDictionary[user.Name.ToLower()] = user;
             UserGuidDictionary[user.ID] = user;
             ObservableUserList.Add(user);
+            _logger.LogInformation($"Added new user: {user.Name}");
+            _logger.LogDebug($"ID: {user.ID}");
         }
 
         public User GetUser(string username)
@@ -105,38 +171,23 @@ namespace Jeffistance.JeffServer.Models
 
         public void OnUserDisconnect(object obj, DisconnectionArgs args)
         {
-            ObservableUserList.Remove(GetUser(args.Client));
+            var user = GetUser(args.Client);
+            ObservableUserList.Remove(user);
+            _logger.LogInformation($"{user.Name} has disconnected.");
         }
 
         public void Broadcast(Message message)
         {
-            Connection.Broadcast(message);
+            MessageHandler.Broadcast(message);
         }
 
         private void OnUserListChanged(object obj, NotifyCollectionChangedEventArgs args)
         {
-            // Greeting message also handles the greeting chat message
-            // TODO Figure out where to put the "user left" mesasge
-
-            // string messageText;
-            // switch (args.Action)
-            // {
-            //     case NotifyCollectionChangedAction.Add:
-            //         messageText = $"{((User)args.NewItems[0]).Name} has joined.";
-            //         break;
-            //     case NotifyCollectionChangedAction.Remove:
-            //         messageText = $"{((User)args.OldItems[0]).Name} has left.";
-            //         break;
-            //     default:
-            //         messageText = "";
-            //         break;
-            // }
-            
-            var messageFactory = IoCManager.Resolve<IServerMessageFactory>();
-
-            var updateList = messageFactory.MakeUpdateMessage();
+            var updateList = _messageFactory.MakeUpdateMessage();
             updateList["UserList"] = UserList;
-            MessageHandler.Broadcast(updateList);
+            Broadcast(updateList);
+
+            if (!_inGame) Lobby.CheckIfAllReady();
         }
     }
 }

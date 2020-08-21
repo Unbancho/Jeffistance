@@ -10,6 +10,7 @@ namespace Jeffistance.Test
     public class BasicGameTests
     {
         List<Player> players;
+        List<User> users;
         Game game;
         PlayerEventManager playerEventManager;
 
@@ -19,16 +20,17 @@ namespace Jeffistance.Test
             playerEventManager = new PlayerEventManager();
             game = new Game(new BasicGamemode(), playerEventManager);
             players = new List<Player>();
-            for (int i = 0; i < 5; i++)
+            users = new List<User>();
+            for (int i=0; i<=5; i++)
             {
-                players.Add(new Player());
+                users.Add(new User());
             }
         }
 
         [Test]
         public void TestStart()
         {
-            game.Start(players);
+            game.Start(users);
             
             Assert.Multiple(() =>
             {
@@ -43,14 +45,14 @@ namespace Jeffistance.Test
         public void TestPhases()
         {
             Assert.That(game.CurrentPhase, Is.EqualTo(Phase.Standby));
-            game.Start(players);
+            game.Start(users);
             Assert.That(game.CurrentPhase, Is.EqualTo(Phase.TeamPicking));
         }
 
         [Test]
         public void TestPickTeam([Range(0, 2)] int x, [Range(3, 4)] int y)
         {
-            game.Start(players);
+            game.Start(users);
             Assert.That(game.NextTeamSize, Is.EqualTo(2));
             int[] team = {x, y};
             playerEventManager.PickTeam(team);
@@ -62,7 +64,7 @@ namespace Jeffistance.Test
         [Test]
         public void TestVoteTeamAllAccept()
         {
-            game.Start(players);
+            game.Start(users);
             playerEventManager.PickTeam(new int[] {0, 1});
             foreach (var player in players)
             {
@@ -74,7 +76,7 @@ namespace Jeffistance.Test
         [Test]
         public void TestVoteTeamAllReject()
         {
-            game.Start(players);
+            game.Start(users);
             var firstLeader = game.CurrentLeader;
             playerEventManager.PickTeam(new int[] {0, 1});
             foreach (var player in players)
@@ -88,7 +90,7 @@ namespace Jeffistance.Test
         [Test]
         public void TestVoteTeamMajorityAccept()
         {
-            game.Start(players);
+            game.Start(users);
             playerEventManager.PickTeam(new int[] {0, 1});
             playerEventManager.VoteTeam(0, true);
             playerEventManager.VoteTeam(1, false);
@@ -102,7 +104,7 @@ namespace Jeffistance.Test
         [Test]
         public void TestVoteTeamMajorityReject()
         {
-            game.Start(players);
+            game.Start(users);
             playerEventManager.PickTeam(new int[] {0, 1});
             playerEventManager.VoteTeam(0, false);
             playerEventManager.VoteTeam(1, false);
@@ -117,7 +119,7 @@ namespace Jeffistance.Test
         public void TestVoteTeamTie()
         {
             players.Add(new Player());
-            game.Start(players);
+            game.Start(users);
             playerEventManager.PickTeam(new int[] {0, 1});
             playerEventManager.VoteTeam(0, true);
             playerEventManager.VoteTeam(1, false);
@@ -132,7 +134,7 @@ namespace Jeffistance.Test
         [Test]
         public void TestVoteMissionSuccess()
         {
-            game.Start(players);
+            game.Start(users);
             playerEventManager.PickTeam(new int[] {0, 1, 2});
             playerEventManager.VoteMission(0, true);
             playerEventManager.VoteMission(1, true);
@@ -146,7 +148,7 @@ namespace Jeffistance.Test
         [Test]
         public void TestVoteMissionFailure()
         {
-            game.Start(players);
+            game.Start(users);
             playerEventManager.PickTeam(new int[] {0, 1, 2});
             playerEventManager.VoteMission(0, true);
             playerEventManager.VoteMission(1, false);
@@ -160,7 +162,7 @@ namespace Jeffistance.Test
         [Test]
         public void TestResistanceVictory()
         {
-            game.Start(players);
+            game.Start(users);
 
             for (int i = 0; i < 3; i++)
             {
@@ -176,7 +178,7 @@ namespace Jeffistance.Test
         [Test]
         public void TestSpiesVictory()
         {
-            game.Start(players);
+            game.Start(users);
 
             for (int i = 0; i < 3; i++)
             {
@@ -192,7 +194,7 @@ namespace Jeffistance.Test
         [Test]
         public void TestMaxFailedVotes()
         {
-            game.Start(players);
+            game.Start(users);
 
             for (int i = 0; i < game.MaxFailedVotes; i++)
             {

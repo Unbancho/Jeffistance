@@ -1,8 +1,11 @@
+using System;
+using System.Collections.Generic;
 using Jeffistance.Common.Services.MessageProcessing;
 using Jeffistance.Common.Models;
 using Jeffistance.JeffServer.Models;
 using ModusOperandi.Networking;
 using ModusOperandi.Messaging;
+using Jeffistance.Common.Services.IoC;
 
 namespace Jeffistance.JeffServer.Services.MessageProcessing
 {
@@ -15,6 +18,14 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
             Server = server;
         }
 
+        public override void ProcessMessage(Message message)
+        {
+            var logger = IoCManager.GetServerLogger();
+            LogMessage(logger, message);
+
+            base.ProcessMessage(message);
+        }
+
         [MessageMethod(JeffistanceFlags.Greeting)]
         private void GreetingFlagMethod(Message message)
         {
@@ -22,6 +33,7 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
             ClientConnection connection = (ClientConnection) message.Sender;
             user.Connection = connection;
             Server.AddUser(user);
+            Server.ChatManager.Notify($"{user.Name} has joined.");
         }
 
         [MessageMethod(JeffistanceFlags.Chat)]
@@ -33,6 +45,7 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
         [MessageMethod(JeffistanceFlags.LobbyReady)]
         private void LobbyReadyFlagMethod(Message message)
         {
+            Server.Lobby.AddReadyUser(Guid.Parse((string) message["UserID"]));
             Server.Broadcast(message);
         }
 
@@ -52,8 +65,32 @@ namespace Jeffistance.JeffServer.Services.MessageProcessing
         private void JoinGameMessageFlagMethod(Message message)
         {
             Server.Broadcast(message);
+            Server.StartGame();
+        }
+
+        [MessageMethod(JeffistanceFlags.GamePhaseReadyMessage)]
+        private void GamePhaseReadyMessageFlagMethod(Message message)
+        {
+            Server.GameManager.AddReadyUser(Guid.Parse((string) message["UserID"]));
+        }
+
+
+        [MessageMethod(JeffistanceFlags.PickTeamMessage)]
+        private void PickTeamMessageFlagMethod(Message message)
+        {
+            Server.GameManager.OnTeamPicked((List<string>) message["PlayersInTeamIDs"]);
+        }
+
+        [MessageMethod(JeffistanceFlags.VoteMessage)]
+        private void VoteMessageFlagMethod(Message message)
+        {
+            Server.GameManager.OnTeamVoted((int) message["PlayerID"], (bool) message["Vote"]);
         }
         
-
+        [MessageMethod(JeffistanceFlags.MissionVoteMessage)]
+        private void MissionVoteMessageFlagMethod(Message message)
+        {
+            Server.GameManager.OnMissionVoted((int) message["PlayerID"], (bool) message["Vote"]);
+        }
     }
 }

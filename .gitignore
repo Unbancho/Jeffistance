@@ -361,3 +361,4 @@ MigrationBackup/
 
 # End of https://www.gitignore.io/api/csharp,visualstudiocode
 nuget.config
+Logs/

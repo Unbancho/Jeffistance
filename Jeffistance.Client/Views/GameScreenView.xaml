@@ -6,9 +6,13 @@
              x:Class="Jeffistance.Client.Views.GameScreenView"
              xmlns:views="clr-namespace:Jeffistance.Client.Views"
              xmlns:vm="clr-namespace:Jeffistance.Client.ViewModels;assembly=Jeffistance.Client">
-   <Grid ColumnDefinitions="9*,1*" RowDefinitions="4*,6*" Margin="4">
-      <UserControl Grid.Row="0" Grid.Column="0" Content="{Binding PlayerArea}"/>
-      <UserControl Grid.Row="1" Grid.Column="0" Content="{Binding ChatView}"/>
-      <UserControl Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Content="{Binding ScorePanel}"/>
+   <Grid ColumnDefinitions="8*,0.5*,0.5*,1*" RowDefinitions="2*,3*,0.5*,4.5*" Margin="4">
+      <UserControl Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="3" Content="{Binding PlayerArea}"/>
+      <TextBox Text="{Binding RoundBox}" IsEnabled="False" TextWrapping="Wrap" Grid.Row="2" Grid.Column="0"/>
+      <Button Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Command="{Binding OnOkClicked}" IsVisible="{Binding EnableOKBtn}">OK</Button>
+      <Button Grid.Row="2" Grid.Column="1" Command="{Binding OnYesClicked}" IsVisible="{Binding EnableVotingBtns}" Foreground="Green" Background="{Binding YesChoice}">YES</Button>
+      <Button Grid.Row="2" Grid.Column="2" Command="{Binding OnNoClicked}" IsVisible="{Binding EnableVotingBtns}" Foreground="Red" Background="{Binding NoChoice}">NO</Button>
+      <UserControl Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Content="{Binding ChatView}"/>
+      <UserControl Grid.Row="1" Grid.Column="3" Grid.RowSpan="3" Content="{Binding ScorePanel}"/>
    </Grid>
 </UserControl>

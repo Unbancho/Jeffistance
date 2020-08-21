@@ -5,7 +5,8 @@ namespace Jeffistance.Client.Views
 {
     public class ChatMessageView : UserControl
     {
-        public TextBox UsernameTextBox => this.FindControl<TextBox>("MessageContentBox");
+        public TextBox UsernameTextBox => this.FindControl<TextBox>("UsernameBox");
+
         public ChatMessageView()
         {
             this.InitializeComponent();
